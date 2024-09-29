@@ -1,0 +1,746 @@
+[gd_scene load_steps=60 format=3 uid="uid://dao4a65ncuf15"]
+
+[ext_resource type="Script" path="res://scripts/game_field.gd" id="1_g35qh"]
+[ext_resource type="Script" path="res://scripts/Player.gd" id="1_nlbl8"]
+[ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://scenes/terrain.tscn" id="2_f2kou"]
+[ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://scenes/net.tscn" id="2_nvxwo"]
+[ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://scenes/trees.tscn" id="3_f8pxf"]
+[ext_resource type="Texture2D" uid="uid://c6rdby1kjqnc5" path="res://images/6f7a97101ad33899f1b0186481123e241.jpg" id="4_1apb5"]
+[ext_resource type="Script" path="res://scripts/Bot.gd" id="5_ju6np"]
+[ext_resource type="Script" path="res://scripts/Ball.gd" id="6_i1fag"]
+[ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://scenes/player_model.tscn" id="7_4vm1e"]
+[ext_resource type="Texture2D" uid="uid://bka37re8brfsp" path="res://images/round-gradient.png" id="7_gu05u"]
+[ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="8_vq6n7"]
+[ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://scenes/bot_model.tscn" id="10_x1wcg"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_17rgp"]
+sky_top_color = Color(0.0850372, 0.348454, 0.717237, 1)
+sky_horizon_color = Color(0.866588, 0.866588, 0.866588, 1)
+sky_curve = 0.1
+ground_bottom_color = Color(0.0862745, 0.34902, 0.717647, 1)
+ground_horizon_color = Color(0.866667, 0.866667, 0.866667, 1)
+ground_curve = 0.313833
+
+[sub_resource type="Sky" id="Sky_81iiv"]
+sky_material = SubResource("ProceduralSkyMaterial_17rgp")
+
+[sub_resource type="Environment" id="Environment_hy0gk"]
+background_mode = 2
+background_color = Color(0.198, 0.666, 0.9, 1)
+sky = SubResource("Sky_81iiv")
+ambient_light_source = 3
+ambient_light_color = Color(0.802947, 0.80637, 0.415385, 1)
+ambient_light_sky_contribution = 0.64
+reflected_light_source = 2
+ssil_enabled = true
+sdfgi_use_occlusion = true
+fog_density = 0.0947
+fog_height_density = -6.0632
+volumetric_fog_emission = Color(0.544974, 0.544974, 0.544974, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5fb7r"]
+size = Vector3(147.88, 0.174, 210.24)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rag3r"]
+albedo_color = Color(0.730331, 1, 0.832115, 1)
+albedo_texture = ExtResource("4_1apb5")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xvpac"]
+albedo_texture = ExtResource("4_1apb5")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_01mkf"]
+size = Vector3(147.88, 1.191, 210.24)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ff3cv"]
+size = Vector3(30.1602, 7.54124, 0.143555)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_228nm"]
+size = Vector3(146.281, 49.7448, 206.596)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oiq72"]
+size = Vector3(30.1299, 19.2035, 30.0156)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rfrsq"]
+size = Vector3(30.1299, 19.2035, 30.0156)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bmam5"]
+radius = 1.00449
+height = 4.82426
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fabdq"]
+size = Vector3(5.1084, 5.80756, 3.12071)
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
+animation = &"playeranims/Walk"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vdjdj"]
+animation = &"playeranims/RacketHold"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vl02x"]
+animation = &"playeranims/RacketSwing"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gk47n"]
+animation = &"playeranims/Throw"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uy41n"]
+animation = &"playeranims/Idle"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_v7dkl"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_un7uq"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+fadeout_time = 0.2
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_vagdm"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.L", "Armature/Skeleton3D:Bone.004.L"]
+fadeout_time = 0.1
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_8sbg3"]
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_r5sud"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_qg37g"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone", "Armature/Skeleton3D:Bone.016.L", "Armature/Skeleton3D:Bone.016.R", "Armature/Skeleton3D:Bone.017.L", "Armature/Skeleton3D:Bone.017.R", "Armature/Skeleton3D:Bone.018.L", "Armature/Skeleton3D:Bone.018.R"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vb8qm"]
+graph_offset = Vector2(-884.818, -389.495)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_uy41n")
+nodes/Animation/position = Vector2(-1120, -380)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_mlw0r")
+"nodes/Animation 2/position" = Vector2(-480, 200)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_vdjdj")
+"nodes/Animation 3/position" = Vector2(-760, 80)
+"nodes/Animation 4/node" = SubResource("AnimationNodeAnimation_vl02x")
+"nodes/Animation 4/position" = Vector2(-880, -60)
+"nodes/Animation 5/node" = SubResource("AnimationNodeAnimation_gk47n")
+"nodes/Animation 5/position" = Vector2(-1120, -220)
+nodes/RacketHold/node = SubResource("AnimationNodeOneShot_v7dkl")
+nodes/RacketHold/position = Vector2(-360, -60)
+nodes/RacketSwing/node = SubResource("AnimationNodeOneShot_un7uq")
+nodes/RacketSwing/position = Vector2(-620, -200)
+nodes/Throw/node = SubResource("AnimationNodeOneShot_vagdm")
+nodes/Throw/position = Vector2(-880, -340)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_8sbg3")
+nodes/TimeScale/position = Vector2(-520, 40)
+nodes/WalkScale/node = SubResource("AnimationNodeTimeScale_r5sud")
+nodes/WalkScale/position = Vector2(-260, 200)
+nodes/WalkSpeed/node = SubResource("AnimationNodeBlend2_qg37g")
+nodes/WalkSpeed/position = Vector2(-100, 100)
+nodes/output/position = Vector2(160, 140)
+node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHold", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v5n6g"]
+size = Vector3(5.1084, 5.80756, 3.12071)
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ey2y2"]
+animation = &"playeranims/RacketHold"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_f8hjd"]
+animation = &"playeranims/RacketSwing"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nv17b"]
+animation = &"playeranims/Throw"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_04wiu"]
+animation = &"playeranims/Walk"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_17ry4"]
+animation = &"playeranims/Idle"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_olhyu"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_dirpv"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+fadeout_time = 0.2
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_hl20q"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.L", "Armature/Skeleton3D:Bone.004.L"]
+fadeout_time = 0.1
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_frxld"]
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_hx8j2"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_ff6w4"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone", "Armature/Skeleton3D:Bone.016.L", "Armature/Skeleton3D:Bone.016.R", "Armature/Skeleton3D:Bone.017.L", "Armature/Skeleton3D:Bone.017.R", "Armature/Skeleton3D:Bone.018.L", "Armature/Skeleton3D:Bone.018.R"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_45jun"]
+graph_offset = Vector2(-859, -218)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_17ry4")
+nodes/Animation/position = Vector2(-1220, -140)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_ey2y2")
+"nodes/Animation 2/position" = Vector2(-760, 340)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_f8hjd")
+"nodes/Animation 3/position" = Vector2(-880, 180)
+"nodes/Animation 4/node" = SubResource("AnimationNodeAnimation_nv17b")
+"nodes/Animation 4/position" = Vector2(-1180, 40)
+"nodes/Animation 5/node" = SubResource("AnimationNodeAnimation_04wiu")
+"nodes/Animation 5/position" = Vector2(-520, 500)
+nodes/RacketHold/node = SubResource("AnimationNodeOneShot_olhyu")
+nodes/RacketHold/position = Vector2(-320, 120)
+nodes/RacketSwing/node = SubResource("AnimationNodeOneShot_dirpv")
+nodes/RacketSwing/position = Vector2(-620, 40)
+nodes/Throw/node = SubResource("AnimationNodeOneShot_hl20q")
+nodes/Throw/position = Vector2(-920, -120)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_frxld")
+nodes/TimeScale/position = Vector2(-480, 300)
+nodes/WalkScale/node = SubResource("AnimationNodeTimeScale_hx8j2")
+nodes/WalkScale/position = Vector2(-280, 420)
+nodes/WalkSpeed/node = SubResource("AnimationNodeBlend2_ff6w4")
+nodes/WalkSpeed/position = Vector2(-60, 160)
+node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 3", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 4", &"TimeScale", 0, &"Animation 2", &"WalkScale", 0, &"Animation 5", &"WalkSpeed", 0, &"RacketHold", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_scbn3"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_xei7b"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hr2xc"]
+bg_color = Color(0.2, 0.2, 0.2, 0.494118)
+skew = Vector2(0.5, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.14, 0.14, 0.14, 1)
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qmew0"]
+bg_color = Color(0.87451, 0.67451, 0.313726, 1)
+skew = Vector2(0.5, 0)
+border_color = Color(0.141176, 0.141176, 0.141176, 1)
+anti_aliasing = false
+
+[sub_resource type="LabelSettings" id="LabelSettings_20vvk"]
+font_size = 80
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_0cqv7"]
+font_size = 56
+outline_size = 10
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_urfof"]
+font_size = 80
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_r3h5r"]
+font_size = 50
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_wpouj"]
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_g35qh")
+
+[node name="World" type="Node" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = SubResource("Environment_hy0gk")
+
+[node name="terrain" parent="World/WorldEnvironment" instance=ExtResource("2_f2kou")]
+transform = Transform3D(5.8, 0, 0, 0, 5.8, 0, 0, 0, 5.8, 0, 0, 0)
+
+[node name="trees" parent="World/WorldEnvironment" instance=ExtResource("3_f8pxf")]
+transform = Transform3D(4.195, 0, 0, 0, 4.195, 0, 0, 0, 4.195, 0, -2.68639, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.0870032, 0.842855, -0.46866, -0.798552, 0.37772, 0, 7.39259, 0)
+shadow_enabled = true
+
+[node name="PlayerCamera" type="Camera3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 0.997474, 0.0710274, 0, -0.0710274, 0.997474, 0, 10.1362, 25)
+current = true
+fov = 60.0
+
+[node name="SideCamera" type="Camera3D" parent="World"]
+transform = Transform3D(-4.34268e-08, -0.0532421, 0.998582, 4.9801e-09, 0.998582, 0.0532421, -1, 7.28517e-09, -4.31001e-08, 47.7466, 5.81986, 0)
+fov = 42.8
+
+[node name="Floor" type="StaticBody3D" parent="World"]
+collision_layer = 11
+collision_mask = 11
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Floor"]
+shape = SubResource("BoxShape3D_5fb7r")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="World/Floor"]
+material_override = SubResource("StandardMaterial3D_rag3r")
+size = Vector3(147.88, 0.174, 210.24)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="World/Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.00197119, 0)
+material_override = SubResource("StandardMaterial3D_xvpac")
+size = Vector3(30, 0.178, 60)
+
+[node name="Area" type="Area3D" parent="World/Floor"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Floor/Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.788358, 0)
+shape = SubResource("BoxShape3D_01mkf")
+
+[node name="Net" type="StaticBody3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7498, 0)
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Net"]
+shape = SubResource("BoxShape3D_ff3cv")
+
+[node name="net" parent="World/Net" instance=ExtResource("2_nvxwo")]
+transform = Transform3D(7.485, 0, 0, 0, 7.485, 0, 0, 0, 7.485, 0, -3.66, 0)
+
+[node name="FieldArea" type="Area3D" parent="World"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/FieldArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.2313, 0)
+shape = SubResource("BoxShape3D_228nm")
+
+[node name="Player1Area" type="Area3D" parent="World"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Player1Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.54946, 15.0049)
+shape = SubResource("BoxShape3D_oiq72")
+
+[node name="Player2Area" type="Area3D" parent="World"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Player2Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.549, -15.005)
+shape = SubResource("BoxShape3D_rfrsq")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.172, 15)
+script = ExtResource("1_nlbl8")
+
+[node name="Collision" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38143, 0)
+shape = SubResource("CapsuleShape3D_bmam5")
+
+[node name="playermodel" parent="Player" instance=ExtResource("7_4vm1e")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
+
+[node name="plrangletarget" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40104, 0.0206308)
+
+[node name="Ball" type="CSGSphere3D" parent="Player"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0213909, 2.09325, -0.0132618)
+
+[node name="RacketArea" type="Area3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474617, 0)
+collision_layer = 4
+collision_mask = 4
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/RacketArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65378, 0.35993)
+shape = SubResource("BoxShape3D_fabdq")
+
+[node name="RacketActive" type="Timer" parent="Player"]
+wait_time = 0.4
+one_shot = true
+
+[node name="RacketCooldown" type="Timer" parent="Player"]
+wait_time = 0.35
+one_shot = true
+
+[node name="RacketHold" type="Timer" parent="Player"]
+one_shot = true
+
+[node name="ActionPressed" type="Timer" parent="Player"]
+wait_time = 0.3
+one_shot = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Player"]
+root_node = NodePath("../playermodel")
+libraries = {
+"playeranims": ExtResource("8_vq6n7")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="Player"]
+active = false
+root_node = NodePath("../playermodel")
+tree_root = SubResource("AnimationNodeBlendTree_vb8qm")
+anim_player = NodePath("../AnimationPlayer")
+parameters/RacketHold/active = false
+parameters/RacketHold/internal_active = false
+parameters/RacketHold/request = 0
+parameters/RacketSwing/active = false
+parameters/RacketSwing/internal_active = false
+parameters/RacketSwing/request = 0
+parameters/Throw/active = false
+parameters/Throw/internal_active = false
+parameters/Throw/request = 0
+parameters/TimeScale/scale = 1.5
+parameters/WalkScale/scale = 1.0
+parameters/WalkSpeed/blend_amount = 1.0
+
+[node name="Bot" type="CharacterBody3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.172, -15)
+script = ExtResource("5_ju6np")
+
+[node name="Collision" type="CollisionShape3D" parent="Bot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38143, 0)
+shape = SubResource("CapsuleShape3D_bmam5")
+
+[node name="botmodel" parent="Bot" instance=ExtResource("10_x1wcg")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
+
+[node name="plrangletarget" type="Node3D" parent="Bot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.401, 0.021)
+
+[node name="RacketArea" type="Area3D" parent="Bot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474617, 0)
+collision_layer = 4
+collision_mask = 4
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bot/RacketArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65378, 0.35993)
+shape = SubResource("BoxShape3D_v5n6g")
+
+[node name="Sprint" type="Timer" parent="Bot"]
+one_shot = true
+
+[node name="RacketCooldown" type="Timer" parent="Bot"]
+wait_time = 0.35
+one_shot = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Bot"]
+deterministic = true
+root_node = NodePath("../botmodel")
+libraries = {
+"playeranims": ExtResource("8_vq6n7")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="Bot"]
+active = false
+root_node = NodePath("../botmodel")
+tree_root = SubResource("AnimationNodeBlendTree_45jun")
+anim_player = NodePath("../AnimationPlayer")
+parameters/RacketHold/active = false
+parameters/RacketHold/internal_active = false
+parameters/RacketHold/request = 0
+parameters/RacketSwing/active = false
+parameters/RacketSwing/internal_active = false
+parameters/RacketSwing/request = 0
+parameters/Throw/active = false
+parameters/Throw/internal_active = false
+parameters/Throw/request = 0
+parameters/TimeScale/scale = 1.5
+parameters/WalkScale/scale = 1.0
+parameters/WalkSpeed/blend_amount = 1.0
+
+[node name="Ball" type="CharacterBody3D" parent="."]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -2, 0)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("6_i1fag")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball"]
+shape = SubResource("SphereShape3D_scbn3")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="Ball"]
+cast_shadow = 0
+
+[node name="Area" type="Area3D" parent="Ball"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball/Area"]
+shape = SubResource("SphereShape3D_xei7b")
+
+[node name="Shadow" type="Sprite3D" parent="Ball"]
+texture = ExtResource("7_gu05u")
+
+[node name="RayCast3D" type="RayCast3D" parent="Ball"]
+target_position = Vector3(0, -100, 0)
+collision_mask = 8
+hit_from_inside = true
+
+[node name="StaminaBarControl" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -66.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="StaminaBar" type="ProgressBar" parent="StaminaBarControl"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -31.0
+offset_right = 140.0
+offset_bottom = -23.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/background = SubResource("StyleBoxFlat_hr2xc")
+theme_override_styles/fill = SubResource("StyleBoxFlat_qmew0")
+value = 50.0
+show_percentage = false
+
+[node name="ScoreControl" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_right = 20.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="Score" type="Label" parent="ScoreControl"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -133.0
+offset_right = 133.0
+offset_bottom = 77.0
+grow_horizontal = 2
+text = "3 : 1
+"
+label_settings = SubResource("LabelSettings_20vvk")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Menu" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Menu"]
+layout_mode = 1
+offset_left = -465.0
+offset_top = -475.0
+offset_right = 535.0
+offset_bottom = 525.0
+color = Color(0, 0, 0, 0.329412)
+
+[node name="Label" type="Label" parent="Menu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -83.0
+offset_top = -170.0
+offset_right = 85.0
+offset_bottom = -93.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Меню"
+label_settings = SubResource("LabelSettings_0cqv7")
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.5
+offset_top = -29.0
+offset_right = 62.5
+offset_bottom = 29.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Close" type="Button" parent="Menu/VBoxContainer"]
+layout_mode = 2
+text = "Возобновить"
+
+[node name="Back" type="Button" parent="Menu/VBoxContainer"]
+layout_mode = 2
+text = "Главное меню"
+
+[node name="GameResult" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="GameResult"]
+layout_mode = 1
+offset_left = -465.0
+offset_top = -475.0
+offset_right = 535.0
+offset_bottom = 525.0
+color = Color(0, 0, 0, 0.329412)
+
+[node name="Control" type="Control" parent="GameResult"]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Result" type="Label" parent="GameResult/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -127.0
+offset_right = 160.0
+offset_bottom = -17.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Победа!"
+label_settings = SubResource("LabelSettings_urfof")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Score" type="Label" parent="GameResult/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -133.0
+offset_top = -42.0
+offset_right = 133.0
+offset_bottom = 68.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "3 : 1
+"
+label_settings = SubResource("LabelSettings_r3h5r")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameResult/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = 69.0
+offset_right = 63.0
+offset_bottom = 135.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NewGame" type="Button" parent="GameResult/Control/VBoxContainer"]
+layout_mode = 2
+text = "Новая игра"
+
+[node name="Back" type="Button" parent="GameResult/Control/VBoxContainer"]
+layout_mode = 2
+text = "Главное меню"
+
+[node name="UsernameInputBox" type="VBoxContainer" parent="GameResult"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="GameResult/UsernameInputBox"]
+layout_mode = 2
+text = "Введите свое имя:"
+label_settings = SubResource("LabelSettings_wpouj")
+
+[node name="LineEdit" type="LineEdit" parent="GameResult/UsernameInputBox"]
+layout_mode = 2
+placeholder_text = "Ваше имя"
+
+[node name="Confirm" type="Button" parent="GameResult/UsernameInputBox"]
+layout_mode = 2
+text = "Подтвердить"
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
+title = "Подтвердите действие"
+size = Vector2i(443, 106)
+unresizable = true
+always_on_top = true
+popup_window = true
+dialog_text = "Вы уверены что хотите вернуться на главное меню?
+Прогресс текущей игры будет сброшен"
+
+[node name="UsernameInputError" type="AcceptDialog" parent="."]
+title = "Ошибка"
+size = Vector2i(121, 80)
+dialog_text = "Введите имя"
+
+[connection signal="timeout" from="Player/RacketActive" to="Player" method="_on_racket_active_timeout"]
+[connection signal="timeout" from="Player/RacketCooldown" to="Player" method="_on_racket_cooldown_timeout"]
+[connection signal="timeout" from="Player/RacketHold" to="Player" method="_on_racket_hold_timeout"]
+[connection signal="timeout" from="Player/ActionPressed" to="Player" method="_on_action_pressed_timeout"]
+[connection signal="timeout" from="Bot/Sprint" to="Bot" method="_on_sprint_timeout"]
+[connection signal="timeout" from="Bot/RacketCooldown" to="Bot" method="_on_racket_cooldown_timeout"]
+[connection signal="pressed" from="Menu/VBoxContainer/Close" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="Menu/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="GameResult/Control/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
+[connection signal="pressed" from="GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="GameResult/UsernameInputBox/Confirm" to="." method="_on_username_confirm_pressed"]
+[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]

@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://v5oscwlgemrg"]
+
+[ext_resource type="PackedScene" uid="uid://lyfnvnka7iko" path="res://meshes/net.glb" id="1_sn55d"]
+[ext_resource type="Texture2D" uid="uid://c86m37ouxocw4" path="res://images/net.png" id="2_dqdkr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7ujjm"]
+transparency = 2
+alpha_scissor_threshold = 0.654
+alpha_antialiasing_mode = 0
+albedo_texture = ExtResource("2_dqdkr")
+
+[node name="net" instance=ExtResource("1_sn55d")]
+
+[node name="Plane" parent="." index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_7ujjm")

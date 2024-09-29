@@ -1,0 +1,22 @@
+extends Node
+
+const BASE_SPEED = 3.0
+const MAX_SPEED = 12.0
+const ACCELERATION = 12.0 #0.5
+const RUN_SPEED_MULT = 1.5
+
+const MAX_STAMINA = 100.0
+const STAMINA_DELPETION = 1.0
+const STAMINA_REGEN = 0.5
+const STAMINA_BAR_COLOR_NORMAL = '#dfac50'
+const STAMINA_BAR_COLOR_LOCKED = '#992b2b'
+
+const BASE_POWER = 20.0
+const MAX_POWER = 40.0
+
+const JUMP_VELOCITY = 18.0
+
+const ACTION_HOLD_TIME = 0.4
+
+const X_LIMIT = 15.0
+const Z_LIMIT = 30.0

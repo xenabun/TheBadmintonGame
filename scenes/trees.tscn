@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://y3b3vjkgak4y"]
+
+[ext_resource type="PackedScene" uid="uid://boi672q816ak4" path="res://meshes/trees.glb" id="1_moirv"]
+[ext_resource type="Texture2D" uid="uid://bro36lykiodo8" path="res://images/360_F_600573310_XjF8hHLKw6c5IV63exzobQlx6NOOyft1-removebg-preview1.png" id="2_c4gt7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_do7hu"]
+transparency = 2
+alpha_scissor_threshold = 0.855
+alpha_antialiasing_mode = 0
+albedo_texture = ExtResource("2_c4gt7")
+
+[node name="trees" instance=ExtResource("1_moirv")]
+
+[node name="Plane_003" parent="." index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_do7hu")

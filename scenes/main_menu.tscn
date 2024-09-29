@@ -1,0 +1,73 @@
+[gd_scene load_steps=4 format=3 uid="uid://7vkm1dlg17bw"]
+
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_piqie"]
+[ext_resource type="Texture2D" uid="uid://vfxhxgqkquwl" path="res://images/Nature___Fields_Green_field_under_the_blue_sky_on_the_desktop_158841_.jpg" id="2_a28to"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_2wmku"]
+font_size = 126
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_piqie")
+
+[node name="NatureFieldsGreenFieldUnderTheBlueSkyOnTheDesktop158841" type="Sprite2D" parent="."]
+position = Vector2(400, 300)
+scale = Vector2(0.208333, 0.277778)
+texture = ExtResource("2_a28to")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -359.0
+offset_top = -298.0
+offset_right = 360.0
+offset_bottom = 86.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Бадминтон"
+label_settings = SubResource("LabelSettings_2wmku")
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = 56.0
+offset_right = 50.0
+offset_bottom = 192.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Play" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Играть
+"
+
+[node name="Games" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Статистика
+"
+
+[node name="Exit" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Выйти
+"
+
+[connection signal="pressed" from="VBoxContainer/Play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="VBoxContainer/Games" to="." method="_on_games_pressed"]
+[connection signal="pressed" from="VBoxContainer/Exit" to="." method="_on_exit_pressed"]

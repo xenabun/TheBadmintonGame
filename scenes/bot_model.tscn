@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://bjehaep4xmt3c"]
+
+[ext_resource type="PackedScene" uid="uid://b2gv00xrf74fl" path="res://meshes/playermodel.glb" id="1_qf2kh"]
+[ext_resource type="Texture2D" uid="uid://jflipnigtuvn" path="res://images/Untitled.002.png" id="2_jnea1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ksy51"]
+transparency = 2
+alpha_scissor_threshold = 0.25
+alpha_antialiasing_mode = 0
+albedo_texture = ExtResource("2_jnea1")
+
+[node name="playermodel" instance=ExtResource("1_qf2kh")]
+
+[node name="Body_001" parent="Armature/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_ksy51")
