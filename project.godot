@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Бадминтон"
-run/main_scene="res://scenes/main_menu.tscn"
+config/name="badminton"
+run/main_scene="res://scenes/game_field.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 boot_splash/show_image=false
 config/icon="res://icon.svg"
@@ -22,12 +22,12 @@ PlayerVariables="*res://scripts/player_variables.gd"
 BallVariables="*res://scripts/ball_variables.gd"
 VectorMath="*res://scripts/vector_math.gd"
 Game="*res://scripts/game.gd"
+GameManager="*res://scripts/GameManager.gd"
 
 [display]
 
-window/size/viewport_width=800
-window/size/viewport_height=600
-window/size/mode=2
+window/size/initial_position_type=3
+window/size/resizable=false
 window/stretch/mode="viewport"
 
 [editor]

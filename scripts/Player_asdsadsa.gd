@@ -1,19 +1,5 @@
 extends CharacterBody3D
 
-@export var player_id = 1 :
-	set(id):
-		player_id = id
-		$PlayerInput.set_multiplayer_authority(id)
-@export var username : String = ""
-@onready var input = $PlayerInput
-var player_data_set = false
-
-@rpc('any_peer', 'call_local')
-func _set_player_data(_player_id):
-	var player_data = GameManager.Players[_player_id]
-	username = player_data.username
-	#$Control/Username.text = username
-
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
@@ -32,15 +18,12 @@ var sprinting = false
 var movement_actions = [false, false, false, false] # up right down left
 var last_movement_action_pressed = null
 
-@onready var ball = get_tree().get_root().get_node('Scene/Level/World/Ball')
-@onready var camera = get_tree().get_root().get_node('Scene/Level/World/PlayerCamera')
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
-@onready var GameUI = UI.get_node('GameUI')
-@onready var stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
-#@onready var menu = get_parent().get_node('Menu')
+@onready var ball = get_parent().get_node('Ball')
+@onready var bot = get_parent().get_node('Bot')
+@onready var camera = get_parent().get_node('World/PlayerCamera')
+@onready var stamina_bar = get_parent().get_node('StaminaBarControl/StaminaBar')
+@onready var menu = get_parent().get_node('Menu')
 func _ready():
-	camera.set_current(true)
-	GameUI.show()
 	$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = stamina
@@ -65,7 +48,7 @@ var ball_ready = true:
 		$Ball.visible = value
 		if value == true and Game.game_in_progress:
 			position = Vector3(0, 1.172, 15)
-			#bot.position = Vector3(0, 1.172, -15)
+			bot.position = Vector3(0, 1.172, -15)
 			update_camera_transform(1)
 func get_camera_transform_info():
 	var cam_pos_x = position.x
@@ -113,9 +96,9 @@ func _on_action_pressed_timeout():
 	last_movement_action_pressed = null
 
 func _input(event):
-	#if event.is_action_pressed('ui_cancel'):
-		#Game.game_in_progress = not Game.game_in_progress
-		#menu.visible = not Game.game_in_progress
+	if event.is_action_pressed('ui_cancel'):
+		Game.game_in_progress = not Game.game_in_progress
+		menu.visible = not Game.game_in_progress
 	
 	if not Game.game_in_progress: return
 	
@@ -177,11 +160,6 @@ func _input(event):
 			sprinting = false
 
 func _physics_process(delta):
-	if $PlayerInput.get_multiplayer_authority() != multiplayer.get_unique_id():
-		return
-	if not player_data_set and GameManager.Players.has(player_id):
-		player_data_set = true
-		_set_player_data.rpc(player_id)
 	if not Game.game_in_progress:
 		$AnimationTree.active = false
 		return
@@ -204,14 +182,14 @@ func _physics_process(delta):
 	else:
 		$AnimationTree['parameters/WalkScale/scale'] = move_toward(
 				$AnimationTree['parameters/WalkScale/scale'], 1, 0.1)
-	
+
 	# jump
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = PlayerVariables.JUMP_VELOCITY
-	
+
 	# direction
-	#var input_dir = Input.get_vector("left", "right", "up", "down")
-	var direction = input.direction #(transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var input_dir = Input.get_vector("left", "right", "up", "down")
+	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# speed
 	if (
@@ -273,4 +251,3 @@ func _physics_process(delta):
 	
 	# camera
 	update_camera_transform(0.2)
-	

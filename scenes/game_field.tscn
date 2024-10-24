@@ -1,17 +1,18 @@
-[gd_scene load_steps=60 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=61 format=3 uid="uid://dao4a65ncuf15"]
 
-[ext_resource type="Script" path="res://scripts/game_field.gd" id="1_g35qh"]
-[ext_resource type="Script" path="res://scripts/Player.gd" id="1_nlbl8"]
-[ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://scenes/terrain.tscn" id="2_f2kou"]
-[ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://scenes/net.tscn" id="2_nvxwo"]
-[ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://scenes/trees.tscn" id="3_f8pxf"]
+[ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
+[ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
+[ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://prefabs/trees.tscn" id="3_f8pxf"]
 [ext_resource type="Texture2D" uid="uid://c6rdby1kjqnc5" path="res://images/6f7a97101ad33899f1b0186481123e241.jpg" id="4_1apb5"]
-[ext_resource type="Script" path="res://scripts/Bot.gd" id="5_ju6np"]
-[ext_resource type="Script" path="res://scripts/Ball.gd" id="6_i1fag"]
-[ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://scenes/player_model.tscn" id="7_4vm1e"]
+[ext_resource type="Script" path="res://scripts/Network.gd" id="6_h2wnu"]
+[ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="7_4vm1e"]
+[ext_resource type="Script" path="res://scripts/ServerBrowser.gd" id="7_4w53d"]
 [ext_resource type="Texture2D" uid="uid://bka37re8brfsp" path="res://images/round-gradient.png" id="7_gu05u"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="8_vq6n7"]
-[ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://scenes/bot_model.tscn" id="10_x1wcg"]
+[ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://prefabs/bot_model.tscn" id="10_x1wcg"]
+[ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
+[ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
+[ext_resource type="PackedScene" uid="uid://c0mrf3fj2l4fq" path="res://prefabs/control.tscn" id="12_hm06h"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_17rgp"]
 sky_top_color = Color(0.0850372, 0.348454, 0.717237, 1)
@@ -108,7 +109,6 @@ filter_enabled = true
 filters = ["Armature/Skeleton3D:Bone", "Armature/Skeleton3D:Bone.016.L", "Armature/Skeleton3D:Bone.016.R", "Armature/Skeleton3D:Bone.017.L", "Armature/Skeleton3D:Bone.017.R", "Armature/Skeleton3D:Bone.018.L", "Armature/Skeleton3D:Bone.018.R"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vb8qm"]
-graph_offset = Vector2(-884.818, -389.495)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_uy41n")
 nodes/Animation/position = Vector2(-1120, -380)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_mlw0r")
@@ -248,141 +248,148 @@ outline_color = Color(0, 0, 0, 1)
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
-[node name="Node3D" type="Node3D"]
-script = ExtResource("1_g35qh")
+[node name="Scene" type="Node3D"]
 
-[node name="World" type="Node" parent="."]
+[node name="MenuCameraPivot" type="Node3D" parent="."]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
-environment = SubResource("Environment_hy0gk")
-
-[node name="terrain" parent="World/WorldEnvironment" instance=ExtResource("2_f2kou")]
-transform = Transform3D(5.8, 0, 0, 0, 5.8, 0, 0, 0, 5.8, 0, 0, 0)
-
-[node name="trees" parent="World/WorldEnvironment" instance=ExtResource("3_f8pxf")]
-transform = Transform3D(4.195, 0, 0, 0, 4.195, 0, 0, 0, 4.195, 0, -2.68639, 0)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
-transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.0870032, 0.842855, -0.46866, -0.798552, 0.37772, 0, 7.39259, 0)
-shadow_enabled = true
-
-[node name="PlayerCamera" type="Camera3D" parent="World"]
-transform = Transform3D(1, 0, 0, 0, 0.997474, 0.0710274, 0, -0.0710274, 0.997474, 0, 10.1362, 25)
+[node name="MenuCamera" type="Camera3D" parent="MenuCameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 0.943766, 0.330613, 0, -0.330613, 0.943766, 0, 18.7164, 34.2618)
 current = true
 fov = 60.0
 
-[node name="SideCamera" type="Camera3D" parent="World"]
+[node name="Level" type="Node" parent="." groups=["Level_root"]]
+
+[node name="World" type="Node3D" parent="Level"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Level/World"]
+environment = SubResource("Environment_hy0gk")
+
+[node name="terrain" parent="Level/World/WorldEnvironment" instance=ExtResource("2_f2kou")]
+transform = Transform3D(5.8, 0, 0, 0, 5.8, 0, 0, 0, 5.8, 0, 0, 0)
+
+[node name="trees" parent="Level/World/WorldEnvironment" instance=ExtResource("3_f8pxf")]
+transform = Transform3D(4.195, 0, 0, 0, 4.195, 0, 0, 0, 4.195, 0, -2.68639, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Level/World"]
+transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.087003, 0.842855, -0.46866, -0.798552, 0.377721, 0, 7.39259, 0)
+shadow_enabled = true
+
+[node name="PlayerCamera" type="Camera3D" parent="Level/World"]
+transform = Transform3D(1, 0, 0, 0, 0.997474, 0.0710274, 0, -0.0710274, 0.997474, 0, 10.1362, 25)
+fov = 60.0
+
+[node name="SideCamera" type="Camera3D" parent="Level/World"]
 transform = Transform3D(-4.34268e-08, -0.0532421, 0.998582, 4.9801e-09, 0.998582, 0.0532421, -1, 7.28517e-09, -4.31001e-08, 47.7466, 5.81986, 0)
 fov = 42.8
 
-[node name="Floor" type="StaticBody3D" parent="World"]
+[node name="Floor" type="StaticBody3D" parent="Level/World"]
 collision_layer = 11
 collision_mask = 11
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Floor"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Floor"]
 shape = SubResource("BoxShape3D_5fb7r")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="World/Floor"]
+[node name="CSGBox3D" type="CSGBox3D" parent="Level/World/Floor"]
 material_override = SubResource("StandardMaterial3D_rag3r")
 size = Vector3(147.88, 0.174, 210.24)
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="World/Floor"]
+[node name="CSGBox3D2" type="CSGBox3D" parent="Level/World/Floor"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.00197119, 0)
 material_override = SubResource("StandardMaterial3D_xvpac")
 size = Vector3(30, 0.178, 60)
 
-[node name="Area" type="Area3D" parent="World/Floor"]
+[node name="Area" type="Area3D" parent="Level/World/Floor"]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Floor/Area"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Floor/Area"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.788358, 0)
 shape = SubResource("BoxShape3D_01mkf")
 
-[node name="Net" type="StaticBody3D" parent="World"]
+[node name="Net" type="StaticBody3D" parent="Level/World"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7498, 0)
 collision_layer = 3
 collision_mask = 3
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Net"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Net"]
 shape = SubResource("BoxShape3D_ff3cv")
 
-[node name="net" parent="World/Net" instance=ExtResource("2_nvxwo")]
+[node name="net" parent="Level/World/Net" instance=ExtResource("2_nvxwo")]
 transform = Transform3D(7.485, 0, 0, 0, 7.485, 0, 0, 0, 7.485, 0, -3.66, 0)
 
-[node name="FieldArea" type="Area3D" parent="World"]
+[node name="FieldArea" type="Area3D" parent="Level/World"]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="World/FieldArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/FieldArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.2313, 0)
 shape = SubResource("BoxShape3D_228nm")
 
-[node name="Player1Area" type="Area3D" parent="World"]
+[node name="Player1Area" type="Area3D" parent="Level/World"]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Player1Area"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Player1Area"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.54946, 15.0049)
 shape = SubResource("BoxShape3D_oiq72")
 
-[node name="Player2Area" type="Area3D" parent="World"]
+[node name="Player2Area" type="Area3D" parent="Level/World"]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Player2Area"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Player2Area"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.549, -15.005)
 shape = SubResource("BoxShape3D_rfrsq")
 
-[node name="Player" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.172, 15)
-script = ExtResource("1_nlbl8")
+[node name="Player" type="CharacterBody3D" parent="Level/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.90091, 15)
+visible = false
 
-[node name="Collision" type="CollisionShape3D" parent="Player"]
+[node name="Collision" type="CollisionShape3D" parent="Level/World/Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38143, 0)
 shape = SubResource("CapsuleShape3D_bmam5")
 
-[node name="playermodel" parent="Player" instance=ExtResource("7_4vm1e")]
+[node name="playermodel" parent="Level/World/Player" instance=ExtResource("7_4vm1e")]
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
 
-[node name="plrangletarget" type="Node3D" parent="Player"]
+[node name="plrangletarget" type="Node3D" parent="Level/World/Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40104, 0.0206308)
 
-[node name="Ball" type="CSGSphere3D" parent="Player"]
+[node name="Ball" type="CSGSphere3D" parent="Level/World/Player"]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0213909, 2.09325, -0.0132618)
 
-[node name="RacketArea" type="Area3D" parent="Player"]
+[node name="RacketArea" type="Area3D" parent="Level/World/Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474617, 0)
 collision_layer = 4
 collision_mask = 4
 monitorable = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/RacketArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Player/RacketArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65378, 0.35993)
 shape = SubResource("BoxShape3D_fabdq")
 
-[node name="RacketActive" type="Timer" parent="Player"]
+[node name="RacketActive" type="Timer" parent="Level/World/Player"]
 wait_time = 0.4
 one_shot = true
 
-[node name="RacketCooldown" type="Timer" parent="Player"]
+[node name="RacketCooldown" type="Timer" parent="Level/World/Player"]
 wait_time = 0.35
 one_shot = true
 
-[node name="RacketHold" type="Timer" parent="Player"]
+[node name="RacketHold" type="Timer" parent="Level/World/Player"]
 one_shot = true
 
-[node name="ActionPressed" type="Timer" parent="Player"]
+[node name="ActionPressed" type="Timer" parent="Level/World/Player"]
 wait_time = 0.3
 one_shot = true
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Player"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Level/World/Player"]
 root_node = NodePath("../playermodel")
 libraries = {
 "playeranims": ExtResource("8_vq6n7")
 }
 
-[node name="AnimationTree" type="AnimationTree" parent="Player"]
+[node name="AnimationTree" type="AnimationTree" parent="Level/World/Player"]
 active = false
 root_node = NodePath("../playermodel")
 tree_root = SubResource("AnimationNodeBlendTree_vb8qm")
@@ -400,45 +407,45 @@ parameters/TimeScale/scale = 1.5
 parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 
-[node name="Bot" type="CharacterBody3D" parent="."]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.172, -15)
-script = ExtResource("5_ju6np")
+[node name="Bot" type="CharacterBody3D" parent="Level/World"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -9.90091, -15)
+visible = false
 
-[node name="Collision" type="CollisionShape3D" parent="Bot"]
+[node name="Collision" type="CollisionShape3D" parent="Level/World/Bot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38143, 0)
 shape = SubResource("CapsuleShape3D_bmam5")
 
-[node name="botmodel" parent="Bot" instance=ExtResource("10_x1wcg")]
+[node name="botmodel" parent="Level/World/Bot" instance=ExtResource("10_x1wcg")]
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
 
-[node name="plrangletarget" type="Node3D" parent="Bot"]
+[node name="plrangletarget" type="Node3D" parent="Level/World/Bot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.401, 0.021)
 
-[node name="RacketArea" type="Area3D" parent="Bot"]
+[node name="RacketArea" type="Area3D" parent="Level/World/Bot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474617, 0)
 collision_layer = 4
 collision_mask = 4
 monitorable = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Bot/RacketArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Bot/RacketArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65378, 0.35993)
 shape = SubResource("BoxShape3D_v5n6g")
 
-[node name="Sprint" type="Timer" parent="Bot"]
+[node name="Sprint" type="Timer" parent="Level/World/Bot"]
 one_shot = true
 
-[node name="RacketCooldown" type="Timer" parent="Bot"]
+[node name="RacketCooldown" type="Timer" parent="Level/World/Bot"]
 wait_time = 0.35
 one_shot = true
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Bot"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Level/World/Bot"]
 deterministic = true
 root_node = NodePath("../botmodel")
 libraries = {
 "playeranims": ExtResource("8_vq6n7")
 }
 
-[node name="AnimationTree" type="AnimationTree" parent="Bot"]
+[node name="AnimationTree" type="AnimationTree" parent="Level/World/Bot"]
 active = false
 root_node = NodePath("../botmodel")
 tree_root = SubResource("AnimationNodeBlendTree_45jun")
@@ -456,47 +463,81 @@ parameters/TimeScale/scale = 1.5
 parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 
-[node name="Ball" type="CharacterBody3D" parent="."]
+[node name="Ball" type="CharacterBody3D" parent="Level/World"]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -2, 0)
+visible = false
 collision_layer = 0
 collision_mask = 0
-script = ExtResource("6_i1fag")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Ball"]
 shape = SubResource("SphereShape3D_scbn3")
 
-[node name="CSGSphere3D" type="CSGSphere3D" parent="Ball"]
+[node name="CSGSphere3D" type="CSGSphere3D" parent="Level/World/Ball"]
 cast_shadow = 0
 
-[node name="Area" type="Area3D" parent="Ball"]
+[node name="Area" type="Area3D" parent="Level/World/Ball"]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball/Area"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Ball/Area"]
 shape = SubResource("SphereShape3D_xei7b")
 
-[node name="Shadow" type="Sprite3D" parent="Ball"]
+[node name="Shadow" type="Sprite3D" parent="Level/World/Ball"]
 texture = ExtResource("7_gu05u")
 
-[node name="RayCast3D" type="RayCast3D" parent="Ball"]
+[node name="RayCast3D" type="RayCast3D" parent="Level/World/Ball"]
 target_position = Vector3(0, -100, 0)
 collision_mask = 8
 hit_from_inside = true
 
-[node name="StaminaBarControl" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -66.0
-offset_right = 20.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="Players" type="Node3D" parent="Level"]
 
-[node name="StaminaBar" type="ProgressBar" parent="StaminaBarControl"]
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="Level"]
+_spawnable_scenes = PackedStringArray("res://prefabs/Player.tscn")
+spawn_path = NodePath("../Players")
+
+[node name="Network" type="Node" parent="." groups=["Network_root"]]
+script = ExtResource("6_h2wnu")
+
+[node name="ServerBrowser" type="Node" parent="." node_paths=PackedStringArray("broadcastTimer") groups=["ServerBrowser_root"]]
+script = ExtResource("7_4w53d")
+broadcastTimer = NodePath("BroadcastTimer")
+server_card_prefab = ExtResource("11_dli3y")
+
+[node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
+
+[node name="UI" type="Control" parent="." node_paths=PackedStringArray("menu_camera_pivot") groups=["UI_root"]]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("12_2yf3a")
+menu_camera_pivot = NodePath("../MenuCameraPivot")
+
+[node name="ServerBrowser" parent="UI" instance=ExtResource("12_hm06h")]
+layout_mode = 1
+
+[node name="GameUI" type="Control" parent="UI"]
+visible = false
+anchors_preset = 0
+offset_right = 1153.0
+offset_bottom = 40.0
+
+[node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -19.5
+offset_top = 529.0
+offset_right = 20.5
+offset_bottom = 595.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StaminaBar" type="ProgressBar" parent="UI/GameUI/StaminaBarControl"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -514,17 +555,18 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_qmew0")
 value = 50.0
 show_percentage = false
 
-[node name="ScoreControl" type="Control" parent="."]
-layout_mode = 3
+[node name="ScoreControl" type="Control" parent="UI/GameUI"]
+visible = false
+layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -20.0
-offset_right = 20.0
+offset_left = 360.0
+offset_right = 400.0
 offset_bottom = 40.0
 grow_horizontal = 2
 
-[node name="Score" type="Label" parent="ScoreControl"]
+[node name="Score" type="Label" parent="UI/GameUI/ScoreControl"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -539,22 +581,22 @@ label_settings = SubResource("LabelSettings_20vvk")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Menu" type="Control" parent="."]
+[node name="Menu" type="Control" parent="UI"]
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+offset_left = 360.0
+offset_top = 260.0
+offset_right = 400.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="Menu"]
+[node name="ColorRect" type="ColorRect" parent="UI/Menu"]
 layout_mode = 1
 offset_left = -465.0
 offset_top = -475.0
@@ -562,7 +604,7 @@ offset_right = 535.0
 offset_bottom = 525.0
 color = Color(0, 0, 0, 0.329412)
 
-[node name="Label" type="Label" parent="Menu"]
+[node name="Label" type="Label" parent="UI/Menu"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -579,7 +621,7 @@ text = "Меню"
 label_settings = SubResource("LabelSettings_0cqv7")
 horizontal_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Menu"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Menu"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -593,30 +635,30 @@ offset_bottom = 29.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Close" type="Button" parent="Menu/VBoxContainer"]
+[node name="Close" type="Button" parent="UI/Menu/VBoxContainer"]
 layout_mode = 2
 text = "Возобновить"
 
-[node name="Back" type="Button" parent="Menu/VBoxContainer"]
+[node name="Back" type="Button" parent="UI/Menu/VBoxContainer"]
 layout_mode = 2
 text = "Главное меню"
 
-[node name="GameResult" type="Control" parent="."]
+[node name="GameResult" type="Control" parent="UI"]
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+offset_left = 360.0
+offset_top = 260.0
+offset_right = 400.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="GameResult"]
+[node name="ColorRect" type="ColorRect" parent="UI/GameResult"]
 layout_mode = 1
 offset_left = -465.0
 offset_top = -475.0
@@ -624,13 +666,12 @@ offset_right = 535.0
 offset_bottom = 525.0
 color = Color(0, 0, 0, 0.329412)
 
-[node name="Control" type="Control" parent="GameResult"]
-visible = false
+[node name="Control" type="Control" parent="UI/GameResult"]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Result" type="Label" parent="GameResult/Control"]
+[node name="Result" type="Label" parent="UI/GameResult/Control"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -648,7 +689,7 @@ label_settings = SubResource("LabelSettings_urfof")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Score" type="Label" parent="GameResult/Control"]
+[node name="Score" type="Label" parent="UI/GameResult/Control"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -667,7 +708,7 @@ label_settings = SubResource("LabelSettings_r3h5r")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameResult/Control"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/GameResult/Control"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -681,15 +722,15 @@ offset_bottom = 135.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="NewGame" type="Button" parent="GameResult/Control/VBoxContainer"]
+[node name="NewGame" type="Button" parent="UI/GameResult/Control/VBoxContainer"]
 layout_mode = 2
 text = "Новая игра"
 
-[node name="Back" type="Button" parent="GameResult/Control/VBoxContainer"]
+[node name="Back" type="Button" parent="UI/GameResult/Control/VBoxContainer"]
 layout_mode = 2
 text = "Главное меню"
 
-[node name="UsernameInputBox" type="VBoxContainer" parent="GameResult"]
+[node name="UsernameInputBox" type="VBoxContainer" parent="UI/GameResult"]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -704,20 +745,20 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="GameResult/UsernameInputBox"]
+[node name="Label" type="Label" parent="UI/GameResult/UsernameInputBox"]
 layout_mode = 2
 text = "Введите свое имя:"
 label_settings = SubResource("LabelSettings_wpouj")
 
-[node name="LineEdit" type="LineEdit" parent="GameResult/UsernameInputBox"]
+[node name="LineEdit" type="LineEdit" parent="UI/GameResult/UsernameInputBox"]
 layout_mode = 2
 placeholder_text = "Ваше имя"
 
-[node name="Confirm" type="Button" parent="GameResult/UsernameInputBox"]
+[node name="Confirm" type="Button" parent="UI/GameResult/UsernameInputBox"]
 layout_mode = 2
 text = "Подтвердить"
 
-[node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="UI"]
 title = "Подтвердите действие"
 size = Vector2i(443, 106)
 unresizable = true
@@ -726,21 +767,42 @@ popup_window = true
 dialog_text = "Вы уверены что хотите вернуться на главное меню?
 Прогресс текущей игры будет сброшен"
 
-[node name="UsernameInputError" type="AcceptDialog" parent="."]
+[node name="UsernameInputError" type="AcceptDialog" parent="UI"]
 title = "Ошибка"
 size = Vector2i(121, 80)
 dialog_text = "Введите имя"
 
-[connection signal="timeout" from="Player/RacketActive" to="Player" method="_on_racket_active_timeout"]
-[connection signal="timeout" from="Player/RacketCooldown" to="Player" method="_on_racket_cooldown_timeout"]
-[connection signal="timeout" from="Player/RacketHold" to="Player" method="_on_racket_hold_timeout"]
-[connection signal="timeout" from="Player/ActionPressed" to="Player" method="_on_action_pressed_timeout"]
-[connection signal="timeout" from="Bot/Sprint" to="Bot" method="_on_sprint_timeout"]
-[connection signal="timeout" from="Bot/RacketCooldown" to="Bot" method="_on_racket_cooldown_timeout"]
-[connection signal="pressed" from="Menu/VBoxContainer/Close" to="." method="_on_close_pressed"]
-[connection signal="pressed" from="Menu/VBoxContainer/Back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="GameResult/Control/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
-[connection signal="pressed" from="GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="GameResult/UsernameInputBox/Confirm" to="." method="_on_username_confirm_pressed"]
-[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
+[node name="DebugUI" type="Control" parent="." groups=["Debug_root"]]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="DebugUI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -1066.0
+offset_right = 799.0
+offset_bottom = -422.0
+grow_vertical = 0
+vertical_alignment = 2
+
+[connection signal="timeout" from="Level/World/Player/RacketActive" to="Level/World/Player" method="_on_racket_active_timeout"]
+[connection signal="timeout" from="Level/World/Player/RacketCooldown" to="Level/World/Player" method="_on_racket_cooldown_timeout"]
+[connection signal="timeout" from="Level/World/Player/RacketHold" to="Level/World/Player" method="_on_racket_hold_timeout"]
+[connection signal="timeout" from="Level/World/Player/ActionPressed" to="Level/World/Player" method="_on_action_pressed_timeout"]
+[connection signal="timeout" from="Level/World/Bot/Sprint" to="Level/World/Bot" method="_on_sprint_timeout"]
+[connection signal="timeout" from="Level/World/Bot/RacketCooldown" to="Level/World/Bot" method="_on_racket_cooldown_timeout"]
+[connection signal="timeout" from="ServerBrowser/BroadcastTimer" to="ServerBrowser" method="_on_broadcast_timer_timeout"]
+[connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
+[connection signal="pressed" from="UI/GameResult/UsernameInputBox/Confirm" to="." method="_on_username_confirm_pressed"]
+[connection signal="confirmed" from="UI/ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]

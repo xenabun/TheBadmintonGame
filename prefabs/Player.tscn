@@ -1,0 +1,179 @@
+[gd_scene load_steps=21 format=3 uid="uid://blx58dx1jig7h"]
+
+[ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
+[ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
+[ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="2_80x2u"]
+[ext_resource type="Script" path="res://scripts/PlayerInput.gd" id="4_ipxnc"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ll8ur"]
+radius = 1.00449
+height = 4.82426
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
+size = Vector3(5.1084, 5.80756, 3.12071)
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
+animation = &"playeranims/Walk"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vdjdj"]
+animation = &"playeranims/RacketHold"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vl02x"]
+animation = &"playeranims/RacketSwing"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gk47n"]
+animation = &"playeranims/Throw"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uy41n"]
+animation = &"playeranims/Idle"
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_v7dkl"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_un7uq"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+fadeout_time = 0.2
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_vagdm"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone.003.L", "Armature/Skeleton3D:Bone.004.L"]
+fadeout_time = 0.1
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_8sbg3"]
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_r5sud"]
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_qg37g"]
+filter_enabled = true
+filters = ["Armature/Skeleton3D:Bone", "Armature/Skeleton3D:Bone.016.L", "Armature/Skeleton3D:Bone.016.R", "Armature/Skeleton3D:Bone.017.L", "Armature/Skeleton3D:Bone.017.R", "Armature/Skeleton3D:Bone.018.L", "Armature/Skeleton3D:Bone.018.R"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_6mkkh"]
+graph_offset = Vector2(-815.879, -303.868)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_uy41n")
+nodes/Animation/position = Vector2(-1120, -380)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_mlw0r")
+"nodes/Animation 2/position" = Vector2(-480, 200)
+"nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_vdjdj")
+"nodes/Animation 3/position" = Vector2(-760, 80)
+"nodes/Animation 4/node" = SubResource("AnimationNodeAnimation_vl02x")
+"nodes/Animation 4/position" = Vector2(-880, -60)
+"nodes/Animation 5/node" = SubResource("AnimationNodeAnimation_gk47n")
+"nodes/Animation 5/position" = Vector2(-1120, -220)
+nodes/RacketHold/node = SubResource("AnimationNodeOneShot_v7dkl")
+nodes/RacketHold/position = Vector2(-360, -60)
+nodes/RacketSwing/node = SubResource("AnimationNodeOneShot_un7uq")
+nodes/RacketSwing/position = Vector2(-620, -200)
+nodes/Throw/node = SubResource("AnimationNodeOneShot_vagdm")
+nodes/Throw/position = Vector2(-880, -340)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_8sbg3")
+nodes/TimeScale/position = Vector2(-520, 40)
+nodes/WalkScale/node = SubResource("AnimationNodeTimeScale_r5sud")
+nodes/WalkScale/position = Vector2(-260, 200)
+nodes/WalkSpeed/node = SubResource("AnimationNodeBlend2_qg37g")
+nodes/WalkSpeed/position = Vector2(-100, 100)
+nodes/output/position = Vector2(160, 140)
+node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHold", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kwohg"]
+properties/0/path = NodePath(".:player_id")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:username")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:position")
+properties/2/spawn = true
+properties/2/replication_mode = 0
+properties/3/path = NodePath("playermodel:rotation")
+properties/3/spawn = true
+properties/3/replication_mode = 0
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lmu2p"]
+properties/0/path = NodePath("PlayerInput:direction")
+properties/0/spawn = false
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:position")
+properties/1/spawn = false
+properties/1/replication_mode = 2
+properties/2/path = NodePath("playermodel:rotation")
+properties/2/spawn = false
+properties/2/replication_mode = 2
+
+[node name="Player" type="CharacterBody3D" groups=["Player"]]
+script = ExtResource("1_pqout")
+
+[node name="playermodel" parent="." instance=ExtResource("1_4y33c")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38143, 0)
+shape = SubResource("CapsuleShape3D_ll8ur")
+
+[node name="plrangletarget" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40104, 0.0206308)
+
+[node name="Ball" type="CSGSphere3D" parent="."]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0213909, 2.09325, -0.0132618)
+
+[node name="RacketArea" type="Area3D" parent="."]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0213909, 2.2119, -0.0132618)
+collision_layer = 4
+collision_mask = 4
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RacketArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65378, 0.35993)
+shape = SubResource("BoxShape3D_i5pof")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../playermodel")
+libraries = {
+"playeranims": ExtResource("2_80x2u")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+active = false
+root_node = NodePath("../playermodel")
+tree_root = SubResource("AnimationNodeBlendTree_6mkkh")
+anim_player = NodePath("../AnimationPlayer")
+parameters/RacketHold/active = false
+parameters/RacketHold/internal_active = false
+parameters/RacketHold/request = 0
+parameters/RacketSwing/active = false
+parameters/RacketSwing/internal_active = false
+parameters/RacketSwing/request = 0
+parameters/Throw/active = false
+parameters/Throw/internal_active = false
+parameters/Throw/request = 0
+parameters/TimeScale/scale = 1.5
+parameters/WalkScale/scale = 1.0
+parameters/WalkSpeed/blend_amount = 1.0
+
+[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_kwohg")
+
+[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_lmu2p")
+script = ExtResource("4_ipxnc")
+
+[node name="RacketActive" type="Timer" parent="."]
+wait_time = 0.4
+one_shot = true
+
+[node name="RacketCooldown" type="Timer" parent="."]
+wait_time = 0.35
+one_shot = true
+
+[node name="RacketHold" type="Timer" parent="."]
+one_shot = true
+
+[node name="ActionPressed" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true
+
+[connection signal="timeout" from="RacketActive" to="." method="_on_racket_active_timeout"]
+[connection signal="timeout" from="RacketCooldown" to="." method="_on_racket_cooldown_timeout"]
+[connection signal="timeout" from="RacketHold" to="." method="_on_racket_hold_timeout"]
+[connection signal="timeout" from="ActionPressed" to="." method="_on_action_pressed_timeout"]

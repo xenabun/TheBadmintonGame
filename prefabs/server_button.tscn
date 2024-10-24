@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://biiikapfvb4vb"]
+
+[ext_resource type="Script" path="res://scripts/server_button.gd" id="1_8ja4g"]
+
+[node name="ServerButton" type="Button"]
+script = ExtResource("1_8ja4g")
+
+[connection signal="pressed" from="." to="." method="_on_connect_button_pressed"]
