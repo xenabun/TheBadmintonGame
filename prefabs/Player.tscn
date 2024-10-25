@@ -127,6 +127,9 @@ properties/9/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
 script = ExtResource("1_pqout")
+player_id = null
+username = null
+actions = null
 
 [node name="playermodel" parent="." instance=ExtResource("1_4y33c")]
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
@@ -181,23 +184,24 @@ replication_config = SubResource("SceneReplicationConfig_kwohg")
 [node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_lmu2p")
 script = ExtResource("4_ipxnc")
+direction = null
 
-[node name="RacketActive" type="Timer" parent="."]
+[node name="RacketActive" type="Timer" parent="PlayerInput"]
 wait_time = 0.4
 one_shot = true
 
-[node name="RacketCooldown" type="Timer" parent="."]
+[node name="RacketCooldown" type="Timer" parent="PlayerInput"]
 wait_time = 0.35
 one_shot = true
 
-[node name="RacketHold" type="Timer" parent="."]
+[node name="RacketHold" type="Timer" parent="PlayerInput"]
 one_shot = true
 
-[node name="ActionPressed" type="Timer" parent="."]
+[node name="ActionPressed" type="Timer" parent="PlayerInput"]
 wait_time = 0.3
 one_shot = true
 
-[connection signal="timeout" from="RacketActive" to="." method="_on_racket_active_timeout"]
-[connection signal="timeout" from="RacketCooldown" to="." method="_on_racket_cooldown_timeout"]
-[connection signal="timeout" from="RacketHold" to="." method="_on_racket_hold_timeout"]
-[connection signal="timeout" from="ActionPressed" to="." method="_on_action_pressed_timeout"]
+[connection signal="timeout" from="PlayerInput/RacketActive" to="PlayerInput" method="_on_racket_active_timeout"]
+[connection signal="timeout" from="PlayerInput/RacketCooldown" to="PlayerInput" method="_on_racket_cooldown_timeout"]
+[connection signal="timeout" from="PlayerInput/RacketHold" to="PlayerInput" method="_on_racket_hold_timeout"]
+[connection signal="timeout" from="PlayerInput/ActionPressed" to="PlayerInput" method="_on_action_pressed_timeout"]
