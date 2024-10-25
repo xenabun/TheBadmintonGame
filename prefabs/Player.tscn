@@ -86,20 +86,44 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath(".:position")
 properties/2/spawn = true
 properties/2/replication_mode = 0
-properties/3/path = NodePath("playermodel:rotation")
+properties/3/path = NodePath(".:rotation")
 properties/3/spawn = true
 properties/3/replication_mode = 0
+properties/4/path = NodePath("playermodel:rotation")
+properties/4/spawn = true
+properties/4/replication_mode = 0
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lmu2p"]
 properties/0/path = NodePath("PlayerInput:direction")
 properties/0/spawn = false
-properties/0/replication_mode = 1
+properties/0/replication_mode = 2
 properties/1/path = NodePath(".:position")
 properties/1/spawn = false
 properties/1/replication_mode = 2
 properties/2/path = NodePath("playermodel:rotation")
 properties/2/spawn = false
 properties/2/replication_mode = 2
+properties/3/path = NodePath("AnimationPlayer:current_animation")
+properties/3/spawn = false
+properties/3/replication_mode = 2
+properties/4/path = NodePath("AnimationTree:anim_player")
+properties/4/spawn = false
+properties/4/replication_mode = 0
+properties/5/path = NodePath("AnimationTree:active")
+properties/5/spawn = false
+properties/5/replication_mode = 2
+properties/6/path = NodePath("AnimationTree:parameters/TimeScale/scale")
+properties/6/spawn = false
+properties/6/replication_mode = 2
+properties/7/path = NodePath("AnimationTree:parameters/WalkScale/scale")
+properties/7/spawn = false
+properties/7/replication_mode = 2
+properties/8/path = NodePath("AnimationTree:parameters/WalkSpeed/blend_amount")
+properties/8/spawn = false
+properties/8/replication_mode = 2
+properties/9/path = NodePath(".:rotation")
+properties/9/spawn = false
+properties/9/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
 script = ExtResource("1_pqout")

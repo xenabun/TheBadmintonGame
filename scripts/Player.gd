@@ -7,6 +7,10 @@ extends CharacterBody3D
 @export var username : String = ""
 @onready var input = $PlayerInput
 var player_data_set = false
+func get_player_side():
+	return 1 if player_id == 1 else -1
+func get_player_num():
+	return 1 if player_id == 1 else 2
 
 @rpc('any_peer', 'call_local')
 func _set_player_data(_player_id):
@@ -33,17 +37,26 @@ var movement_actions = [false, false, false, false] # up right down left
 var last_movement_action_pressed = null
 
 @onready var ball = get_tree().get_root().get_node('Scene/Level/World/Ball')
+#var camera
 @onready var camera = get_tree().get_root().get_node('Scene/Level/World/PlayerCamera')
 @onready var UI = get_tree().get_first_node_in_group('UI_root')
 @onready var GameUI = UI.get_node('GameUI')
 @onready var stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 #@onready var menu = get_parent().get_node('Menu')
 func _ready():
-	camera.set_current(true)
+	#camera.set_current(true)
+	#set_current_camera.rpc_id(multiplayer.get_unique_id())
+	if is_multiplayer_authority():
+		camera.make_current()
 	GameUI.show()
 	$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = stamina
+#@rpc("authority", "call_local")
+#func set_current_camera():
+	#var num = get_player_num()
+	#camera = get_tree().get_root().get_node('Scene/Level/World/PlayerCamera')
+	#camera.make_current()
 
 var action_ready = true
 var action_hold = false:
@@ -63,15 +76,17 @@ var ball_ready = true:
 	set(value):
 		ball_ready = value
 		$Ball.visible = value
-		if value == true and Game.game_in_progress:
-			position = Vector3(0, 1.172, 15)
+		#if value == true and Game.game_in_progress:
+			#position = Vector3(0, 1.172, 15)
 			#bot.position = Vector3(0, 1.172, -15)
-			update_camera_transform(1)
+			#update_camera_transform(1)
 func get_camera_transform_info():
+	var side = get_player_side()
+	var num = get_player_num()
 	var cam_pos_x = position.x
-	var cam_pos_z = position.z + 20
-	var player_pos_x_frac = position.x / PlayerVariables.X_LIMIT
-	var player_pos_z_frac = position.z / PlayerVariables.Z_LIMIT
+	var cam_pos_z = position.z + (20 * side)
+	var player_pos_x_frac = position.x / PlayerVariables.X_LIMIT * side
+	var player_pos_z_frac = position.z / PlayerVariables.Z_LIMIT * side
 	var screen_width = get_viewport().get_visible_rect().size.x
 	var mouse_x = get_viewport().get_mouse_position().x
 	var mouse_on_screen_frac = -((mouse_x / screen_width) - 0.5) * 2
@@ -84,7 +99,7 @@ func get_camera_transform_info():
 	return {
 		'cam_pos_x' = cam_pos_x,
 		'cam_pos_z' = cam_pos_z,
-		'cam_rot_y' = cam_rot_y,
+		'cam_rot_y' = cam_rot_y + PI * (num - 1),
 	}
 func update_camera_transform(t):
 	var cam_info = get_camera_transform_info()
@@ -185,7 +200,8 @@ func _physics_process(delta):
 	if not Game.game_in_progress:
 		$AnimationTree.active = false
 		return
-	$AnimationTree.active = true
+	if $AnimationTree.active == false:
+		$AnimationTree.active = true
 	
 	# racket hold
 	if action_hold:
@@ -263,13 +279,15 @@ func _physics_process(delta):
 			exhausted = false
 	
 	# velocity
-	var vel = Vector3(sign(direction.x), 0, sign(direction.z)).normalized() * speed
+	var vel = direction.normalized() * speed
 	velocity = Vector3(vel.x, velocity.y, vel.z)
 	
 	# position
 	move_and_slide()
 	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
-	position.z = clamp(position.z, 2, PlayerVariables.Z_LIMIT)
+	var side = get_player_side()
+	var z_clamp = [2 * side, PlayerVariables.Z_LIMIT * side]
+	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# camera
 	update_camera_transform(0.2)

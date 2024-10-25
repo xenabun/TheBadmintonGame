@@ -111,8 +111,10 @@ func add_player(id: int = 1):
 	#character.username = GameManager.Players[id].username
 	#character.get_node('Control/Username').text = GameManager.Players[id].username
 	character.name = str(id)
-	character.position = Vector3(0, 1.172, 15)
-	#Vector2(150 + 50*(randf()*2-1), 150 + 50*(randf()*2-1))
+	var num = 1 if id == 1 else 2
+	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
+	character.position = spawn_point.position
+	character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
 	#character.set_username.rpc_id(id, GameManager.Players[id].username)
 

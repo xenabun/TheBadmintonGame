@@ -261,6 +261,12 @@ fov = 60.0
 
 [node name="World" type="Node3D" parent="Level"]
 
+[node name="Player1Spawn" type="Node3D" parent="Level/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 16)
+
+[node name="Player2Spawn" type="Node3D" parent="Level/World"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 8, -16)
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Level/World"]
 environment = SubResource("Environment_hy0gk")
 
@@ -270,12 +276,17 @@ transform = Transform3D(5.8, 0, 0, 0, 5.8, 0, 0, 0, 5.8, 0, 0, 0)
 [node name="trees" parent="Level/World/WorldEnvironment" instance=ExtResource("3_f8pxf")]
 transform = Transform3D(4.195, 0, 0, 0, 4.195, 0, 0, 0, 4.195, 0, -2.68639, 0)
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Level/World"]
-transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.087003, 0.842855, -0.46866, -0.798552, 0.377721, 0, 7.39259, 0)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Level/World/WorldEnvironment"]
+transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.0870029, 0.842855, -0.46866, -0.798552, 0.37772, 0, 7.39259, 0)
 shadow_enabled = true
 
 [node name="PlayerCamera" type="Camera3D" parent="Level/World"]
 transform = Transform3D(1, 0, 0, 0, 0.997474, 0.0710274, 0, -0.0710274, 0.997474, 0, 10.1362, 25)
+fov = 60.0
+
+[node name="Player2Camera" type="Camera3D" parent="Level/World"]
+transform = Transform3D(-1, 1.2318e-08, -8.65506e-08, 0, 0.990024, 0.140901, 8.74228e-08, 0.140901, -0.990024, 0, 10.136, -25)
+visible = false
 fov = 60.0
 
 [node name="SideCamera" type="Camera3D" parent="Level/World"]
