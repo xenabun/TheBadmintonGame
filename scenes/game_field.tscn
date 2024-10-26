@@ -305,7 +305,7 @@ material_override = SubResource("StandardMaterial3D_rag3r")
 size = Vector3(147.88, 0.174, 210.24)
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="Level/World/Floor"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.00197119, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05373, 0)
 material_override = SubResource("StandardMaterial3D_xvpac")
 size = Vector3(30, 0.178, 60)
 
@@ -319,6 +319,7 @@ shape = SubResource("BoxShape3D_01mkf")
 
 [node name="Net" type="StaticBody3D" parent="Level/World"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7498, 0)
+visible = false
 collision_layer = 3
 collision_mask = 3
 
@@ -476,7 +477,6 @@ parameters/WalkSpeed/blend_amount = 1.0
 
 [node name="Ball" type="CharacterBody3D" parent="Level/World"]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -2, 0)
-visible = false
 collision_layer = 0
 collision_mask = 0
 
@@ -813,7 +813,7 @@ vertical_alignment = 2
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="." method="_on_close_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
+[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/UsernameInputBox/Confirm" to="." method="_on_username_confirm_pressed"]
 [connection signal="confirmed" from="UI/ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]

@@ -9,5 +9,5 @@ extends Control
 		in_menu = value
 
 func _physics_process(_delta):
-	if in_menu:
+	if in_menu and Game.window_focus:
 		menu_camera_pivot.rotation.y += 0.0005

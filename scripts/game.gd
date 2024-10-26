@@ -1,5 +1,7 @@
 extends Node
 
+var window_focus = true
+
 var data = {}
 var path = "res://BadmintonData.json"
 func save_json_file():
@@ -30,6 +32,26 @@ func load_json_file():
 var score = [ 0, 0 ]
 var winner = null
 var game_in_progress = true
+@onready var Level = get_tree().get_first_node_in_group('Level_root')
+@onready var ball = Level.get_node('World/Ball')
+var ball_ready = true:
+	set(value):
+		ball_ready = value
+		#ball.visible = value
+		if value == true and Game.game_in_progress:
+			for player in Level.get_node('Players').get_children():
+				player.reset_position.emit()
+
+@rpc("any_peer", 'call_local')
+func throw_ball(pos, dir):
+	Game.ball_ready = false
+	ball.position = pos
+	ball.set('direction', dir)
+	ball.set('power', PlayerVariables.MAX_POWER)
+	ball.set('launch_y', pos.y)
+	ball.set('launch_z', pos.z)
+	ball.set('last_interact', name)
+
 var score_text_path = 'Node3D/ScoreControl/Score'
 func get_score_str():
 	return str(score[0], ' : ', score[1])
@@ -65,4 +87,10 @@ func reset_score():
 	update_score_text()
 
 func _ready():
-	data = load_json_file()
+	get_viewport().focus_entered.connect(_on_window_focus_in)
+	get_viewport().focus_exited.connect(_on_window_focus_out)
+
+func _on_window_focus_in():
+	window_focus = true
+func _on_window_focus_out():
+	window_focus = false

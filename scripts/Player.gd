@@ -6,6 +6,12 @@ extends CharacterBody3D
 		$PlayerInput.set_multiplayer_authority(id)
 @export var username : String = ""
 @onready var input = $PlayerInput
+#@export var actions = {
+	#"throw_ready": false,
+	#"racket_hold": false,
+	##"racket_hold_stop": false,
+	#"racket_swing": false,
+#}
 var player_data_set = false
 func get_player_side():
 	return 1 if player_id == 1 else -1
@@ -16,43 +22,62 @@ func get_player_num():
 func _set_player_data(_player_id):
 	var player_data = GameManager.Players[_player_id]
 	username = player_data.username
+	$Username.text = username
 	#$Control/Username.text = username
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
 var prev_direction = Vector3.ZERO
-var stamina = PlayerVariables.MAX_STAMINA:
-	set(value):
-		stamina = value
-		stamina_bar.value = value
-var exhausted = false:
-	set(value):
-		exhausted = value
-		stamina_bar.get("theme_override_styles/fill").bg_color = Color.html(
-				PlayerVariables.STAMINA_BAR_COLOR_LOCKED if value else
-				PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
-var sprinting = false
+#var stamina = PlayerVariables.MAX_STAMINA:
+	#set(value):
+		#stamina = value
+		#stamina_bar.value = value
+#var exhausted = false:
+	#set(value):
+		#exhausted = value
+		#stamina_bar.get("theme_override_styles/fill").bg_color = Color.html(
+				#PlayerVariables.STAMINA_BAR_COLOR_LOCKED if value else
+				#PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
+#var sprinting = false
 #var movement_actions = [false, false, false, false] # up right down left
-var last_movement_action_pressed = null
+#var last_movement_action_pressed = null
 
-@onready var ball = get_tree().get_root().get_node('Scene/Level/World/Ball')
-#var camera
-@onready var camera = get_tree().get_root().get_node('Scene/Level/World/PlayerCamera')
+@onready var Level = get_tree().get_first_node_in_group('Level_root')
+@onready var ball = Level.get_node('World/Ball')
+@onready var camera = Level.get_node('World/PlayerCamera')
 @onready var UI = get_tree().get_first_node_in_group('UI_root')
 @onready var GameUI = UI.get_node('GameUI')
-@onready var stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
+@export var stamina_bar : Node
+#@onready var stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 #@onready var menu = get_parent().get_node('Menu')
+
+signal reset_position
+func _reset_position():
+	var num = get_player_num()
+	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
+	position = spawn_point.position
+	rotation = spawn_point.rotation
+	update_camera_transform(1)
+
 func _ready():
+	GameManager.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
+	#print(GameManager.Players.has(player_id))
+	set_physics_process(multiplayer.get_unique_id() == player_id)
+	if multiplayer.get_unique_id() != player_id: return
+	
 	#camera.set_current(true)
 	#set_current_camera.rpc_id(multiplayer.get_unique_id())
-	if is_multiplayer_authority():
-		camera.make_current()
-		update_camera_transform(1)
+	#print(input.get_multiplayer_authority())
+	#if is_multiplayer_authority():
+	reset_position.connect(_reset_position)
+	camera.make_current()
+	update_camera_transform(1)
 	GameUI.show()
-	$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
+	#$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
+	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
-	stamina_bar.value = stamina
+	stamina_bar.value = input.stamina
 #@rpc("authority", "call_local")
 #func set_current_camera():
 	#var num = get_player_num()
@@ -128,11 +153,6 @@ func update_camera_transform(t):
 #func _on_action_pressed_timeout():
 	#last_movement_action_pressed = null
 
-@export var actions = {
-	"throw_ready": false,
-	"racket_hold": false,
-	"racket_swing": false,
-}
 #func _input(event):
 	##if event.is_action_pressed('ui_cancel'):
 		##Game.game_in_progress = not Game.game_in_progress
@@ -198,8 +218,8 @@ func update_camera_transform(t):
 			#sprinting = false
 
 func _physics_process(delta):
-	if $PlayerInput.get_multiplayer_authority() != multiplayer.get_unique_id():
-		return
+	#if not input or input.get_multiplayer_authority() != multiplayer.get_unique_id():
+		#return
 	if not player_data_set and GameManager.Players.has(player_id):
 		player_data_set = true
 		_set_player_data.rpc(player_id)
@@ -209,14 +229,25 @@ func _physics_process(delta):
 	if $AnimationTree.active == false:
 		$AnimationTree.active = true
 	
-	# racket hold
-	if action_hold:
-		var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
-				$RacketHold.time_left) /
-				PlayerVariables.ACTION_HOLD_TIME)
-		throw_power = (PlayerVariables.BASE_POWER +
-				(PlayerVariables.MAX_POWER -
-				PlayerVariables.BASE_POWER) * hold_mult)
+	#if actions.throw_ready:
+		#actions.throw_ready = false
+		#$AnimationTree['parameters/Throw/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	#if actions.racket_hold:
+		#actions.racket_hold = false
+		#$AnimationTree['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	#if actions.racket_swing:
+		#actions.racket_swing = false
+		#$AnimationTree['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+		#$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	
+	## racket hold
+	#if action_hold:
+		#var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
+				#$RacketHold.time_left) /
+				#PlayerVariables.ACTION_HOLD_TIME)
+		#throw_power = (PlayerVariables.BASE_POWER +
+				#(PlayerVariables.MAX_POWER -
+				#PlayerVariables.BASE_POWER) * hold_mult)
 	
 	# gravity
 	if not is_on_floor():
@@ -245,7 +276,7 @@ func _physics_process(delta):
 	if direction.length() > 0:
 		var max_speed = PlayerVariables.MAX_SPEED
 		var accel = PlayerVariables.ACCELERATION
-		if sprinting and not exhausted and stamina > 0:
+		if input.sprinting and not input.exhausted and input.stamina > 0:
 			max_speed *= PlayerVariables.RUN_SPEED_MULT
 			accel *= PlayerVariables.RUN_SPEED_MULT
 		speed = move_toward(speed, max_speed, accel)
@@ -256,7 +287,7 @@ func _physics_process(delta):
 	# animation
 	var blend_amount = 0
 	if direction.length() > 0:
-		if sprinting and not exhausted and stamina > 0:
+		if input.sprinting and not input.exhausted and input.stamina > 0:
 			blend_amount = 1
 		else:
 			blend_amount = 0.5
@@ -273,16 +304,16 @@ func _physics_process(delta):
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# stamina
-	if sprinting and not exhausted and direction.length() > 0:
-		stamina = max(stamina - PlayerVariables.STAMINA_DELPETION, 0)
-		if stamina <= 0:
-			sprinting = false
-			exhausted = true
+	if input.sprinting and not input.exhausted and direction.length() > 0:
+		input.stamina = max(input.stamina - PlayerVariables.STAMINA_DELPETION, 0)
+		if input.stamina <= 0:
+			input.sprinting = false
+			input.exhausted = true
 	else:
-		stamina = min(stamina + PlayerVariables.STAMINA_REGEN,
+		input.stamina = min(input.stamina + PlayerVariables.STAMINA_REGEN,
 				PlayerVariables.MAX_STAMINA)
-		if stamina >= PlayerVariables.MAX_STAMINA:
-			exhausted = false
+		if input.stamina >= PlayerVariables.MAX_STAMINA:
+			input.exhausted = false
 	
 	# velocity
 	var vel = direction.normalized() * speed
@@ -296,5 +327,6 @@ func _physics_process(delta):
 	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# camera
-	update_camera_transform(0.2)
+	if Game.window_focus:
+		update_camera_transform(0.2)
 	

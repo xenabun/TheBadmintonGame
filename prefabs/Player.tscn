@@ -1,8 +1,9 @@
-[gd_scene load_steps=21 format=3 uid="uid://blx58dx1jig7h"]
+[gd_scene load_steps=22 format=3 uid="uid://blx58dx1jig7h"]
 
 [ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="2_80x2u"]
+[ext_resource type="Material" uid="uid://5ikr8dl3gf0d" path="res://materials/test.material" id="3_s24ti"]
 [ext_resource type="Script" path="res://scripts/PlayerInput.gd" id="4_ipxnc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ll8ur"]
@@ -10,7 +11,7 @@ radius = 1.00449
 height = 4.82426
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
-size = Vector3(5.1084, 5.80756, 3.12071)
+size = Vector3(12.8984, 19.1476, 14.8733)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
 animation = &"playeranims/Walk"
@@ -92,6 +93,9 @@ properties/3/replication_mode = 0
 properties/4/path = NodePath("playermodel:rotation")
 properties/4/spawn = true
 properties/4/replication_mode = 0
+properties/5/path = NodePath("Username:text")
+properties/5/spawn = true
+properties/5/replication_mode = 1
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lmu2p"]
 properties/0/path = NodePath("PlayerInput:direction")
@@ -127,9 +131,15 @@ properties/9/replication_mode = 2
 
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
 script = ExtResource("1_pqout")
-player_id = null
-username = null
-actions = null
+
+[node name="Username" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.50246, 0)
+pixel_size = 0.001
+billboard = 1
+double_sided = false
+no_depth_test = true
+fixed_size = true
+text = "aboba"
 
 [node name="playermodel" parent="." instance=ExtResource("1_4y33c")]
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
@@ -151,8 +161,14 @@ collision_mask = 4
 monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RacketArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65378, 0.35993)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.17987, -2.86776)
 shape = SubResource("BoxShape3D_i5pof")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="RacketArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.17987, -2.86776)
+visible = false
+size = Vector3(12.8984, 19.1476, 14.8733)
+material = ExtResource("3_s24ti")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../playermodel")
@@ -184,7 +200,6 @@ replication_config = SubResource("SceneReplicationConfig_kwohg")
 [node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_lmu2p")
 script = ExtResource("4_ipxnc")
-direction = null
 
 [node name="RacketActive" type="Timer" parent="PlayerInput"]
 wait_time = 0.4

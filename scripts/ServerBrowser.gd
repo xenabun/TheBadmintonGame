@@ -59,12 +59,14 @@ func _process(_delta):
 		for i in ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').get_children():
 			if i.name == pRoomInfo.name:
 				i.ip = server_ip
+				i.port = server_port
 				i.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
 				return
 		
 		var server_card = server_card_prefab.instantiate()
 		server_card.name = pRoomInfo.name
 		server_card.ip = server_ip
+		server_card.port = server_port
 		server_card.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
 		ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').add_child(server_card)
 		server_card.join_server.connect(join_by_ip)
