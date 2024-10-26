@@ -44,6 +44,10 @@ func peer_disconnected(id):
 func connected_to_server():
 	GameManager.print_debug_msg('Connected to server')
 	var peer_id = multiplayer.get_unique_id()
+	GameManager.Players[peer_id] = {
+		'username': ServerBrowserUI.get_node('UsernameBox').text,
+		'id': peer_id,
+	}
 	send_player_information.rpc_id(1, ServerBrowserUI.get_node('UsernameBox').text, peer_id)
 	#add_player(peer_id) #.rpc_id(1, peer_id)
 
@@ -111,6 +115,7 @@ func add_player(id: int = 1):
 	#character.username = GameManager.Players[id].username
 	#character.get_node('Control/Username').text = GameManager.Players[id].username
 	character.name = str(id)
+	#GameManager.print_debug_msg('trying to get plr username: ' + str(GameManager.Players[id]['username']))
 	var num = 1 if id == 1 else 2
 	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
 	character.position = spawn_point.position

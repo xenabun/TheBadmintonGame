@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=63 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="7_4vm1e"]
 [ext_resource type="Script" path="res://scripts/ServerBrowser.gd" id="7_4w53d"]
 [ext_resource type="Texture2D" uid="uid://bka37re8brfsp" path="res://images/round-gradient.png" id="7_gu05u"]
+[ext_resource type="Script" path="res://scripts/Ball.gd" id="8_d4rec"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="8_vq6n7"]
 [ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://prefabs/bot_model.tscn" id="10_x1wcg"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
@@ -203,6 +204,17 @@ node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeSc
 [sub_resource type="SphereShape3D" id="SphereShape3D_scbn3"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_xei7b"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xd51s"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("Shadow:position")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("Shadow:rotation")
+properties/2/spawn = true
+properties/2/replication_mode = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hr2xc"]
 bg_color = Color(0.2, 0.2, 0.2, 0.494118)
@@ -476,9 +488,10 @@ parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 
 [node name="Ball" type="CharacterBody3D" parent="Level/World"]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -2, 0)
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -2, -2.74399)
 collision_layer = 0
 collision_mask = 0
+script = ExtResource("8_d4rec")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Ball"]
 shape = SubResource("SphereShape3D_scbn3")
@@ -500,6 +513,9 @@ texture = ExtResource("7_gu05u")
 target_position = Vector3(0, -100, 0)
 collision_mask = 8
 hit_from_inside = true
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="Level/World/Ball"]
+replication_config = SubResource("SceneReplicationConfig_xd51s")
 
 [node name="Players" type="Node3D" parent="Level"]
 
@@ -813,7 +829,7 @@ vertical_alignment = 2
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="." method="_on_close_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
 [connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
 [connection signal="pressed" from="UI/GameResult/UsernameInputBox/Confirm" to="." method="_on_username_confirm_pressed"]
 [connection signal="confirmed" from="UI/ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]

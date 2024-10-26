@@ -5,6 +5,11 @@ extends CharacterBody3D
 		player_id = id
 		$PlayerInput.set_multiplayer_authority(id)
 @export var username : String = ""
+#:
+	#set(value):
+		#username = value
+		#GameManager.print_debug_msg(str(multiplayer.get_unique_id()) + ' username setter call!')
+		#$Username.text = value
 @onready var input = $PlayerInput
 #@export var actions = {
 	#"throw_ready": false,
@@ -12,22 +17,22 @@ extends CharacterBody3D
 	##"racket_hold_stop": false,
 	#"racket_swing": false,
 #}
-var player_data_set = false
+#var player_data_set = false
 func get_player_side():
 	return 1 if player_id == 1 else -1
 func get_player_num():
 	return 1 if player_id == 1 else 2
 
-@rpc('any_peer', 'call_local')
-func _set_player_data(_player_id):
-	var player_data = GameManager.Players[_player_id]
-	username = player_data.username
-	$Username.text = username
+#@rpc('any_peer', 'call_local')
+#func _set_player_data(_player_id):
+	#var player_data = GameManager.Players[_player_id]
+	#username = player_data.username
+	#$Username.text = username
 	#$Control/Username.text = username
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
-var throw_power = PlayerVariables.MAX_POWER
+@export var throw_power = PlayerVariables.MAX_POWER
 var prev_direction = Vector3.ZERO
 #var stamina = PlayerVariables.MAX_STAMINA:
 	#set(value):
@@ -66,6 +71,13 @@ func _ready():
 	set_physics_process(multiplayer.get_unique_id() == player_id)
 	if multiplayer.get_unique_id() != player_id: return
 	
+	var player_data = GameManager.Players[player_id]
+	if player_data:
+		GameManager.print_debug_msg('getting player data: username: ' + str(player_data.username))
+	else:
+		GameManager.print_debug_msg('getting player data: not found')
+	username = player_data.username
+	$Username.text = player_data.username
 	#camera.set_current(true)
 	#set_current_camera.rpc_id(multiplayer.get_unique_id())
 	#print(input.get_multiplayer_authority())
@@ -220,9 +232,9 @@ func update_camera_transform(t):
 func _physics_process(delta):
 	#if not input or input.get_multiplayer_authority() != multiplayer.get_unique_id():
 		#return
-	if not player_data_set and GameManager.Players.has(player_id):
-		player_data_set = true
-		_set_player_data.rpc(player_id)
+	#if not player_data_set and GameManager.Players.has(player_id):
+		#player_data_set = true
+		#_set_player_data.rpc(player_id)
 	if not Game.game_in_progress:
 		$AnimationTree.active = false
 		return

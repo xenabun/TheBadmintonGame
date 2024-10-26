@@ -51,6 +51,10 @@ func racket_swing():
 	player.get_node('AnimationTree')['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
 	player.get_node('AnimationTree')['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 
+@rpc('any_peer', 'call_local')
+func set_throw_power(value):
+	player.throw_power = value
+
 func _ready():
 	var authority = get_multiplayer_authority() == multiplayer.get_unique_id()
 	set_process(authority)
@@ -156,7 +160,10 @@ func _process(_delta):
 		var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
 				$RacketHold.time_left) /
 				PlayerVariables.ACTION_HOLD_TIME)
-		player.throw_power = (PlayerVariables.BASE_POWER +
+		#player.throw_power = (PlayerVariables.BASE_POWER +
+				#(PlayerVariables.MAX_POWER -
+				#PlayerVariables.BASE_POWER) * hold_mult)
+		set_throw_power.rpc(PlayerVariables.BASE_POWER +
 				(PlayerVariables.MAX_POWER -
 				PlayerVariables.BASE_POWER) * hold_mult)
 	

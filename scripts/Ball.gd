@@ -1,13 +1,12 @@
 extends CharacterBody3D
 
 @onready var Player = get_parent().get_node('Player')
-@onready var BASE_PLAYER_POS_Y = Player.get_node('Collision').get_shape().get_height() / 2
-@onready var FieldArea = get_parent().get_node('World/FieldArea')
-@onready var FloorArea = get_parent().get_node('World/Floor/Area')
-@onready var Player1Area = get_parent().get_node('World/Player1Area')
-@onready var Player2Area = get_parent().get_node('World/Player2Area')
+var BASE_PLAYER_POS_Y = 4.824 / 2
+@onready var FieldArea = get_parent().get_node('FieldArea')
+@onready var FloorArea = get_parent().get_node('Floor/Area')
+@onready var Player1Area = get_parent().get_node('Player1Area')
+@onready var Player2Area = get_parent().get_node('Player2Area')
 
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var direction = 0.0
 var power = 0.0
 var launch_y = 0.0
@@ -37,11 +36,15 @@ func get_land_z():
 	var d = direction
 	return (p / 2.0) * (1.0 + sqrt((my - by) / y)) * d + lz
 
+func _ready():
+	set_physics_process(multiplayer.is_server())
+
 func _physics_process(_delta):
 	if not Game.game_in_progress: return
 	
 	# position reset when inactive
-	if Player.get('ball_ready'):
+	if Game.ball_ready:
+	#Player.get('ball_ready'):
 		ignored_area = null
 		velocity = Vector3.ZERO
 		position = Vector3(0, -2, 0)
@@ -49,7 +52,8 @@ func _physics_process(_delta):
 	
 	# reset when leaves field area
 	if not $Area.overlaps_area(FieldArea):
-		Player.set('ball_ready', true)
+		#Player.set('ball_ready', true)
+		Game.ball_ready = true
 		return
 	
 	# floor interact
@@ -63,7 +67,8 @@ func _physics_process(_delta):
 				Game.grant_point(1)
 			elif last_interact == 'Bot':
 				Game.grant_point(0)
-		Player.set('ball_ready', true)
+		#Player.set('ball_ready', true)
+		Game.ball_ready = true
 		return
 	
 	# racket interact
