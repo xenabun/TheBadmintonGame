@@ -38,7 +38,7 @@ var last_movement_action_pressed = null
 func racket_area_activate(value):
 	#$RacketArea.monitorable = value
 	player.get_node('RacketArea').monitorable = value
-	player.get_node('RacketArea/CSGBox3D').visible = value
+	#player.get_node('RacketArea/CSGBox3D').visible = value
 
 @rpc("any_peer", "call_local")
 func throw_ready():

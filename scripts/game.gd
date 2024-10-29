@@ -39,7 +39,7 @@ var ball_ready = true:
 		ball_ready = value
 		#ball.visible = value
 		if value == true and Game.game_in_progress:
-			for player in Level.get_node('Players').get_children():
+			for player in get_tree().get_nodes_in_group('Player'):
 				player.reset_position.emit()
 
 @rpc("any_peer", 'call_local')

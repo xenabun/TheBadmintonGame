@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=66 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://bka37re8brfsp" path="res://images/round-gradient.png" id="7_gu05u"]
 [ext_resource type="Script" path="res://scripts/Ball.gd" id="8_d4rec"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="8_vq6n7"]
+[ext_resource type="Shader" path="res://shaders/outline.gdshader" id="9_jrner"]
 [ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://prefabs/bot_model.tscn" id="10_x1wcg"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
@@ -203,6 +204,15 @@ node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeSc
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_scbn3"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t3p6m"]
+render_priority = 0
+shader = ExtResource("9_jrner")
+shader_parameter/color = Color(1, 1, 1, 1)
+shader_parameter/size = 1.5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oakse"]
+next_pass = SubResource("ShaderMaterial_t3p6m")
+
 [sub_resource type="SphereShape3D" id="SphereShape3D_xei7b"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xd51s"]
@@ -294,11 +304,6 @@ shadow_enabled = true
 
 [node name="PlayerCamera" type="Camera3D" parent="Level/World"]
 transform = Transform3D(1, 0, 0, 0, 0.997474, 0.0710274, 0, -0.0710274, 0.997474, 0, 10.1362, 25)
-fov = 60.0
-
-[node name="Player2Camera" type="Camera3D" parent="Level/World"]
-transform = Transform3D(-1, 1.2318e-08, -8.65506e-08, 0, 0.990024, 0.140901, 8.74228e-08, 0.140901, -0.990024, 0, 10.136, -25)
-visible = false
 fov = 60.0
 
 [node name="SideCamera" type="Camera3D" parent="Level/World"]
@@ -498,6 +503,7 @@ shape = SubResource("SphereShape3D_scbn3")
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="Level/World/Ball"]
 cast_shadow = 0
+material = SubResource("StandardMaterial3D_oakse")
 
 [node name="Area" type="Area3D" parent="Level/World/Ball"]
 collision_layer = 4
