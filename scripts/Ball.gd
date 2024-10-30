@@ -36,39 +36,43 @@ func get_land_z():
 	var d = direction
 	return (p / 2.0) * (1.0 + sqrt((my - by) / y)) * d + lz
 
-func _ready():
-	set_physics_process(multiplayer.is_server())
+#func _ready():
+	#set_physics_process(multiplayer.is_server())
 
 func _physics_process(_delta):
-	if not Game.game_in_progress: return
+	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
+	#print(get_multiplayer_authority())
+	if not Game.game_in_progress or Game.ball_ready: return
 	
-	# position reset when inactive
-	if Game.ball_ready:
-	#Player.get('ball_ready'):
-		ignored_area = null
-		velocity = Vector3.ZERO
-		position = Vector3(0, -2, 0)
-		return
+	## position reset when inactive
+	#if Game.ball_ready:
+	##Player.get('ball_ready'):
+		#ignored_area = null
+		#velocity = Vector3.ZERO
+		#position = Vector3(0, -2, 0)
+		#return
 	
 	# reset when leaves field area
 	if not $Area.overlaps_area(FieldArea):
 		#Player.set('ball_ready', true)
-		Game.ball_ready = true
+		#Game.ball_ready = true
+		Game.set_ball_ready.rpc(true)
 		return
 	
 	# floor interact
 	if $Area.overlaps_area(FloorArea):
 		if $Area.overlaps_area(Player1Area):
-			Game.grant_point(1)
+			Game.grant_point.rpc(1)
 		elif $Area.overlaps_area(Player2Area):
-			Game.grant_point(0)
+			Game.grant_point.rpc(0)
 		else:
 			if last_interact == 'Player':
-				Game.grant_point(1)
+				Game.grant_point.rpc(1)
 			elif last_interact == 'Bot':
-				Game.grant_point(0)
+				Game.grant_point.rpc(0)
 		#Player.set('ball_ready', true)
-		Game.ball_ready = true
+		#Game.ball_ready = true
+		Game.set_ball_ready.rpc(true)
 		return
 	
 	# racket interact
@@ -83,14 +87,18 @@ func _physics_process(_delta):
 		var x_offset = position.x - oarea.global_position.x
 		var x_velocity = oarea.get_parent().velocity.x
 		var x = ((x_offset * 1.5) + (x_velocity * 0.25)) * (1 + power_frac * 0.5)
+		var player_name = oarea.get_parent().name
+		var dir = VectorMath.look_vector(oarea).z
 		
-		velocity.x = x
-		direction = VectorMath.look_vector(oarea).z
-		power = new_power
-		launch_y = position.y
-		launch_z = position.z
-		last_interact = oarea.get_parent().name
-		ignored_area = oarea
+		Game.bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()), x,
+				dir, new_power, position.y, position.z, player_name, oarea)
+		#velocity.x = x
+		#direction = VectorMath.look_vector(oarea).z
+		#power = new_power
+		#launch_y = position.y
+		#launch_z = position.z
+		#last_interact = oarea.get_parent().name
+		#ignored_area = oarea
 		break
 	
 	# shadow

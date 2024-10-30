@@ -39,18 +39,45 @@ var ball_ready = true:
 		ball_ready = value
 		#ball.visible = value
 		if value == true and Game.game_in_progress:
+			ball.ignored_area = null
+			ball.velocity = Vector3.ZERO
+			ball.position = Vector3(0, -2, 0)
 			for player in get_tree().get_nodes_in_group('Player'):
 				player.reset_position.emit()
+@rpc('any_peer', 'call_local')
+func set_ball_ready(value):
+	ball_ready = value
 
 @rpc("any_peer", 'call_local')
-func throw_ball(pos, dir):
+func throw_ball(peer_id, pos, dir):
 	Game.ball_ready = false
 	ball.position = pos
-	ball.set('direction', dir)
-	ball.set('power', PlayerVariables.MAX_POWER)
-	ball.set('launch_y', pos.y)
-	ball.set('launch_z', pos.z)
-	ball.set('last_interact', name)
+	#ball.set('direction', dir)
+	#ball.set('power', PlayerVariables.MAX_POWER)
+	#ball.set('launch_y', pos.y)
+	#ball.set('launch_z', pos.z)
+	#ball.set('last_interact', name)
+	ball.direction = dir
+	ball.power = PlayerVariables.MAX_POWER
+	ball.launch_y = pos.y
+	ball.launch_z = pos.z
+	ball.last_interact = name
+	ball.set_multiplayer_authority(peer_id)
+@rpc('any_peer', 'call_local')
+func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
+	ball.velocity.x = x
+	ball.direction = dir
+	ball.power = new_power
+	ball.launch_y = y
+	ball.launch_z = z
+	ball.last_interact = player_name
+	ball.ignored_area = oarea
+	ball.set_multiplayer_authority(peer_id)
+
+func get_opponent_peer_id(peer_id):
+	for id in GameManager.Players:
+		if id == peer_id: continue
+		return id
 
 var score_text_path = 'Node3D/ScoreControl/Score'
 func get_score_str():
@@ -71,6 +98,7 @@ func check_win(p):
 	else:
 		if score[p] >= 21:
 			return true
+@rpc('any_peer', 'call_local')
 func grant_point(p):
 	score[p] += 1
 	if check_win(p):

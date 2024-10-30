@@ -82,10 +82,9 @@ func _input(event):
 			##set('ball_ready', false)
 			#Game.ball_ready = false
 			
-			
 			var dir = VectorMath.look_vector(player.get_node('RacketArea')).z
 			var pos = player.get_node('Ball').global_position
-			Game.throw_ball.rpc(pos, dir)
+			Game.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()), pos, dir)
 			player.get_node('Ball').visible = false
 			
 			#$AnimationTree['parameters/Throw/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
