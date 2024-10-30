@@ -40,9 +40,11 @@ func get_land_z():
 	#set_physics_process(multiplayer.is_server())
 
 func _physics_process(_delta):
+	print(get_multiplayer_authority())
+	print(multiplayer.get_unique_id())
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
-	#print(get_multiplayer_authority())
 	if not Game.game_in_progress or Game.ball_ready: return
+	#print(get_multiplayer_authority())
 	
 	## position reset when inactive
 	#if Game.ball_ready:

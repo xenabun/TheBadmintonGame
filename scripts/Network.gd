@@ -33,12 +33,23 @@ func peer_connected(id):
 		add_player(id)
 
 func peer_disconnected(id):
-	GameManager.print_debug_msg('Player disconnected' + str(id))
-	GameManager.Players.erase(id)
-	var players = get_tree().get_nodes_in_group('Player')
-	for player in players:
-		if player.name == str(id):
+	GameManager.print_debug_msg('Player disconnected ' + str(id))
+	#GameManager.Players.erase(id)
+	Level.get_node('World/Ball').set_multiplayer_authority(1)
+	if multiplayer.is_server():
+		for player in get_tree().get_nodes_in_group('Player'):
+			disconnect_peer.rpc(str(player.name).to_int())
 			player.queue_free()
+		clear_player_information()
+	else:
+		del_player_information(id)
+		for player in get_tree().get_nodes_in_group('Player'):
+			if player.name == str(id):
+				player.queue_free()
+		pass
+@rpc("any_peer")
+func disconnect_peer():
+	multiplayer.multiplayer_peer.disconnect_peer(1)
 
 ##client
 func connected_to_server():
@@ -66,6 +77,16 @@ func send_player_information(username, id):
 	if multiplayer.is_server():
 		for player_id in GameManager.Players:
 			send_player_information.rpc(GameManager.Players[player_id].username, player_id)
+@rpc('any_peer')
+func del_player_information(id):
+	if !GameManager.Players.has(id): return
+	GameManager.Players.erase(id)
+	if multiplayer.is_server():
+		for player_id in GameManager.Players:
+			del_player_information.rpc(player_id)
+@rpc('any_peer')
+func clear_player_information():
+	GameManager.Players = []
 
 func _on_host_pressed():
 	if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
@@ -98,11 +119,14 @@ func join_by_ip(ip):
 		return
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
+	#print('multiplayer peers: ', multiplayer.get_peers())
 	start_game()
 
 func start_game():
 	#ServerBrowserUI.hide()
 	UI.in_menu = false
+#func end_game():
+	#UI.in_menu = true
 
 #@rpc('any_peer')
 func add_player(id: int = 1):

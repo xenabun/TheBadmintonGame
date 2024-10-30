@@ -13,6 +13,7 @@ extends MultiplayerSynchronizer
 		player.stamina_bar.get("theme_override_styles/fill").bg_color = Color.html(
 				PlayerVariables.STAMINA_BAR_COLOR_LOCKED if value else
 				PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
+@onready var UI = get_tree().get_first_node_in_group('UI_root')
 
 var action_ready = true
 var action_hold = false:
@@ -65,10 +66,13 @@ func _ready():
 func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
 	
-	#if event.is_action_pressed('ui_cancel'):
+	if event.is_action_pressed('ui_cancel'):
 		#Game.game_in_progress = not Game.game_in_progress
 		#menu.visible = not Game.game_in_progress
+		var menu = UI.get_node('Menu')
+		menu.visible = not menu.visible
 	
+	if UI.get_node('Menu').visible: return
 	if not Game.game_in_progress: return
 	
 	if event.is_action_pressed('action'):
