@@ -68,9 +68,9 @@ func _physics_process(_delta):
 		elif $Area.overlaps_area(Player2Area):
 			Game.grant_point.rpc(0)
 		else:
-			if last_interact == 'Player':
+			if last_interact == '1':
 				Game.grant_point.rpc(1)
-			elif last_interact == 'Bot':
+			else:
 				Game.grant_point.rpc(0)
 		#Player.set('ball_ready', true)
 		#Game.ball_ready = true

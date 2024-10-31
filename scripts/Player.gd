@@ -271,7 +271,7 @@ func _physics_process(delta):
 				$AnimationTree['parameters/WalkScale/scale'], 1, 0.1)
 	
 	# jump
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+	if !UI.get_node('Menu').visible and Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = PlayerVariables.JUMP_VELOCITY
 	
 	# direction

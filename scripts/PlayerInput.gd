@@ -65,6 +65,7 @@ func _ready():
 
 func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
+	if not Game.game_in_progress: return
 	
 	if event.is_action_pressed('ui_cancel'):
 		#Game.game_in_progress = not Game.game_in_progress
@@ -73,7 +74,6 @@ func _input(event):
 		menu.visible = not menu.visible
 	
 	if UI.get_node('Menu').visible: return
-	if not Game.game_in_progress: return
 	
 	if event.is_action_pressed('action'):
 		if Game.ball_ready and Game.game_in_progress:

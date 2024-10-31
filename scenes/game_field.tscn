@@ -1,4 +1,4 @@
-[gd_scene load_steps=66 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=65 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -262,12 +262,8 @@ outline_size = 8
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_r3h5r"]
-font_size = 50
+font_size = 100
 outline_size = 8
-outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_wpouj"]
-outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
 [node name="Scene" type="Node3D"]
@@ -284,10 +280,10 @@ fov = 60.0
 [node name="World" type="Node3D" parent="Level"]
 
 [node name="Player1Spawn" type="Node3D" parent="Level/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1845, 16)
 
 [node name="Player2Spawn" type="Node3D" parent="Level/World"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 8, -16)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.185, -16)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Level/World"]
 environment = SubResource("Environment_hy0gk")
@@ -303,12 +299,8 @@ transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.0870029, 0.8
 shadow_enabled = true
 
 [node name="PlayerCamera" type="Camera3D" parent="Level/World"]
-transform = Transform3D(1, 0, 0, 0, 0.997474, 0.0710274, 0, -0.0710274, 0.997474, 0, 10.1362, 25)
+transform = Transform3D(1, 0, 0, 0, 0.960303, 0.278958, 0, -0.278958, 0.960303, 0, 13.5088, 25)
 fov = 60.0
-
-[node name="SideCamera" type="Camera3D" parent="Level/World"]
-transform = Transform3D(-4.34268e-08, -0.0532421, 0.998582, 4.9801e-09, 0.998582, 0.0532421, -1, 7.28517e-09, -4.31001e-08, 47.7466, 5.81986, 0)
-fov = 42.8
 
 [node name="Floor" type="StaticBody3D" parent="Level/World"]
 collision_layer = 11
@@ -336,7 +328,6 @@ shape = SubResource("BoxShape3D_01mkf")
 
 [node name="Net" type="StaticBody3D" parent="Level/World"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7498, 0)
-visible = false
 collision_layer = 3
 collision_mask = 3
 
@@ -525,9 +516,11 @@ replication_config = SubResource("SceneReplicationConfig_xd51s")
 
 [node name="Players" type="Node3D" parent="Level"]
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="Level"]
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="Level"]
+unique_name_in_owner = true
 _spawnable_scenes = PackedStringArray("res://prefabs/Player.tscn")
 spawn_path = NodePath("../Players")
+spawn_limit = 2
 
 [node name="Network" type="Node" parent="." groups=["Network_root"]]
 script = ExtResource("6_h2wnu")
@@ -539,37 +532,40 @@ server_card_prefab = ExtResource("11_dli3y")
 
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
 
-[node name="UI" type="Control" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera") groups=["UI_root"]]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("12_2yf3a")
-menu_camera_pivot = NodePath("../MenuCameraPivot")
-player_camera = NodePath("../Level/World/PlayerCamera")
-
-[node name="ServerBrowser" parent="UI" instance=ExtResource("12_hm06h")]
-layout_mode = 1
-
-[node name="GameUI" type="Control" parent="UI"]
-visible = false
-anchors_preset = 0
-offset_right = 1153.0
-offset_bottom = 40.0
-
-[node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
-layout_mode = 1
+[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera") groups=["UI_root"]]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -19.5
-offset_top = 529.0
-offset_right = 20.5
-offset_bottom = 595.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("12_2yf3a")
+menu_camera_pivot = NodePath("../MenuCameraPivot")
+player_camera = NodePath("../Level/World/PlayerCamera")
+
+[node name="ServerBrowser" parent="UI" instance=ExtResource("12_hm06h")]
+layout_mode = 2
+
+[node name="GameUI" type="Control" parent="UI"]
+visible = false
+layout_mode = 2
+
+[node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = 249.0
+offset_right = 20.0
+offset_bottom = 315.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="StaminaBar" type="ProgressBar" parent="UI/GameUI/StaminaBarControl"]
 layout_mode = 1
@@ -590,14 +586,14 @@ value = 50.0
 show_percentage = false
 
 [node name="ScoreControl" type="Control" parent="UI/GameUI"]
-visible = false
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = 360.0
-offset_right = 400.0
-offset_bottom = 40.0
+offset_left = -20.0
+offset_top = -321.0
+offset_right = 20.0
+offset_bottom = -281.0
 grow_horizontal = 2
 
 [node name="Score" type="Label" parent="UI/GameUI/ScoreControl"]
@@ -617,18 +613,7 @@ vertical_alignment = 1
 
 [node name="Menu" type="Control" parent="UI"]
 visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 522.0
-offset_top = 261.0
-offset_right = 562.0
-offset_bottom = 301.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 
 [node name="ColorRect" type="ColorRect" parent="UI/Menu"]
 layout_mode = 1
@@ -653,9 +638,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -84.0
-offset_top = -179.0
+offset_top = -203.0
 offset_right = 84.0
-offset_bottom = -102.0
+offset_bottom = -126.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Меню"
@@ -670,9 +655,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -62.0
-offset_top = 29.0
+offset_top = 23.0
 offset_right = 63.0
-offset_bottom = 95.0
+offset_bottom = 89.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -686,33 +671,24 @@ text = "Выйти"
 
 [node name="GameResult" type="Control" parent="UI"]
 visible = false
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/GameResult"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 360.0
-offset_top = 260.0
-offset_right = 400.0
-offset_bottom = 300.0
+offset_left = -719.0
+offset_top = -500.0
+offset_right = 719.0
+offset_bottom = 500.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="ColorRect" type="ColorRect" parent="UI/GameResult"]
-layout_mode = 1
-offset_left = -465.0
-offset_top = -475.0
-offset_right = 535.0
-offset_bottom = 525.0
 color = Color(0, 0, 0, 0.329412)
 
-[node name="Control" type="Control" parent="UI/GameResult"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Result" type="Label" parent="UI/GameResult/Control"]
+[node name="Result" type="Label" parent="UI/GameResult"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -720,9 +696,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -160.0
-offset_top = -127.0
+offset_top = -155.0
 offset_right = 160.0
-offset_bottom = -17.0
+offset_bottom = -45.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Победа!"
@@ -730,17 +706,17 @@ label_settings = SubResource("LabelSettings_urfof")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Score" type="Label" parent="UI/GameResult/Control"]
+[node name="Score" type="Label" parent="UI/GameResult"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -133.0
-offset_top = -42.0
-offset_right = 133.0
-offset_bottom = 68.0
+offset_left = -358.0
+offset_top = -68.5
+offset_right = 358.0
+offset_bottom = 68.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "3 : 1
@@ -749,7 +725,7 @@ label_settings = SubResource("LabelSettings_r3h5r")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/GameResult/Control"]
+[node name="Back" type="Button" parent="UI/GameResult"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -757,61 +733,39 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -62.0
-offset_top = 69.0
+offset_top = 77.0
 offset_right = 63.0
-offset_bottom = 135.0
+offset_bottom = 108.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="NewGame" type="Button" parent="UI/GameResult/Control/VBoxContainer"]
-layout_mode = 2
-text = "Новая игра"
-
-[node name="Back" type="Button" parent="UI/GameResult/Control/VBoxContainer"]
-layout_mode = 2
 text = "Главное меню"
 
-[node name="UsernameInputBox" type="VBoxContainer" parent="UI/GameResult"]
+[node name="Connecting" type="Control" parent="UI"]
 visible = false
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/Connecting"]
+layout_mode = 2
+offset_left = -706.0
+offset_top = -467.0
+offset_right = 698.0
+offset_bottom = 445.0
+color = Color(0, 0, 0, 0.329412)
+
+[node name="Label" type="Label" parent="UI/Connecting"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+offset_left = -98.0
+offset_top = -11.5
+offset_right = 98.0
+offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Label" type="Label" parent="UI/GameResult/UsernameInputBox"]
-layout_mode = 2
-text = "Введите свое имя:"
-label_settings = SubResource("LabelSettings_wpouj")
-
-[node name="LineEdit" type="LineEdit" parent="UI/GameResult/UsernameInputBox"]
-layout_mode = 2
-placeholder_text = "Ваше имя"
-
-[node name="Confirm" type="Button" parent="UI/GameResult/UsernameInputBox"]
-layout_mode = 2
-text = "Подтвердить"
-
-[node name="ConfirmationDialog" type="ConfirmationDialog" parent="UI"]
-title = "Подтвердите действие"
-size = Vector2i(443, 106)
-unresizable = true
-always_on_top = true
-popup_window = true
-dialog_text = "Вы уверены что хотите вернуться на главное меню?
-Прогресс текущей игры будет сброшен"
-
-[node name="UsernameInputError" type="AcceptDialog" parent="UI"]
-title = "Ошибка"
-size = Vector2i(121, 80)
-dialog_text = "Введите имя"
+text = "Establishing connection..."
 
 [node name="DebugUI" type="Control" parent="." groups=["Debug_root"]]
 layout_mode = 3
@@ -833,6 +787,17 @@ offset_bottom = -422.0
 grow_vertical = 0
 vertical_alignment = 2
 
+[node name="ListenPortBound" type="Label" parent="DebugUI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = -23.0
+offset_right = 180.0
+grow_vertical = 0
+text = "listen port bound: false"
+
 [connection signal="timeout" from="Level/World/Player/RacketActive" to="Level/World/Player" method="_on_racket_active_timeout"]
 [connection signal="timeout" from="Level/World/Player/RacketCooldown" to="Level/World/Player" method="_on_racket_cooldown_timeout"]
 [connection signal="timeout" from="Level/World/Player/RacketHold" to="Level/World/Player" method="_on_racket_hold_timeout"]
@@ -842,8 +807,4 @@ vertical_alignment = 2
 [connection signal="timeout" from="ServerBrowser/BroadcastTimer" to="ServerBrowser" method="_on_broadcast_timer_timeout"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_close_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="UI" method="_on_back_pressed"]
-[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/NewGame" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="UI/GameResult/Control/VBoxContainer/Back" to="." method="_on_rback_pressed"]
-[connection signal="pressed" from="UI/GameResult/UsernameInputBox/Confirm" to="." method="_on_username_confirm_pressed"]
-[connection signal="confirmed" from="UI/ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
+[connection signal="pressed" from="UI/GameResult/Back" to="UI" method="_on_back_pressed"]

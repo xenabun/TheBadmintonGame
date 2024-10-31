@@ -24,10 +24,12 @@ func listen_to_broadcast():
 	var status = listener.bind(listenPort)
 	if status == OK:
 		GameManager.print_debug_msg('Bound to listen port ' + str(listenPort) + ' successful')
-		ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: true'
+		GameManager.set_listen_port_bound_text('listen port bound: true')
+		#ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: true'
 	else:
 		GameManager.print_debug_msg('Failed to bind to listen port')
-		ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: false'
+		GameManager.set_listen_port_bound_text('listen port bound: false')
+		#ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: false'
 
 func broadcast(room_name):
 	roomInfo.name = room_name
@@ -45,10 +47,6 @@ func broadcast(room_name):
 		GameManager.print_debug_msg('Failed to bind to broadcast port')
 	
 	broadcastTimer.start()
-func stop_broadcast():
-	broadcastTimer.stop()
-	if broadcaster != null:
-		broadcaster.close()
 
 func _process(_delta):
 	if listener.get_available_packet_count() > 0:
@@ -66,7 +64,9 @@ func _process(_delta):
 		for i in ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').get_children():
 			if i.ip == server_ip:
 				i.port = server_port
+				i.player_count = pRoomInfo.player_count
 				i.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
+				i.get_node('PlayerCount').text = str(pRoomInfo.player_count) + '/2'
 				i.restart_timer.emit()
 				return
 		
@@ -74,7 +74,10 @@ func _process(_delta):
 		server_card.name = pRoomInfo.name
 		server_card.ip = server_ip
 		server_card.port = server_port
+		server_card.max_player_count = %PlayerSpawner.get_spawn_limit()
+		server_card.player_count = pRoomInfo.player_count
 		server_card.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
+		server_card.get_node('PlayerCount').text = str(pRoomInfo.player_count) + '/2'
 		ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').add_child(server_card)
 		server_card.join_server.connect(join_by_ip)
 
@@ -85,12 +88,13 @@ func _on_broadcast_timer_timeout():
 	var packet = data.to_ascii_buffer()
 	broadcaster.put_packet(packet)
 
-func clean_up():
-	listener.close()
+func stop_broadcast():
 	broadcastTimer.stop()
 	if broadcaster != null:
 		broadcaster.close()
-
+func clean_up():
+	listener.close()
+	stop_broadcast()
 func _exit_tree():
 	clean_up()
 

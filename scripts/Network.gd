@@ -13,7 +13,7 @@ func _ready():
 	multiplayer.server_relay = false
 	ServerBrowserUI.host_pressed.connect(_on_host_pressed)
 	
-	if not multiplayer.is_server():
+	if !multiplayer.is_server():
 		return
 	#multiplayer.peer_connected.connect(add_player)
 	#multiplayer.peer_disconnected.connect(del_player)
@@ -35,11 +35,12 @@ func peer_connected(id):
 func peer_disconnected(id):
 	GameManager.print_debug_msg('Player disconnected ' + str(id))
 	#GameManager.Players.erase(id)
-	Level.get_node('World/Ball').set_multiplayer_authority(1)
-	del_player_information(id)
-	for player in get_tree().get_nodes_in_group('Player'):
-		if str(player.name) == str(id):
-			player.queue_free()
+	if multiplayer.is_server():
+		Level.get_node('World/Ball').set_multiplayer_authority(1)
+		del_player_information(id)
+		for player in get_tree().get_nodes_in_group('Player'):
+			if str(player.name) == str(id):
+				player.queue_free()
 	
 	#print(multiplayer.get_unique_id())
 	#if multiplayer.is_server():
@@ -52,9 +53,9 @@ func peer_disconnected(id):
 		#for player in get_tree().get_nodes_in_group('Player'):
 			#if player.name == str(id):
 				#player.queue_free()
-@rpc("any_peer")
-func disconnect_peer():
-	multiplayer.multiplayer_peer.disconnect_peer(1)
+#@rpc("any_peer")
+#func disconnect_peer():
+	#multiplayer.multiplayer_peer.disconnect_peer(1)
 
 ##client
 func connected_to_server():
@@ -65,17 +66,24 @@ func connected_to_server():
 		'id': peer_id,
 	}
 	send_player_information.rpc_id(1, ServerBrowserUI.get_node('UsernameBox').text, peer_id)
+	UI.get_node('Connecting').hide()
 	multiplayer.server_disconnected.connect(func():
 		#var multiplayer_peer = multiplayer.multiplayer_peer
 		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 		peer.close()
 		GameManager.Players = {}
+		Game.game_in_progress = true
 		UI.in_menu = true)
 	#add_player(peer_id) #.rpc_id(1, peer_id)
 
 ##client
 func connection_failed():
 	GameManager.print_debug_msg('Connection failed')
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	peer.close()
+	GameManager.Players = {}
+	Game.game_in_progress = true
+	UI.in_menu = true
 
 @rpc('any_peer')
 func send_player_information(username, id):
@@ -95,13 +103,12 @@ func del_player_information(id):
 	if multiplayer.is_server():
 		for player_id in GameManager.Players:
 			del_player_information.rpc(player_id)
-@rpc('any_peer')
-func clear_player_information():
-	GameManager.Players = {}
+#@rpc('any_peer')
+#func clear_player_information():
+	#GameManager.Players = {}
 
 func _on_host_pressed():
 	if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
-	
 	GameManager.print_debug_msg('host pressed')
 	peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(PORT)
@@ -115,13 +122,14 @@ func _on_host_pressed():
 	multiplayer.set_multiplayer_peer(peer)
 	send_player_information(ServerBrowserUI.get_node('UsernameBox').text, multiplayer.get_unique_id())
 	ServerBrowser.broadcast(ServerBrowserUI.get_node('UsernameBox').text + "'s server")
-	start_game()
+	#start_game()
+	UI.in_menu = false
 	##host doesnt get a character on host pressed
 	add_player()
+	Game.start_game()
 
 func join_by_ip(ip):
 	if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
-	
 	GameManager.print_debug_msg('trying to join by ip: ' + ip)
 	peer = ENetMultiplayerPeer.new()
 	peer.create_client(ip, PORT)
@@ -131,11 +139,14 @@ func join_by_ip(ip):
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
 	#print('multiplayer peers: ', multiplayer.get_peers())
-	start_game()
-
-func start_game():
-	#ServerBrowserUI.hide()
+	#start_game()
 	UI.in_menu = false
+	UI.get_node('Connecting').show()
+
+#func start_game():
+	#UI.in_menu = false
+
+	#ServerBrowserUI.hide()
 #func end_game():
 	#UI.in_menu = true
 
@@ -158,7 +169,7 @@ func add_player(id: int = 1):
 	Level.get_node('Players').add_child(character, true)
 	#character.set_username.rpc_id(id, GameManager.Players[id].username)
 
-func del_player(id: int):
-	if not Level.get_node('World/Players').has_node(str(id)):
-		return
-	Level.get_node('World/Players').get_node(str(id)).queue_free()
+#func del_player(id: int):
+	#if not Level.get_node('World/Players').has_node(str(id)):
+		#return
+	#Level.get_node('World/Players').get_node(str(id)).queue_free()

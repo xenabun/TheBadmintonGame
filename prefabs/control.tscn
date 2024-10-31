@@ -4,38 +4,63 @@
 
 [node name="Control" type="Control"]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_vertical = 0
 script = ExtResource("1_fqjku")
 
 [node name="UsernameBox" type="LineEdit" parent="."]
-layout_mode = 0
-offset_left = 406.0
-offset_top = 479.0
-offset_right = 717.0
-offset_bottom = 515.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -155.0
+offset_top = 122.0
+offset_right = 156.0
+offset_bottom = 158.0
+grow_horizontal = 2
+grow_vertical = 2
 placeholder_text = "username"
 max_length = 20
 caret_blink = true
 caret_blink_interval = 1.0
 
 [node name="Host" type="Button" parent="."]
-layout_mode = 0
-offset_left = 406.0
-offset_top = 432.0
-offset_right = 717.0
-offset_bottom = 463.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -155.0
+offset_top = 86.0
+offset_right = 156.0
+offset_bottom = 117.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "Host
 "
 
 [node name="ServerList" type="Panel" parent="."]
-layout_mode = 0
-offset_left = 402.995
-offset_top = 173.0
-offset_right = 714.996
-offset_bottom = 416.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -156.0
+offset_top = -162.0
+offset_right = 156.001
+offset_bottom = 81.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Label" type="Label" parent="ServerList"]
 layout_mode = 1
@@ -82,13 +107,5 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-
-[node name="ListenPortBound" type="Label" parent="."]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 619.0
-offset_right = 185.0
-offset_bottom = 642.0
-text = "listen port bound: false"
 
 [connection signal="pressed" from="Host" to="." method="_on_host_pressed"]

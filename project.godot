@@ -27,7 +27,6 @@ GameManager="*res://scripts/GameManager.gd"
 [display]
 
 window/size/initial_position_type=3
-window/size/resizable=false
 window/stretch/mode="viewport"
 
 [editor]

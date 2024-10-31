@@ -4,6 +4,8 @@ signal join_server(ip)
 signal restart_timer()
 @export var ip : String
 @export var port : int
+@export var player_count : int
+@export var max_player_count : int
 
 @onready var timer = $Timer
 
@@ -17,4 +19,7 @@ func _on_timer_timeout():
 
 func _on_connect_button_pressed():
 	if port == 0: return
+	if player_count >= max_player_count:
+		OS.alert('Server is full')
+		return
 	join_server.emit(ip)
