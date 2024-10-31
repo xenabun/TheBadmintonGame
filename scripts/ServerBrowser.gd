@@ -65,8 +65,8 @@ func _process(_delta):
 			if i.ip == server_ip:
 				i.port = server_port
 				i.player_count = pRoomInfo.player_count
-				i.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
-				i.get_node('PlayerCount').text = str(pRoomInfo.player_count) + '/2'
+				i.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name + '\n' + server_ip
+				i.get_node('PlayerCount').text = str(pRoomInfo.player_count) + '/' + str(i.max_player_count)
 				i.restart_timer.emit()
 				return
 		
@@ -76,14 +76,15 @@ func _process(_delta):
 		server_card.port = server_port
 		server_card.max_player_count = %PlayerSpawner.get_spawn_limit()
 		server_card.player_count = pRoomInfo.player_count
-		server_card.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
-		server_card.get_node('PlayerCount').text = str(pRoomInfo.player_count) + '/2'
+		server_card.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name + '\n' + server_ip
+		server_card.get_node('PlayerCount').text = str(pRoomInfo.player_count) + '/' + str(server_card.max_player_count)
 		ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').add_child(server_card)
 		server_card.join_server.connect(join_by_ip)
 
 func _on_broadcast_timer_timeout():
 	#print('Broadcasting game')
 	roomInfo.player_count = GameManager.Players.size()
+	
 	var data = JSON.stringify(roomInfo)
 	var packet = data.to_ascii_buffer()
 	broadcaster.put_packet(packet)
