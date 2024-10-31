@@ -339,6 +339,6 @@ func _physics_process(delta):
 	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# camera
-	if Game.window_focus:
+	if Game.window_focus and !UI.get_node('Menu').visible:
 		update_camera_transform(0.2)
 	

@@ -45,22 +45,29 @@ func broadcast(room_name):
 		GameManager.print_debug_msg('Failed to bind to broadcast port')
 	
 	broadcastTimer.start()
+func stop_broadcast():
+	broadcastTimer.stop()
+	if broadcaster != null:
+		broadcaster.close()
 
 func _process(_delta):
 	if listener.get_available_packet_count() > 0:
 		var server_ip = listener.get_packet_ip()
-		var server_port = listener.get_packet_port()
 		var packet = listener.get_packet()
+		if server_ip.is_empty(): return
+		
+		var server_port = listener.get_packet_port()
 		var data = packet.get_string_from_ascii()
 		var pRoomInfo = JSON.parse_string(data)
 		
-		#print('server ip: ', server_ip, ' server port: ', str(server_port), ' room info: ', str(pRoomInfo))
+		#print('server ip: ', server_ip, ' server port: ', str(server_port))
+		#, ' room info: ', str(pRoomInfo))
 		
 		for i in ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').get_children():
-			if i.name == pRoomInfo.name:
-				i.ip = server_ip
+			if i.ip == server_ip:
 				i.port = server_port
 				i.text = 'Loading' if int(server_port) == 0 else pRoomInfo.name
+				i.restart_timer.emit()
 				return
 		
 		var server_card = server_card_prefab.instantiate()

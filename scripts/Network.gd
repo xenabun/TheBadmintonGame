@@ -36,17 +36,22 @@ func peer_disconnected(id):
 	GameManager.print_debug_msg('Player disconnected ' + str(id))
 	#GameManager.Players.erase(id)
 	Level.get_node('World/Ball').set_multiplayer_authority(1)
-	if multiplayer.is_server():
-		for player in get_tree().get_nodes_in_group('Player'):
-			disconnect_peer.rpc(str(player.name).to_int())
+	del_player_information(id)
+	for player in get_tree().get_nodes_in_group('Player'):
+		if str(player.name) == str(id):
 			player.queue_free()
-		clear_player_information()
-	else:
-		del_player_information(id)
-		for player in get_tree().get_nodes_in_group('Player'):
-			if player.name == str(id):
-				player.queue_free()
-		pass
+	
+	#print(multiplayer.get_unique_id())
+	#if multiplayer.is_server():
+		#for player in get_tree().get_nodes_in_group('Player'):
+			#disconnect_peer.rpc(str(player.name).to_int())
+			#player.queue_free()
+		#clear_player_information()
+	#else:
+		#del_player_information(id)
+		#for player in get_tree().get_nodes_in_group('Player'):
+			#if player.name == str(id):
+				#player.queue_free()
 @rpc("any_peer")
 func disconnect_peer():
 	multiplayer.multiplayer_peer.disconnect_peer(1)
@@ -60,6 +65,12 @@ func connected_to_server():
 		'id': peer_id,
 	}
 	send_player_information.rpc_id(1, ServerBrowserUI.get_node('UsernameBox').text, peer_id)
+	multiplayer.server_disconnected.connect(func():
+		#var multiplayer_peer = multiplayer.multiplayer_peer
+		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+		peer.close()
+		GameManager.Players = {}
+		UI.in_menu = true)
 	#add_player(peer_id) #.rpc_id(1, peer_id)
 
 ##client
@@ -86,7 +97,7 @@ func del_player_information(id):
 			del_player_information.rpc(player_id)
 @rpc('any_peer')
 func clear_player_information():
-	GameManager.Players = []
+	GameManager.Players = {}
 
 func _on_host_pressed():
 	if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
