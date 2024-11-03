@@ -96,14 +96,43 @@ func get_opponent_peer_id(peer_id):
 		opponent_id = peer_id
 	return opponent_id
 
-var score_text_path = 'GameUI/ScoreControl/Score'
+#var score_text_path = 'GameUI/ScoreControl/Score'
 func get_score_str():
-	return str(score[0], ' : ', score[1])
+	#print('get_score_str(): ', multiplayer.get_unique_id())
+	if multiplayer.is_server():
+		return str(score[0], ' : ', score[1])
+	else:
+		return str(score[1], ' : ', score[0])
+func get_player_usernames():
+	var my_peer = multiplayer.get_unique_id()
+	var op_peer = get_opponent_peer_id(my_peer)
+	var usernames = []
+	#print(my_peer,' ', GameManager.Players)
+	var my_info = GameManager.Players.get(my_peer, {'username': ''})
+	var op_info = GameManager.Players.get(op_peer, {'username': ''}) if op_peer != my_peer else {'username': ''}
+	usernames.insert(0, my_info.username)
+	usernames.insert(1, op_info.username)
+	#usernames[0] = my_info.username
+	#usernames[1] = op_info.username
+	return usernames
+@rpc("any_peer")
 func update_score_text():
-	if UI.has_node(score_text_path):
+	#if UI.has_node(score_text_path):
 	#get_parent().has_node(score_text_path):
-		var score_text = UI.get_node(score_text_path)
-		score_text.text = get_score_str()
+	#var score_text = UI.get_node(score_text_path)
+	var score_control = UI.get_node('GameUI/ScoreControl')
+	var score_str = get_score_str()
+	var usernames = get_player_usernames()
+	score_control.get_node('Score').text = score_str
+	score_control.get_node('Player1').text = usernames[0]
+	score_control.get_node('Player2').text = usernames[1]
+@rpc("any_peer", 'call_local')
+func update_score_text_for_all():
+	update_score_text()
+	#for player in get_tree().get_nodes_in_group('Player'):
+		#var plr_id = str(player.name).to_int()
+		#if plr_id != multiplayer.get_unique_id():
+			#Game.update_score_text.rpc_id(plr_id)
 func i(p): return abs(p - 1)
 func peer_id_to_score_index(id):
 	return 0 if id == 1 else 1

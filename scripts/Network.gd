@@ -73,7 +73,9 @@ func connected_to_server():
 		peer.close()
 		GameManager.Players = {}
 		Game.game_in_progress = true
-		UI.in_menu = true)
+		UI.in_menu = true
+		UI.in_main_menu = true
+		UI.in_server_browser = false)
 	#add_player(peer_id) #.rpc_id(1, peer_id)
 
 ##client
@@ -84,6 +86,8 @@ func connection_failed():
 	GameManager.Players = {}
 	Game.game_in_progress = true
 	UI.in_menu = true
+	UI.in_main_menu = false
+	UI.in_server_browser = true
 
 @rpc('any_peer')
 func send_player_information(username, id):
@@ -93,6 +97,7 @@ func send_player_information(username, id):
 			'username': username,
 			'id': id,
 		}
+		Game.update_score_text_for_all.rpc()
 	if multiplayer.is_server():
 		for player_id in GameManager.Players:
 			send_player_information.rpc(GameManager.Players[player_id].username, player_id)
@@ -124,6 +129,7 @@ func _on_host_pressed():
 	ServerBrowser.broadcast(ServerBrowserUI.get_node('UsernameBox').text + "'s server")
 	#start_game()
 	UI.in_menu = false
+	UI.in_server_browser = false
 	##host doesnt get a character on host pressed
 	add_player()
 	Game.start_game()
@@ -141,6 +147,7 @@ func join_by_ip(ip):
 	#print('multiplayer peers: ', multiplayer.get_peers())
 	#start_game()
 	UI.in_menu = false
+	UI.in_server_browser = false
 	UI.get_node('Connecting').show()
 
 #func start_game():
@@ -167,6 +174,15 @@ func add_player(id: int = 1):
 	character.position = spawn_point.position
 	character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
+	Game.update_score_text_for_all.rpc()
+	#for player in get_tree().get_nodes_in_group('Player'):
+		#var plr_id = str(player.name).to_int()
+		#if plr_id == 1:
+			#Game.update_score_text()
+		#else:
+			#Game.update_score_text.rpc_id(plr_id)
+	#if id != 1:
+		#Game.update_score_text.rpc_id(id)
 	#character.set_username.rpc_id(id, GameManager.Players[id].username)
 
 #func del_player(id: int):

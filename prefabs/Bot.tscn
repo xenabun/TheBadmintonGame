@@ -1,16 +1,15 @@
-[gd_scene load_steps=22 format=3 uid="uid://blx58dx1jig7h"]
+[gd_scene load_steps=19 format=3 uid="uid://1xlbegfmg65d"]
 
-[ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
-[ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
-[ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="2_80x2u"]
-[ext_resource type="Material" uid="uid://5ikr8dl3gf0d" path="res://materials/test.material" id="3_s24ti"]
-[ext_resource type="Script" path="res://scripts/PlayerInput.gd" id="4_ipxnc"]
+[ext_resource type="Script" path="res://scripts/Bot.gd" id="1_0an7d"]
+[ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://prefabs/bot_model.tscn" id="2_y3rjh"]
+[ext_resource type="Material" uid="uid://5ikr8dl3gf0d" path="res://materials/test.material" id="3_e147w"]
+[ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="4_q5ot3"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ll8ur"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qmixw"]
 radius = 1.00449
 height = 4.82426
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_sioav"]
 size = Vector3(12.8984, 23.9078, 14.8733)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
@@ -50,7 +49,8 @@ fadeout_time = 0.1
 filter_enabled = true
 filters = ["Armature/Skeleton3D:Bone", "Armature/Skeleton3D:Bone.016.L", "Armature/Skeleton3D:Bone.016.R", "Armature/Skeleton3D:Bone.017.L", "Armature/Skeleton3D:Bone.017.R", "Armature/Skeleton3D:Bone.018.L", "Armature/Skeleton3D:Bone.018.R"]
 
-[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_6mkkh"]
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_4s4sa"]
+graph_offset = Vector2(-788, 143)
 nodes/Animation/node = SubResource("AnimationNodeAnimation_uy41n")
 nodes/Animation/position = Vector2(-1120, -380)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_mlw0r")
@@ -76,63 +76,8 @@ nodes/WalkSpeed/position = Vector2(-100, 100)
 nodes/output/position = Vector2(160, 140)
 node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHold", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kwohg"]
-properties/0/path = NodePath(".:player_id")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:position")
-properties/1/spawn = true
-properties/1/replication_mode = 0
-properties/2/path = NodePath(".:rotation")
-properties/2/spawn = true
-properties/2/replication_mode = 0
-properties/3/path = NodePath("playermodel:rotation")
-properties/3/spawn = true
-properties/3/replication_mode = 0
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lmu2p"]
-properties/0/path = NodePath("PlayerInput:direction")
-properties/0/spawn = false
-properties/0/replication_mode = 2
-properties/1/path = NodePath(".:position")
-properties/1/spawn = false
-properties/1/replication_mode = 2
-properties/2/path = NodePath("playermodel:rotation")
-properties/2/spawn = false
-properties/2/replication_mode = 2
-properties/3/path = NodePath("AnimationPlayer:current_animation")
-properties/3/spawn = false
-properties/3/replication_mode = 2
-properties/4/path = NodePath("AnimationTree:anim_player")
-properties/4/spawn = false
-properties/4/replication_mode = 0
-properties/5/path = NodePath("AnimationTree:active")
-properties/5/spawn = false
-properties/5/replication_mode = 2
-properties/6/path = NodePath("AnimationTree:parameters/TimeScale/scale")
-properties/6/spawn = false
-properties/6/replication_mode = 2
-properties/7/path = NodePath("AnimationTree:parameters/WalkScale/scale")
-properties/7/spawn = false
-properties/7/replication_mode = 2
-properties/8/path = NodePath("AnimationTree:parameters/WalkSpeed/blend_amount")
-properties/8/spawn = false
-properties/8/replication_mode = 2
-properties/9/path = NodePath(".:rotation")
-properties/9/spawn = false
-properties/9/replication_mode = 2
-properties/10/path = NodePath("Username:text")
-properties/10/spawn = false
-properties/10/replication_mode = 2
-properties/11/path = NodePath(".:username")
-properties/11/spawn = false
-properties/11/replication_mode = 2
-properties/12/path = NodePath(".:throw_power")
-properties/12/spawn = false
-properties/12/replication_mode = 2
-
-[node name="Player" type="CharacterBody3D" groups=["Player"]]
-script = ExtResource("1_pqout")
+[node name="Bot" type="CharacterBody3D"]
+script = ExtResource("1_0an7d")
 
 [node name="Username" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.50246, 0)
@@ -141,14 +86,15 @@ billboard = 1
 double_sided = false
 no_depth_test = true
 fixed_size = true
-text = "aboba"
+text = "Computer
+"
 
-[node name="playermodel" parent="." instance=ExtResource("1_4y33c")]
+[node name="playermodel" parent="." instance=ExtResource("2_y3rjh")]
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.38143, 0)
-shape = SubResource("CapsuleShape3D_ll8ur")
+shape = SubResource("CapsuleShape3D_qmixw")
 
 [node name="plrangletarget" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40104, 0.0206308)
@@ -164,24 +110,24 @@ monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RacketArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.20022, -2.86776)
-shape = SubResource("BoxShape3D_i5pof")
+shape = SubResource("BoxShape3D_sioav")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="RacketArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.20022, -2.86776)
 visible = false
 size = Vector3(12.8984, 23.9078, 14.8733)
-material = ExtResource("3_s24ti")
+material = ExtResource("3_e147w")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../playermodel")
 libraries = {
-"playeranims": ExtResource("2_80x2u")
+"playeranims": ExtResource("4_q5ot3")
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
 active = false
 root_node = NodePath("../playermodel")
-tree_root = SubResource("AnimationNodeBlendTree_6mkkh")
+tree_root = SubResource("AnimationNodeBlendTree_4s4sa")
 anim_player = NodePath("../AnimationPlayer")
 parameters/RacketHold/active = false
 parameters/RacketHold/internal_active = false
@@ -195,30 +141,3 @@ parameters/Throw/request = 0
 parameters/TimeScale/scale = 1.5
 parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
-
-[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_kwohg")
-
-[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_lmu2p")
-script = ExtResource("4_ipxnc")
-
-[node name="RacketActive" type="Timer" parent="PlayerInput"]
-wait_time = 0.4
-one_shot = true
-
-[node name="RacketCooldown" type="Timer" parent="PlayerInput"]
-wait_time = 0.35
-one_shot = true
-
-[node name="RacketHold" type="Timer" parent="PlayerInput"]
-one_shot = true
-
-[node name="ActionPressed" type="Timer" parent="PlayerInput"]
-wait_time = 0.3
-one_shot = true
-
-[connection signal="timeout" from="PlayerInput/RacketActive" to="PlayerInput" method="_on_racket_active_timeout"]
-[connection signal="timeout" from="PlayerInput/RacketCooldown" to="PlayerInput" method="_on_racket_cooldown_timeout"]
-[connection signal="timeout" from="PlayerInput/RacketHold" to="PlayerInput" method="_on_racket_hold_timeout"]
-[connection signal="timeout" from="PlayerInput/ActionPressed" to="PlayerInput" method="_on_action_pressed_timeout"]

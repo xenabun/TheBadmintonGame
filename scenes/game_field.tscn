@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=67 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -226,6 +226,11 @@ properties/2/path = NodePath("Shadow:rotation")
 properties/2/spawn = true
 properties/2/replication_mode = 1
 
+[sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
+font_size = 121
+outline_size = 10
+outline_color = Color(0, 0, 0, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hr2xc"]
 bg_color = Color(0.2, 0.2, 0.2, 0.494118)
 skew = Vector2(0.5, 0)
@@ -249,6 +254,11 @@ anti_aliasing = false
 [sub_resource type="LabelSettings" id="LabelSettings_20vvk"]
 font_size = 80
 outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_tnxmh"]
+font_size = 46
+outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_0cqv7"]
@@ -532,7 +542,7 @@ server_card_prefab = ExtResource("11_dli3y")
 
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
 
-[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera") groups=["UI_root"]]
+[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label") groups=["UI_root"]]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -545,12 +555,60 @@ size_flags_vertical = 3
 script = ExtResource("12_2yf3a")
 menu_camera_pivot = NodePath("../MenuCameraPivot")
 player_camera = NodePath("../Level/World/PlayerCamera")
+title_label = NodePath("MainMenu/Title")
+
+[node name="MainMenu" type="Control" parent="UI"]
+visible = false
+layout_mode = 2
+
+[node name="Title" type="Label" parent="UI/MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -398.0
+offset_top = -253.0
+offset_right = 399.0
+offset_bottom = -87.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(398, 83)
+text = "БАДМИНТОН"
+label_settings = SubResource("LabelSettings_xyt14")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -125.0
+offset_top = 9.0
+offset_right = 126.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Singleplayer" type="Button" parent="UI/MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "Одиночная игра"
+
+[node name="Multiplayer" type="Button" parent="UI/MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "Многопользовательская игра"
+
+[node name="Exit" type="Button" parent="UI/MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "Выйти"
 
 [node name="ServerBrowser" parent="UI" instance=ExtResource("12_hm06h")]
+visible = false
 layout_mode = 2
 
 [node name="GameUI" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -591,25 +649,62 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -20.0
-offset_top = -321.0
+offset_top = -319.0
 offset_right = 20.0
-offset_bottom = -281.0
+offset_bottom = -192.0
 grow_horizontal = 2
 
 [node name="Score" type="Label" parent="UI/GameUI/ScoreControl"]
 layout_mode = 1
-anchors_preset = 5
+anchors_preset = 8
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
+anchor_bottom = 0.5
 offset_left = -133.0
+offset_top = -55.0
 offset_right = 133.0
-offset_bottom = 77.0
+offset_bottom = 55.0
 grow_horizontal = 2
+grow_vertical = 2
 text = "3 : 1
 "
 label_settings = SubResource("LabelSettings_20vvk")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Player1" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -623.0
+offset_top = -31.5
+offset_right = 523.0
+offset_bottom = 32.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Player1"
+label_settings = SubResource("LabelSettings_tnxmh")
+
+[node name="Player2" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -499.0
+offset_top = -31.5
+offset_right = 623.0
+offset_bottom = 32.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Player2"
+label_settings = SubResource("LabelSettings_tnxmh")
+horizontal_alignment = 2
 
 [node name="Menu" type="Control" parent="UI"]
 visible = false
@@ -781,9 +876,9 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -1066.0
-offset_right = 799.0
-offset_bottom = -422.0
+offset_top = -61.0
+offset_right = 1031.0
+offset_bottom = -23.0
 grow_vertical = 0
 vertical_alignment = 2
 
@@ -793,10 +888,11 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 1.0
-offset_top = -23.0
+offset_top = -24.0
 offset_right = 180.0
+offset_bottom = -1.0
 grow_vertical = 0
-text = "listen port bound: false"
+text = "listen port bound: -"
 
 [connection signal="timeout" from="Level/World/Player/RacketActive" to="Level/World/Player" method="_on_racket_active_timeout"]
 [connection signal="timeout" from="Level/World/Player/RacketCooldown" to="Level/World/Player" method="_on_racket_cooldown_timeout"]
@@ -805,6 +901,10 @@ text = "listen port bound: false"
 [connection signal="timeout" from="Level/World/Bot/Sprint" to="Level/World/Bot" method="_on_sprint_timeout"]
 [connection signal="timeout" from="Level/World/Bot/RacketCooldown" to="Level/World/Bot" method="_on_racket_cooldown_timeout"]
 [connection signal="timeout" from="ServerBrowser/BroadcastTimer" to="ServerBrowser" method="_on_broadcast_timer_timeout"]
+[connection signal="visibility_changed" from="UI/MainMenu/Title" to="UI" method="_on_title_visibility_changed"]
+[connection signal="pressed" from="UI/MainMenu/VBoxContainer/Singleplayer" to="UI" method="_on_singleplayer_pressed"]
+[connection signal="pressed" from="UI/MainMenu/VBoxContainer/Multiplayer" to="UI" method="_on_multiplayer_pressed"]
+[connection signal="pressed" from="UI/MainMenu/VBoxContainer/Exit" to="UI" method="_on_exit_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_close_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="UI" method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/Back" to="UI" method="_on_back_pressed"]

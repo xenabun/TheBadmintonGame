@@ -78,13 +78,17 @@ func _ready():
 		GameManager.print_debug_msg('getting player data: not found')
 	username = player_data.username
 	$Username.text = player_data.username
+	#Game.update_score_text_for_all.rpc()
 	#camera.set_current(true)
 	#set_current_camera.rpc_id(multiplayer.get_unique_id())
 	#print(input.get_multiplayer_authority())
 	#if is_multiplayer_authority():
 	reset_position.connect(_reset_position)
 	camera.make_current()
-	update_camera_transform(1)
+	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
+	camera.global_position = menu_camera.global_position
+	camera.global_rotation = menu_camera.global_rotation
+	update_camera_transform(0.2)
 	GameUI.show()
 	#$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')

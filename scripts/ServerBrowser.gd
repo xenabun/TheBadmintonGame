@@ -17,8 +17,9 @@ var listener : PacketPeerUDP
 @onready var ServerBrowserUI = UI.get_node('ServerBrowser')
 
 func _ready():
-	listen_to_broadcast()
-	
+	set_process(false)
+	#listen_to_broadcast()
+
 func listen_to_broadcast():
 	listener = PacketPeerUDP.new()
 	var status = listener.bind(listenPort)
@@ -30,6 +31,7 @@ func listen_to_broadcast():
 		GameManager.print_debug_msg('Failed to bind to listen port')
 		GameManager.set_listen_port_bound_text('listen port bound: false')
 		#ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: false'
+	set_process(true)
 
 func broadcast(room_name):
 	roomInfo.name = room_name
@@ -49,13 +51,15 @@ func broadcast(room_name):
 	broadcastTimer.start()
 
 func _process(_delta):
+	if !listener: return
+	
 	if listener.get_available_packet_count() > 0:
 		var server_ip = listener.get_packet_ip()
 		var packet = listener.get_packet()
 		if server_ip.is_empty(): return
 		
 		var server_port = listener.get_packet_port()
-		var data = packet.get_string_from_ascii()
+		var data = packet.get_string_from_utf8()
 		var pRoomInfo = JSON.parse_string(data)
 		
 		#print('server ip: ', server_ip, ' server port: ', str(server_port))
@@ -86,15 +90,21 @@ func _on_broadcast_timer_timeout():
 	roomInfo.player_count = GameManager.Players.size()
 	
 	var data = JSON.stringify(roomInfo)
-	var packet = data.to_ascii_buffer()
+	var packet = data.to_utf8_buffer()
 	broadcaster.put_packet(packet)
 
 func stop_broadcast():
 	broadcastTimer.stop()
 	if broadcaster != null:
 		broadcaster.close()
+func stop_listen():
+	if listener != null:
+		listener.close()
+		set_process(false)
+		GameManager.print_debug_msg('Listener closed')
+		GameManager.set_listen_port_bound_text('listen port bound: -')
 func clean_up():
-	listener.close()
+	stop_listen()
 	stop_broadcast()
 func _exit_tree():
 	clean_up()
