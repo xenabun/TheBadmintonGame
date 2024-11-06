@@ -11,10 +11,14 @@ var racket_cooldown = false:
 	set(value):
 		racket_cooldown = value
 		$RacketArea.monitorable = value
-		if value: $RacketCooldown.start()
+		if value:
+			$RacketCooldown.start()
 
-@onready var ball = get_parent().get_node('Ball')
-@onready var player = get_parent().get_node('Player')
+@onready var Level = get_tree().get_first_node_in_group('Level_root')
+@onready var ball = Level.get_node('World/Ball')
+#@onready var ball = get_parent().get_node('Ball')
+#@onready var player = get_parent().get_node('Player')
+@export var player : Node = null
 
 func _on_sprint_timeout():
 	sprinting = false
@@ -45,8 +49,8 @@ func _physics_process(delta):
 	# get direction
 	var direction = Vector3.ZERO
 	var target_position = null
-	if not player.get('ball_ready'):
-		if ball.get('last_interact') != name:
+	if !Game.ball_ready:
+		if ball.last_interact != name:
 			## jumping
 			target_position = Vector3(ball.position.x,
 					position.y, ball.get_land_z())
@@ -59,6 +63,7 @@ func _physics_process(delta):
 				target_position * Vector3(1, 0, 1))
 		if d > 0.05:
 			direction = (position.direction_to(target_position) * Vector3(1, 0, 1))
+	$Debug_Dest.global_position = target_position
 	
 	# normalize direction
 	if abs(direction.x) <= 0.1: direction.x = 0
@@ -85,17 +90,17 @@ func _physics_process(delta):
 	)
 	if direction.length() > 0:
 		$plrangletarget.look_at($plrangletarget.global_position + direction)
-		var currot = Quaternion($botmodel.transform.basis.orthonormalized())
+		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
 		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.2)
-		$botmodel.transform.basis = Basis(newrot).scaled($botmodel.scale)
+		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# sprint
 	var dist = 0
 	if target_position != null:
 		dist = position.distance_to(target_position)
 	if (PlayerVariables.MAX_SPEED <= dist and
-			not player.get('ball_ready') and
+			not Game.ball_ready and
 			not sprinting and not exhausted and stamina > 0):
 		sprinting = true
 		$Sprint.start()

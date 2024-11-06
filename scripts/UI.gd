@@ -1,5 +1,6 @@
 extends Control
 
+@onready var Network = get_tree().get_first_node_in_group('Network_root')
 @onready var ServerBrowser = get_tree().get_first_node_in_group('ServerBrowser_root')
 
 @export var menu_camera_pivot : Node
@@ -56,17 +57,7 @@ func _enter_tree():
 	title_tween.chain().tween_property(title_label, 'rotation', deg_to_rad(-title_rot_deg), title_rot_time)
 
 func _on_back_pressed():
-	multiplayer.multiplayer_peer.close()
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	GameManager.Players = {}
-	Game.game_in_progress = true
-	in_menu = true
-	in_server_browser = false
-	in_main_menu = true
-	if multiplayer.is_server():
-		ServerBrowser.stop_broadcast()
-		for player in get_tree().get_nodes_in_group('Player'):
-			player.queue_free()
+	Network.quit_server()
 
 func _on_server_browser_back_pressed():
 	in_main_menu = true
@@ -83,7 +74,7 @@ func _on_title_visibility_changed():
 		title_tween.stop()
 
 func _on_singleplayer_pressed():
-	pass # Replace with function body.
+	Network.start_singleplayer()
 
 func _on_multiplayer_pressed():
 	in_main_menu = false

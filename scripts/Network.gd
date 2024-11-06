@@ -1,7 +1,7 @@
 extends Node
 
 const ADDRESS = '127.0.0.1'
-const PORT = 49664 #8910 #49666
+const PORT = 5000 #49664
 var peer
 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
@@ -38,6 +38,7 @@ func peer_disconnected(id):
 	if multiplayer.is_server():
 		Level.get_node('World/Ball').set_multiplayer_authority(1)
 		del_player_information(id)
+		Game.update_score_text_for_all.rpc()
 		for player in get_tree().get_nodes_in_group('Player'):
 			if str(player.name) == str(id):
 				player.queue_free()
@@ -123,7 +124,7 @@ func _on_host_pressed():
 	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
 		OS.alert('Failed to start server')
 		return
-	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
+	#peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
 	send_player_information(ServerBrowserUI.get_node('UsernameBox').text, multiplayer.get_unique_id())
 	ServerBrowser.broadcast(ServerBrowserUI.get_node('UsernameBox').text + "'s server")
@@ -139,10 +140,11 @@ func join_by_ip(ip):
 	GameManager.print_debug_msg('trying to join by ip: ' + ip)
 	peer = ENetMultiplayerPeer.new()
 	peer.create_client(ip, PORT)
+	#GameManager.print_debug_msg("Connection status: " + con[peer.get_connection_status()])
 	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
 		OS.alert('Failed to start client')
 		return
-	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
+	#peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	multiplayer.set_multiplayer_peer(peer)
 	#print('multiplayer peers: ', multiplayer.get_peers())
 	#start_game()
@@ -150,12 +152,34 @@ func join_by_ip(ip):
 	UI.in_server_browser = false
 	UI.get_node('Connecting').show()
 
+func quit_server():
+	multiplayer.multiplayer_peer.close()
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	GameManager.Players = {}
+	Game.game_in_progress = true
+	UI.in_menu = true
+	UI.in_server_browser = false
+	UI.in_main_menu = true
+	if multiplayer.is_server():
+		ServerBrowser.stop_broadcast()
+		for player in get_tree().get_nodes_in_group('Player'):
+			player.queue_free()
+		for player in get_tree().get_nodes_in_group('Bot'):
+			player.queue_free()
+
 #func start_game():
 	#UI.in_menu = false
 
 	#ServerBrowserUI.hide()
 #func end_game():
 	#UI.in_menu = true
+
+func start_singleplayer():
+	UI.in_menu = false
+	UI.in_main_menu = false
+	var plr_char = add_player()
+	add_bot(plr_char)
+	Game.start_game()
 
 #@rpc('any_peer')
 func add_player(id: int = 1):
@@ -175,6 +199,7 @@ func add_player(id: int = 1):
 	character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
 	Game.update_score_text_for_all.rpc()
+	return character
 	#for player in get_tree().get_nodes_in_group('Player'):
 		#var plr_id = str(player.name).to_int()
 		#if plr_id == 1:
@@ -184,6 +209,27 @@ func add_player(id: int = 1):
 	#if id != 1:
 		#Game.update_score_text.rpc_id(id)
 	#character.set_username.rpc_id(id, GameManager.Players[id].username)
+
+func add_bot(player_char):
+	var character = preload("res://prefabs/Bot.tscn").instantiate()
+	character.player = player_char
+	var spawn_point = Level.get_node('World/Player2Spawn')
+	character.position = spawn_point.position
+	character.rotation = spawn_point.rotation
+	Level.get_node('Players').add_child(character, true)
+	Game.update_score_text()
+
+var con = [
+	'CONNECTION_DISCONNECTED',
+	'CONNECTION_CONNECTING',
+	'CONNECTION_CONNECTED',
+]
+func _process(_delta):
+	if peer:
+		var status = peer.get_connection_status()
+		GameManager.set_connection_status_text('Connection status: ' + con[status])
+	else:
+		GameManager.set_connection_status_text('Connection status: -')
 
 #func del_player(id: int):
 	#if not Level.get_node('World/Players').has_node(str(id)):

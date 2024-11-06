@@ -71,13 +71,13 @@ func _ready():
 	set_physics_process(multiplayer.get_unique_id() == player_id)
 	if multiplayer.get_unique_id() != player_id: return
 	
-	var player_data = GameManager.Players[player_id]
+	var player_data = GameManager.Players.get(player_id)
 	if player_data:
+		username = player_data.username
+		$Username.text = player_data.username
 		GameManager.print_debug_msg('getting player data: username: ' + str(player_data.username))
 	else:
 		GameManager.print_debug_msg('getting player data: not found')
-	username = player_data.username
-	$Username.text = player_data.username
 	#Game.update_score_text_for_all.rpc()
 	#camera.set_current(true)
 	#set_current_camera.rpc_id(multiplayer.get_unique_id())

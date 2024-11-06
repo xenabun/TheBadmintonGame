@@ -1,16 +1,14 @@
 extends Node
 
-signal found_server
-signal server_removed
 signal join_server(ip)
 
 var roomInfo = {"name": "room name", "player_count": 0}
 var broadcaster : PacketPeerUDP
 var listener : PacketPeerUDP
 
-@export var listenPort : int = 49665 #60989 #8911 #49667
-@export var broadcastPort : int = 49666 #60990 #8912 #49668
-@export var broadcastAddress : String = '255.255.255.255'
+@export var listenPort : int = 5001 #49665
+@export var broadcastPort : int = 5002 #49666
+@export var broadcastAddress : String = '26.255.255.255'
 @export var broadcastTimer : Timer
 @export var server_card_prefab : PackedScene
 @onready var UI = get_tree().get_first_node_in_group('UI_root')
@@ -38,8 +36,8 @@ func broadcast(room_name):
 	roomInfo.player_count = GameManager.Players.size()
 	
 	broadcaster = PacketPeerUDP.new()
-	broadcaster.set_broadcast_enabled(true)
 	broadcaster.set_dest_address(broadcastAddress, listenPort)
+	broadcaster.set_broadcast_enabled(true)
 	
 	var status = broadcaster.bind(broadcastPort)
 	

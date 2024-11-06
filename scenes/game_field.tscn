@@ -863,12 +863,23 @@ grow_vertical = 2
 text = "Establishing connection..."
 
 [node name="DebugUI" type="Control" parent="." groups=["Debug_root"]]
+clip_contents = true
 layout_mode = 3
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -40.0
-offset_right = 40.0
+offset_top = -212.0
+offset_right = 413.0
+grow_vertical = 0
+
+[node name="Panel" type="Panel" parent="DebugUI"]
+self_modulate = Color(1, 1, 1, 0.670588)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -260.0
+offset_right = 489.0
 grow_vertical = 0
 
 [node name="Label" type="Label" parent="DebugUI"]
@@ -876,9 +887,9 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -61.0
+offset_top = -84.0
 offset_right = 1031.0
-offset_bottom = -23.0
+offset_bottom = -46.0
 grow_vertical = 0
 vertical_alignment = 2
 
@@ -888,11 +899,23 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 1.0
-offset_top = -24.0
+offset_top = -48.0
 offset_right = 180.0
-offset_bottom = -1.0
+offset_bottom = -25.0
 grow_vertical = 0
 text = "listen port bound: -"
+
+[node name="ConnectionStatus" type="Label" parent="DebugUI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = -25.0
+offset_right = 612.0
+offset_bottom = -2.0
+grow_vertical = 0
+text = "Connection status: -"
 
 [connection signal="timeout" from="Level/World/Player/RacketActive" to="Level/World/Player" method="_on_racket_active_timeout"]
 [connection signal="timeout" from="Level/World/Player/RacketCooldown" to="Level/World/Player" method="_on_racket_cooldown_timeout"]

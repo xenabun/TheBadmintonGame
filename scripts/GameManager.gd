@@ -13,3 +13,8 @@ func set_listen_port_bound_text(value):
 	if debug:
 		var label = debug.get_node('ListenPortBound')
 		label.text = value
+func set_connection_status_text(value):
+	var debug = get_tree().get_first_node_in_group('Debug_root')
+	if debug:
+		var label = debug.get_node('ConnectionStatus')
+		label.text = value
