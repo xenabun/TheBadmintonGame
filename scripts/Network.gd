@@ -164,8 +164,8 @@ func quit_server():
 		ServerBrowser.stop_broadcast()
 		for player in get_tree().get_nodes_in_group('Player'):
 			player.queue_free()
-		for player in get_tree().get_nodes_in_group('Bot'):
-			player.queue_free()
+		for bot in get_tree().get_nodes_in_group('Bot'):
+			bot.queue_free()
 
 #func start_game():
 	#UI.in_menu = false
@@ -177,6 +177,14 @@ func quit_server():
 func start_singleplayer():
 	UI.in_menu = false
 	UI.in_main_menu = false
+	GameManager.Players[1] = {
+		'username': ServerBrowserUI.get_node('UsernameBox').text,
+		'id': 1,
+	}
+	GameManager.Players[2] = {
+		'username': 'Computer',
+		'id': 2,
+	}
 	var plr_char = add_player()
 	add_bot(plr_char)
 	Game.start_game()

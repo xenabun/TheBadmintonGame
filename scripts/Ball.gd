@@ -1,11 +1,12 @@
 extends CharacterBody3D
 
-@onready var Player = get_parent().get_node('Player')
+#@onready var Player = get_parent().get_node('Player')
 var BASE_PLAYER_POS_Y = 4.824 / 2
-@onready var FieldArea = get_parent().get_node('FieldArea')
-@onready var FloorArea = get_parent().get_node('Floor/Area')
-@onready var Player1Area = get_parent().get_node('Player1Area')
-@onready var Player2Area = get_parent().get_node('Player2Area')
+@onready var Level = get_tree().get_first_node_in_group('Level_root')
+@onready var FieldArea = Level.get_node('World/FieldArea') #get_parent().get_node('FieldArea')
+@onready var FloorArea = Level.get_node('World/Floor/Area') #get_parent().get_node('Floor/Area')
+@onready var Player1Area = Level.get_node('World/Player1Area') #get_parent().get_node('Player1Area')
+@onready var Player2Area = Level.get_node('World/Player2Area') #get_parent().get_node('Player2Area')
 
 var direction = 0.0
 var power = 0.0
@@ -42,6 +43,12 @@ func get_land_z():
 func _physics_process(_delta):
 	#print(get_multiplayer_authority())
 	#print(multiplayer.get_unique_id())
+	
+	if Game.ball_ready:
+		for node in get_children():
+			if node.name.contains('Debug'):
+				node.position = Vector3(0, 0, 0)
+	
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
 	if not Game.game_in_progress or Game.ball_ready: return
 	#print(get_multiplayer_authority())
@@ -79,6 +86,7 @@ func _physics_process(_delta):
 	
 	# racket interact
 	var overlapped_areas = $Area.get_overlapping_areas()
+	#print('ball touched: ', overlapped_areas)
 	for oarea in overlapped_areas:
 		if oarea.name != 'RacketArea': continue
 		if oarea == ignored_area: continue
@@ -127,6 +135,7 @@ func _physics_process(_delta):
 	position.y = height
 	velocity.z = power * direction * height_frac
 	
+	$Debug_LaunchHeight.global_position = Vector3(position.x, launch_y + get_launch_height(), launch_z)
 	$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
 	$Debug_Z.global_position = Vector3(position.x, 1, launch_z)
 	$Debug_ZLand.global_position = Vector3(position.x, 1, get_land_z())

@@ -49,7 +49,7 @@ var prev_direction = Vector3.ZERO
 #var last_movement_action_pressed = null
 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var ball = Level.get_node('World/Ball')
+#@onready var ball = Game.ball #Level.get_node('World/Ball')
 @onready var camera = Level.get_node('World/PlayerCamera')
 @onready var UI = get_tree().get_first_node_in_group('UI_root')
 @onready var GameUI = UI.get_node('GameUI')
@@ -88,6 +88,10 @@ func _ready():
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
 	camera.global_position = menu_camera.global_position
 	camera.global_rotation = menu_camera.global_rotation
+	
+	#var cam = get_tree().get_root().get_node('Scene/Level/World/Camera3D')
+	#cam.make_current()
+	
 	update_camera_transform(0.2)
 	GameUI.show()
 	#$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
@@ -345,4 +349,5 @@ func _physics_process(delta):
 	# camera
 	if Game.window_focus and !UI.get_node('Menu').visible:
 		update_camera_transform(0.2)
+		#pass
 	

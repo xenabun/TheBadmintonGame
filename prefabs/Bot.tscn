@@ -155,7 +155,6 @@ one_shot = true
 
 [node name="Debug_Dest" type="CSGSphere3D" parent="."]
 transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, 0, 1.40104, 0.0206308)
-visible = false
 material = SubResource("StandardMaterial3D_bo71e")
 
 [connection signal="timeout" from="Sprint" to="." method="_on_sprint_timeout"]

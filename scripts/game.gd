@@ -47,15 +47,20 @@ var ball_ready = true:
 		if value == true and Game.game_in_progress:
 			ball.ignored_area = null
 			ball.velocity = Vector3.ZERO
-			ball.position = Vector3(0, -2, 0)
+			ball.position = Vector3(0, -10, 0)
 			for player in get_tree().get_nodes_in_group('Player'):
 				player.reset_position.emit()
+			for bot in get_tree().get_nodes_in_group('Bot'):
+				bot._reset_position()
 @rpc('any_peer', 'call_local')
 func set_ball_ready(value):
 	ball_ready = value
 
 @rpc("any_peer", 'call_local')
 func throw_ball(peer_id, pos, dir):
+	if not peer_id or peer_id < 1:
+		peer_id = 1
+	
 	Game.ball_ready = false
 	ball.position = pos
 	#ball.set('direction', dir)
@@ -71,6 +76,9 @@ func throw_ball(peer_id, pos, dir):
 	ball.set_multiplayer_authority(peer_id)
 @rpc('any_peer', 'call_local')
 func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
+	if not peer_id or peer_id < 1:
+		peer_id = 1
+	
 	ball.velocity.x = x
 	ball.direction = dir
 	ball.power = new_power
