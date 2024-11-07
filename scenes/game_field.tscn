@@ -1,4 +1,4 @@
-[gd_scene load_steps=67 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=71 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -225,6 +225,19 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath("Shadow:rotation")
 properties/2/spawn = true
 properties/2/replication_mode = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yjqqn"]
+albedo_color = Color(0.0886668, 0.76, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pswn4"]
+albedo_color = Color(0, 0, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wq3n2"]
+no_depth_test = true
+shading_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rjn21"]
+albedo_color = Color(0, 0.447059, 1, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
 font_size = 121
@@ -494,7 +507,7 @@ parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 
 [node name="Ball" type="CharacterBody3D" parent="Level/World"]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -2, -2.74399)
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -10, 0)
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("8_d4rec")
@@ -523,6 +536,25 @@ hit_from_inside = true
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="Level/World/Ball"]
 replication_config = SubResource("SceneReplicationConfig_xd51s")
+
+[node name="Debug_MaxHeight" type="CSGBox3D" parent="Level/World/Ball"]
+material_override = SubResource("StandardMaterial3D_yjqqn")
+size = Vector3(0.266602, 0.285156, 65.9668)
+
+[node name="Debug_Z" type="CSGSphere3D" parent="Level/World/Ball"]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_pswn4")
+material = SubResource("StandardMaterial3D_wq3n2")
+
+[node name="Debug_ZLand" type="CSGSphere3D" parent="Level/World/Ball"]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_rjn21")
+material = SubResource("StandardMaterial3D_wq3n2")
+
+[node name="Debug_LaunchHeight" type="CSGSphere3D" parent="Level/World/Ball"]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_rjn21")
+material = SubResource("StandardMaterial3D_wq3n2")
 
 [node name="Players" type="Node3D" parent="Level"]
 

@@ -84,7 +84,7 @@ func reset_ball():
 	ball_ready = true
 	ball.ignored_area = null
 	ball.velocity = Vector3.ZERO
-	ball.position = Vector3(0, -2, 0)
+	ball.position = Vector3(0, -10, 0)
 
 func get_opponent_peer_id(peer_id):
 	var opponent_id = null

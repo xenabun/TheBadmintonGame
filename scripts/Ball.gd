@@ -127,6 +127,10 @@ func _physics_process(_delta):
 	position.y = height
 	velocity.z = power * direction * height_frac
 	
+	$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
+	$Debug_Z.global_position = Vector3(position.x, 1, launch_z)
+	$Debug_ZLand.global_position = Vector3(position.x, 1, get_land_z())
+	
 	#var debug = CSGSphere3D.new()
 	#debug.scale = Vector3.ONE * 0.2
 	#debug.position = Vector3(position.x, height, position.z)

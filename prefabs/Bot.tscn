@@ -5,10 +5,6 @@
 [ext_resource type="Material" uid="uid://5ikr8dl3gf0d" path="res://materials/test.material" id="3_e147w"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="4_q5ot3"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bo71e"]
-no_depth_test = true
-shading_mode = 0
-
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qmixw"]
 radius = 1.00449
 height = 4.82426
@@ -80,12 +76,12 @@ nodes/WalkSpeed/position = Vector2(-100, 100)
 nodes/output/position = Vector2(160, 140)
 node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHold", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bo71e"]
+no_depth_test = true
+shading_mode = 0
+
 [node name="Bot" type="CharacterBody3D" groups=["Bot"]]
 script = ExtResource("1_0an7d")
-
-[node name="Debug_Dest" type="CSGSphere3D" parent="."]
-transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, 0, 1.40104, 0.0206308)
-material = SubResource("StandardMaterial3D_bo71e")
 
 [node name="Username" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.50246, 0)
@@ -156,6 +152,11 @@ one_shot = true
 [node name="RacketCooldown" type="Timer" parent="."]
 wait_time = 0.35
 one_shot = true
+
+[node name="Debug_Dest" type="CSGSphere3D" parent="."]
+transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, 0, 1.40104, 0.0206308)
+visible = false
+material = SubResource("StandardMaterial3D_bo71e")
 
 [connection signal="timeout" from="Sprint" to="." method="_on_sprint_timeout"]
 [connection signal="timeout" from="RacketCooldown" to="." method="_on_racket_cooldown_timeout"]
