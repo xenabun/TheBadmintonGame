@@ -1,4 +1,4 @@
-[gd_scene load_steps=72 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=73 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -246,6 +246,14 @@ node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeSc
 font_size = 121
 outline_size = 10
 outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yedmd"]
+bg_color = Color(0, 0, 0, 0.541176)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hr2xc"]
 bg_color = Color(0.2, 0.2, 0.2, 0.494118)
@@ -596,29 +604,28 @@ menu_camera_pivot = NodePath("../MenuCameraPivot")
 player_camera = NodePath("../Level/World/PlayerCamera")
 title_label = NodePath("MainMenu/Title")
 
-[node name="Username" type="Control" parent="UI"]
+[node name="CurrentUsername" type="Control" parent="UI"]
 layout_mode = 2
 
-[node name="UsernameBox" type="LineEdit" parent="UI/Username"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -155.5
-offset_top = -18.0
-offset_right = 155.5
-offset_bottom = 18.0
-grow_horizontal = 2
-grow_vertical = 2
-placeholder_text = "username"
-max_length = 10
-caret_blink = true
-caret_blink_interval = 1.0
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/CurrentUsername"]
+layout_mode = 2
+offset_left = 163.0
+offset_top = -357.0
+offset_right = 638.0
+offset_bottom = -299.0
+grow_horizontal = 0
+
+[node name="Username" type="Label" parent="UI/CurrentUsername/VBoxContainer"]
+layout_mode = 2
+text = "aboba"
+horizontal_alignment = 2
+
+[node name="Change" type="Button" parent="UI/CurrentUsername/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Изменить"
 
 [node name="MainMenu" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/MainMenu"]
@@ -638,7 +645,39 @@ pivot_offset = Vector2(398, 83)
 text = "БАДМИНТОН"
 label_settings = SubResource("LabelSettings_xyt14")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/MainMenu"]
+[node name="Username" type="VBoxContainer" parent="UI/MainMenu"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -2.0
+offset_right = 150.0
+offset_bottom = 91.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/MainMenu/Username"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_yedmd")
+text = "Введите свое имя:"
+
+[node name="UsernameBox" type="LineEdit" parent="UI/MainMenu/Username"]
+layout_mode = 2
+placeholder_text = "Имя"
+max_length = 10
+caret_blink = true
+caret_blink_interval = 1.0
+
+[node name="Confirm" type="Button" parent="UI/MainMenu/Username"]
+layout_mode = 2
+text = "Подтвердить"
+
+[node name="Menu" type="VBoxContainer" parent="UI/MainMenu"]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -646,21 +685,21 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -125.0
-offset_top = 9.0
+offset_top = -7.0
 offset_right = 126.0
-offset_bottom = 75.0
+offset_bottom = 94.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Singleplayer" type="Button" parent="UI/MainMenu/VBoxContainer"]
+[node name="Singleplayer" type="Button" parent="UI/MainMenu/Menu"]
 layout_mode = 2
 text = "Одиночная игра"
 
-[node name="Multiplayer" type="Button" parent="UI/MainMenu/VBoxContainer"]
+[node name="Multiplayer" type="Button" parent="UI/MainMenu/Menu"]
 layout_mode = 2
 text = "Многопользовательская игра"
 
-[node name="Exit" type="Button" parent="UI/MainMenu/VBoxContainer"]
+[node name="Exit" type="Button" parent="UI/MainMenu/Menu"]
 layout_mode = 2
 text = "Выйти"
 
@@ -985,10 +1024,12 @@ text = "Connection status: -"
 [connection signal="timeout" from="Level/World/Bot/Sprint" to="Level/World/Bot" method="_on_sprint_timeout"]
 [connection signal="timeout" from="Level/World/Bot/RacketCooldown" to="Level/World/Bot" method="_on_racket_cooldown_timeout"]
 [connection signal="timeout" from="ServerBrowser/BroadcastTimer" to="ServerBrowser" method="_on_broadcast_timer_timeout"]
+[connection signal="pressed" from="UI/CurrentUsername/VBoxContainer/Change" to="UI" method="_on_username_change_pressed"]
 [connection signal="visibility_changed" from="UI/MainMenu/Title" to="UI" method="_on_title_visibility_changed"]
-[connection signal="pressed" from="UI/MainMenu/VBoxContainer/Singleplayer" to="UI" method="_on_singleplayer_pressed"]
-[connection signal="pressed" from="UI/MainMenu/VBoxContainer/Multiplayer" to="UI" method="_on_multiplayer_pressed"]
-[connection signal="pressed" from="UI/MainMenu/VBoxContainer/Exit" to="UI" method="_on_exit_pressed"]
+[connection signal="pressed" from="UI/MainMenu/Username/Confirm" to="UI" method="_on_username_confirm_pressed"]
+[connection signal="pressed" from="UI/MainMenu/Menu/Singleplayer" to="UI" method="_on_singleplayer_pressed"]
+[connection signal="pressed" from="UI/MainMenu/Menu/Multiplayer" to="UI" method="_on_multiplayer_pressed"]
+[connection signal="pressed" from="UI/MainMenu/Menu/Exit" to="UI" method="_on_exit_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_close_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="UI" method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/Back" to="UI" method="_on_back_pressed"]

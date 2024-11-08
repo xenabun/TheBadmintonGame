@@ -15,6 +15,7 @@ var title_rot_time = 1
 		in_menu = value
 		set_physics_process(value)
 		menu_camera_pivot.get_node('MenuCamera').set_current(value)
+		get_node('CurrentUsername').visible = value
 		if value:
 			get_node('GameUI').hide()
 			get_node('Menu').hide()
@@ -25,6 +26,14 @@ var title_rot_time = 1
 	set(value):
 		in_main_menu = value
 		get_node('MainMenu').visible = value
+@export var editing_username : bool = true :
+	set(value):
+		editing_username = value
+		in_main_menu = true
+		in_server_browser = false
+		get_node('CurrentUsername').visible = not value
+		get_node('MainMenu/Menu').visible = not value
+		get_node('MainMenu/Username').visible = value
 @export var in_server_browser : bool = false :
 	set(value):
 		in_server_browser = value
@@ -42,12 +51,17 @@ var title_rot_time = 1
 			#player_camera.set_current(false)
 
 func _ready():
+	get_node('MainMenu/Username').show()
+	get_node('MainMenu/Menu').hide()
 	get_node('MainMenu').show()
+	
+	get_node('CurrentUsername').hide()
 	get_node('ServerBrowser').hide()
 	get_node('GameUI').hide()
 	get_node('Menu').hide()
 	get_node('GameResult').hide()
 	get_node('Connecting').hide()
+	
 	get_node('ServerBrowser/Back').pressed.connect(_on_server_browser_back_pressed)
 
 func _enter_tree():
@@ -65,6 +79,8 @@ func _on_server_browser_back_pressed():
 
 func _on_close_pressed():
 	get_node('Menu').hide()
+	if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+		Game.game_in_progress = true
 
 func _on_title_visibility_changed():
 	if title_label.visible:
@@ -72,6 +88,13 @@ func _on_title_visibility_changed():
 		title_tween.play()
 	else:
 		title_tween.stop()
+		
+func _on_username_confirm_pressed():
+	editing_username = false
+	get_node('CurrentUsername/VBoxContainer/Username').text = get_node('MainMenu/Username/UsernameBox').text
+
+func _on_username_change_pressed():
+	editing_username = true
 
 func _on_singleplayer_pressed():
 	Network.start_singleplayer()
@@ -86,3 +109,5 @@ func _on_exit_pressed():
 func _physics_process(_delta):
 	if Game.window_focus:
 		menu_camera_pivot.rotation.y += 0.0005
+
+

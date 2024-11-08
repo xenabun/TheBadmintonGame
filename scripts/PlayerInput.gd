@@ -65,14 +65,16 @@ func _ready():
 
 func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
-	if not Game.game_in_progress: return
 	
 	if event.is_action_pressed('ui_cancel'):
 		#Game.game_in_progress = not Game.game_in_progress
 		#menu.visible = not Game.game_in_progress
 		var menu = UI.get_node('Menu')
 		menu.visible = not menu.visible
+		if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+			Game.game_in_progress = not menu.visible
 	
+	if not Game.game_in_progress: return
 	if UI.get_node('Menu').visible: return
 	
 	if event.is_action_pressed('action'):

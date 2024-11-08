@@ -78,7 +78,7 @@ func _physics_process(delta):
 	
 	# racket
 	var ball_dist = position.distance_to(ball.position)
-	if not racket_cooldown and ball_dist <= 5:#4:
+	if not racket_cooldown and ball_dist <= 6:#4:
 		racket_cooldown = true
 		$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 	

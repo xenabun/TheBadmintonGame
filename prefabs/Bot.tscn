@@ -150,7 +150,7 @@ parameters/WalkSpeed/blend_amount = 1.0
 one_shot = true
 
 [node name="RacketCooldown" type="Timer" parent="."]
-wait_time = 0.35
+wait_time = 0.4
 one_shot = true
 
 [node name="Debug_Dest" type="CSGSphere3D" parent="."]

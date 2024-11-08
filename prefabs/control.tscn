@@ -15,6 +15,7 @@ size_flags_vertical = 0
 script = ExtResource("1_fqjku")
 
 [node name="UsernameBox" type="LineEdit" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -111,9 +112,9 @@ size_flags_vertical = 3
 [node name="Back" type="Button" parent="."]
 layout_mode = 0
 offset_left = -155.0
-offset_top = 163.0
+offset_top = 121.0
 offset_right = 156.0
-offset_bottom = 194.0
+offset_bottom = 152.0
 text = "Back"
 
 [connection signal="pressed" from="Host" to="." method="_on_host_pressed"]

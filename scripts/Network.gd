@@ -63,20 +63,26 @@ func connected_to_server():
 	GameManager.print_debug_msg('Connected to server')
 	var peer_id = multiplayer.get_unique_id()
 	GameManager.Players[peer_id] = {
-		'username': ServerBrowserUI.get_node('UsernameBox').text,
+		'username': UI.get_node('CurrentUsername/VBoxContainer/Username').text,
+		#ServerBrowserUI.get_node('UsernameBox').text,
 		'id': peer_id,
 	}
-	send_player_information.rpc_id(1, ServerBrowserUI.get_node('UsernameBox').text, peer_id)
+	send_player_information.rpc_id(1, 
+			UI.get_node('CurrentUsername/VBoxContainer/Username').text, peer_id)
+	#ServerBrowserUI.get_node('UsernameBox').text, peer_id)
 	UI.get_node('Connecting').hide()
-	multiplayer.server_disconnected.connect(func():
-		#var multiplayer_peer = multiplayer.multiplayer_peer
-		multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-		peer.close()
-		GameManager.Players = {}
-		Game.game_in_progress = true
-		UI.in_menu = true
-		UI.in_main_menu = true
-		UI.in_server_browser = false)
+	multiplayer.server_disconnected.connect(quit_server)
+		#func():
+		##var multiplayer_peer = multiplayer.multiplayer_peer
+		#Game.current_game_type = Game.game_type.NONE
+		#multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+		#peer.close()
+		#GameManager.Players = {}
+		#Game.game_in_progress = true
+		#Game.reset_ball()
+		#UI.in_menu = true
+		#UI.in_main_menu = true
+		#UI.in_server_browser = false)
 	#add_player(peer_id) #.rpc_id(1, peer_id)
 
 ##client
@@ -114,7 +120,7 @@ func del_player_information(id):
 	#GameManager.Players = {}
 
 func _on_host_pressed():
-	if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
+	#if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
 	GameManager.print_debug_msg('host pressed')
 	peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(PORT)
@@ -125,9 +131,13 @@ func _on_host_pressed():
 		OS.alert('Failed to start server')
 		return
 	#peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
+	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)
-	send_player_information(ServerBrowserUI.get_node('UsernameBox').text, multiplayer.get_unique_id())
-	ServerBrowser.broadcast(ServerBrowserUI.get_node('UsernameBox').text + "'s server")
+	#send_player_information(ServerBrowserUI.get_node('UsernameBox').text, multiplayer.get_unique_id())
+	send_player_information(UI.get_node('CurrentUsername/VBoxContainer/Username').text,
+			multiplayer.get_unique_id())
+	#ServerBrowser.broadcast(ServerBrowserUI.get_node('UsernameBox').text + "'s server")
+	ServerBrowser.broadcast(UI.get_node('CurrentUsername/VBoxContainer/Username').text + "'s server")
 	#start_game()
 	UI.in_menu = false
 	UI.in_server_browser = false
@@ -136,7 +146,7 @@ func _on_host_pressed():
 	Game.start_game()
 
 func join_by_ip(ip):
-	if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
+	#if ServerBrowserUI.get_node('UsernameBox').text.is_empty(): return
 	GameManager.print_debug_msg('trying to join by ip: ' + ip)
 	peer = ENetMultiplayerPeer.new()
 	peer.create_client(ip, PORT)
@@ -145,6 +155,7 @@ func join_by_ip(ip):
 		OS.alert('Failed to start client')
 		return
 	#peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
+	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)
 	#print('multiplayer peers: ', multiplayer.get_peers())
 	#start_game()
@@ -153,10 +164,14 @@ func join_by_ip(ip):
 	UI.get_node('Connecting').show()
 
 func quit_server():
-	multiplayer.multiplayer_peer.close()
+	if multiplayer.server_disconnected.is_connected(quit_server):
+		multiplayer.server_disconnected.disconnect(quit_server)
+	Game.current_game_type = Game.game_type.NONE
+	peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	GameManager.Players = {}
 	Game.game_in_progress = true
+	Game.reset_ball()
 	UI.in_menu = true
 	UI.in_server_browser = false
 	UI.in_main_menu = true
@@ -175,10 +190,12 @@ func quit_server():
 	#UI.in_menu = true
 
 func start_singleplayer():
+	Game.current_game_type = Game.game_type.SINGLEPLAYER
 	UI.in_menu = false
 	UI.in_main_menu = false
 	GameManager.Players[1] = {
-		'username': ServerBrowserUI.get_node('UsernameBox').text,
+		'username': UI.get_node('CurrentUsername/VBoxContainer/Username').text,
+		#ServerBrowserUI.get_node('UsernameBox').text,
 		'id': 1,
 	}
 	GameManager.Players[2] = {

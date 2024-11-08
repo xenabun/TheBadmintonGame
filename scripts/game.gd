@@ -40,6 +40,13 @@ var game_in_progress = true
 @onready var ball = Level.get_node('World/Ball')
 @onready var ServerBrowser = get_tree().get_first_node_in_group('ServerBrowser_root')
 
+enum game_type {
+	NONE,
+	SINGLEPLAYER,
+	MULTIPLAYER
+}
+@export var current_game_type : game_type = game_type.NONE
+
 var ball_ready = true:
 	set(value):
 		ball_ready = value
@@ -58,7 +65,7 @@ func set_ball_ready(value):
 
 @rpc("any_peer", 'call_local')
 func throw_ball(peer_id, pos, dir):
-	if not peer_id or peer_id < 1:
+	if not peer_id or peer_id < 1 or current_game_type == game_type.SINGLEPLAYER:
 		peer_id = 1
 	
 	Game.ball_ready = false
@@ -76,7 +83,7 @@ func throw_ball(peer_id, pos, dir):
 	ball.set_multiplayer_authority(peer_id)
 @rpc('any_peer', 'call_local')
 func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
-	if not peer_id or peer_id < 1:
+	if not peer_id or peer_id < 1 or current_game_type == game_type.SINGLEPLAYER:
 		peer_id = 1
 	
 	ball.velocity.x = x
@@ -100,8 +107,10 @@ func get_opponent_peer_id(peer_id):
 		if id == peer_id: continue
 		opponent_id = id
 		break
+	
 	if !opponent_id:
 		opponent_id = peer_id
+	
 	return opponent_id
 
 #var score_text_path = 'GameUI/ScoreControl/Score'
