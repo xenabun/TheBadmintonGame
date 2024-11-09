@@ -1,6 +1,7 @@
 extends Node
 
 var window_focus = true
+var debug = false
 
 var data = {}
 var path = "res://BadmintonData.json"
@@ -33,7 +34,6 @@ const WIN_TEXT = 'Победа!'
 const LOSE_TEXT = 'Поражение'
 
 var score = [ 0, 0 ]
-#var winner = null
 var game_in_progress = true
 @onready var UI = get_tree().get_first_node_in_group('UI_root')
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
@@ -50,7 +50,6 @@ enum game_type {
 var ball_ready = true:
 	set(value):
 		ball_ready = value
-		#ball.visible = value
 		if value == true and Game.game_in_progress:
 			ball.ignored_area = null
 			ball.velocity = Vector3.ZERO
@@ -70,11 +69,6 @@ func throw_ball(peer_id, pos, dir):
 	
 	Game.ball_ready = false
 	ball.position = pos
-	#ball.set('direction', dir)
-	#ball.set('power', PlayerVariables.MAX_POWER)
-	#ball.set('launch_y', pos.y)
-	#ball.set('launch_z', pos.z)
-	#ball.set('last_interact', name)
 	ball.direction = dir
 	ball.power = PlayerVariables.MAX_POWER
 	ball.launch_y = pos.y
@@ -94,7 +88,6 @@ func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
 	ball.last_interact = player_name
 	ball.ignored_area = oarea
 	ball.set_multiplayer_authority(peer_id)
-#@rpc('any_peer', 'call_local')
 func reset_ball():
 	ball_ready = true
 	ball.ignored_area = null
@@ -113,9 +106,7 @@ func get_opponent_peer_id(peer_id):
 	
 	return opponent_id
 
-#var score_text_path = 'GameUI/ScoreControl/Score'
 func get_score_str():
-	#print('get_score_str(): ', multiplayer.get_unique_id())
 	if multiplayer.is_server():
 		return str(score[0], ' : ', score[1])
 	else:
@@ -124,19 +115,13 @@ func get_player_usernames():
 	var my_peer = multiplayer.get_unique_id()
 	var op_peer = get_opponent_peer_id(my_peer)
 	var usernames = []
-	#print(my_peer,' ', GameManager.Players)
 	var my_info = GameManager.Players.get(my_peer, {'username': ''})
 	var op_info = GameManager.Players.get(op_peer, {'username': ''}) if op_peer != my_peer else {'username': ''}
 	usernames.insert(0, my_info.username)
 	usernames.insert(1, op_info.username)
-	#usernames[0] = my_info.username
-	#usernames[1] = op_info.username
 	return usernames
 @rpc("any_peer")
 func update_score_text():
-	#if UI.has_node(score_text_path):
-	#get_parent().has_node(score_text_path):
-	#var score_text = UI.get_node(score_text_path)
 	var score_control = UI.get_node('GameUI/ScoreControl')
 	var score_str = get_score_str()
 	var usernames = get_player_usernames()
@@ -146,15 +131,10 @@ func update_score_text():
 @rpc("any_peer", 'call_local')
 func update_score_text_for_all():
 	update_score_text()
-	#for player in get_tree().get_nodes_in_group('Player'):
-		#var plr_id = str(player.name).to_int()
-		#if plr_id != multiplayer.get_unique_id():
-			#Game.update_score_text.rpc_id(plr_id)
 func i(p): return abs(p - 1)
 func peer_id_to_score_index(id):
 	return 0 if id == 1 else 1
 func check_win(p):
-	#return true
 	if score[p] >= 20 and score[i(p)] >= 20:
 		if score[p] >= 29 and score[i(p)] >= 29:
 			if score[p] >= 30:
@@ -169,7 +149,6 @@ func check_win(p):
 func grant_point(p):
 	score[p] += 1
 	if check_win(p):
-		#winner = p
 		game_in_progress = false
 		var game_result_ui = UI.get_node('GameResult')
 		var score_index = peer_id_to_score_index(multiplayer.get_unique_id())
@@ -184,7 +163,6 @@ func grant_point(p):
 			ServerBrowser.stop_broadcast()
 	update_score_text()
 func reset_score():
-	#winner = null
 	score = [ 0, 0 ]
 	update_score_text()
 
@@ -192,6 +170,11 @@ func start_game():
 	reset_score()
 	game_in_progress = true
 func _ready():
+	debug = get_tree().get_root().get_node('Scene/DebugUI').visible
+	for argument in OS.get_cmdline_args():
+		if argument.contains('-debug'):
+			get_tree().get_root().get_node('Scene/DebugUI').visible = true
+			debug = true
 	start_game()
 	get_viewport().focus_entered.connect(_on_window_focus_in)
 	get_viewport().focus_exited.connect(_on_window_focus_out)

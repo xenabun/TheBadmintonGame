@@ -14,7 +14,7 @@ config/name="badminton"
 run/main_scene="res://scenes/game_field.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 boot_splash/show_image=false
-config/icon="res://icon.svg"
+config/icon="res://badminton_icon.svg"
 
 [autoload]
 

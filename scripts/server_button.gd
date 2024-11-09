@@ -20,6 +20,6 @@ func _on_timer_timeout():
 func _on_connect_button_pressed():
 	if port == 0: return
 	if player_count >= max_player_count:
-		OS.alert('Server is full')
+		OS.alert('Сервер полон')
 		return
 	join_server.emit(ip)

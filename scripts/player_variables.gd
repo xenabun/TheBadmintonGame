@@ -2,7 +2,7 @@ extends Node
 
 const BASE_SPEED = 3.0
 const MAX_SPEED = 12.0
-const ACCELERATION = 12.0 #0.5
+const ACCELERATION = 12.0
 const RUN_SPEED_MULT = 1.5
 
 const MAX_STAMINA = 100.0

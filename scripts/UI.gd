@@ -42,13 +42,6 @@ var title_rot_time = 1
 			ServerBrowser.listen_to_broadcast()
 		else:
 			ServerBrowser.stop_listen()
-		#menu_camera_pivot.get_node('MenuCamera').set_current(value)
-		#if value == true:
-			#get_node('GameUI').hide()
-			#get_node('Menu').hide()
-			#get_node('GameResult').hide()
-			#get_node('Connecting').hide()
-			#player_camera.set_current(false)
 
 func _ready():
 	get_node('MainMenu/Username').show()
@@ -90,6 +83,7 @@ func _on_title_visibility_changed():
 		title_tween.stop()
 		
 func _on_username_confirm_pressed():
+	if get_node('MainMenu/Username/UsernameBox').text.is_empty(): return
 	editing_username = false
 	get_node('CurrentUsername/VBoxContainer/Username').text = get_node('MainMenu/Username/UsernameBox').text
 
@@ -109,5 +103,3 @@ func _on_exit_pressed():
 func _physics_process(_delta):
 	if Game.window_focus:
 		menu_camera_pivot.rotation.y += 0.0005
-
-

@@ -11,14 +11,12 @@ var racket_cooldown = false:
 	set(value):
 		racket_cooldown = value
 		$RacketArea.monitorable = value
-		$RacketArea/CSGBox3D.visible = value
+		if Game.debug: $RacketArea/CSGBox3D.visible = value
 		if value:
 			$RacketCooldown.start()
 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var ball = Game.ball #Level.get_node('World/Ball')
-#@onready var ball = get_parent().get_node('Ball')
-#@onready var player = get_parent().get_node('Player')
+@onready var ball = Game.ball
 @export var player : Node = null
 
 func _on_sprint_timeout():
@@ -30,6 +28,10 @@ func _reset_position():
 	var spawn_point = Level.get_node('World/Player2Spawn')
 	position = spawn_point.position
 	rotation = spawn_point.rotation
+
+func _ready():
+	$Debug_Dest.visible = Game.debug
+	$RacketArea/CSGBox3D.hide()
 
 func _physics_process(delta):
 	if not Game.game_in_progress:
@@ -78,7 +80,7 @@ func _physics_process(delta):
 	
 	# racket
 	var ball_dist = position.distance_to(ball.position)
-	if not racket_cooldown and ball_dist <= 6:#4:
+	if not racket_cooldown and ball_dist <= 4.5:
 		racket_cooldown = true
 		$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 	

@@ -1,12 +1,11 @@
 extends CharacterBody3D
 
-#@onready var Player = get_parent().get_node('Player')
 var BASE_PLAYER_POS_Y = 4.824 / 2
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var FieldArea = Level.get_node('World/FieldArea') #get_parent().get_node('FieldArea')
-@onready var FloorArea = Level.get_node('World/Floor/Area') #get_parent().get_node('Floor/Area')
-@onready var Player1Area = Level.get_node('World/Player1Area') #get_parent().get_node('Player1Area')
-@onready var Player2Area = Level.get_node('World/Player2Area') #get_parent().get_node('Player2Area')
+@onready var FieldArea = Level.get_node('World/FieldArea')
+@onready var FloorArea = Level.get_node('World/Floor/Area')
+@onready var Player1Area = Level.get_node('World/Player1Area')
+@onready var Player2Area = Level.get_node('World/Player2Area')
 
 var direction = 0.0
 var power = 0.0
@@ -40,35 +39,23 @@ func get_land_x():
 	
 	pass
 
-#func _ready():
-	#set_physics_process(multiplayer.is_server())
+func _ready():
+	$Debug_MaxHeight.visible = Game.debug
+	$Debug_Z.visible = Game.debug
+	$Debug_ZLand.visible = Game.debug
+	$Debug_LaunchHeight.visible = Game.debug
 
 func _physics_process(_delta):
-	#print(get_multiplayer_authority())
-	#print(multiplayer.get_unique_id())
-	
-	if Game.ball_ready:
+	if Game.debug and Game.ball_ready:
 		for node in get_children():
 			if node.name.contains('Debug'):
 				node.position = Vector3(0, 0, 0)
-	#print('ball authority: ', get_multiplayer_authority())
 	
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
 	if not Game.game_in_progress or Game.ball_ready: return
-	#print(get_multiplayer_authority())
-	
-	## position reset when inactive
-	#if Game.ball_ready:
-	##Player.get('ball_ready'):
-		#ignored_area = null
-		#velocity = Vector3.ZERO
-		#position = Vector3(0, -2, 0)
-		#return
 	
 	# reset when leaves field area
 	if not $Area.overlaps_area(FieldArea):
-		#Player.set('ball_ready', true)
-		#Game.ball_ready = true
 		Game.set_ball_ready.rpc(true)
 		return
 	
@@ -83,14 +70,11 @@ func _physics_process(_delta):
 				Game.grant_point.rpc(1)
 			else:
 				Game.grant_point.rpc(0)
-		#Player.set('ball_ready', true)
-		#Game.ball_ready = true
 		Game.set_ball_ready.rpc(true)
 		return
 	
 	# racket interact
 	var overlapped_areas = $Area.get_overlapping_areas()
-	#print('ball touched: ', overlapped_areas)
 	for oarea in overlapped_areas:
 		if oarea.name != 'RacketArea': continue
 		if oarea == ignored_area: continue
@@ -106,13 +90,6 @@ func _physics_process(_delta):
 		
 		Game.bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
 				velocity_x, dir, new_power, position.y, position.z, player_name, oarea)
-		#velocity.x = x
-		#direction = VectorMath.look_vector(oarea).z
-		#power = new_power
-		#launch_y = position.y
-		#launch_z = position.z
-		#last_interact = oarea.get_parent().name
-		#ignored_area = oarea
 		break
 	
 	# shadow
@@ -139,14 +116,8 @@ func _physics_process(_delta):
 	position.y = height
 	velocity.z = power * direction * height_frac
 	
-	$Debug_LaunchHeight.global_position = Vector3(position.x, launch_y + get_launch_height(), launch_z)
-	$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
-	$Debug_Z.global_position = Vector3(position.x, 1, launch_z)
-	$Debug_ZLand.global_position = Vector3(position.x, 1, get_land_z())
-	
-	#var debug = CSGSphere3D.new()
-	#debug.scale = Vector3.ONE * 0.2
-	#debug.position = Vector3(position.x, height, position.z)
-	#get_parent().add_child(debug)
-	#get_parent().get_node('CSGSphere3D').position.y = BASE_PLAYER_POS_Y
-	#get_parent().get_node('CSGSphere3D').position.z = get_land_z()
+	if Game.debug:
+		$Debug_LaunchHeight.global_position = Vector3(position.x, launch_y + get_launch_height(), launch_z)
+		$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
+		$Debug_Z.global_position = Vector3(position.x, 1, launch_z)
+		$Debug_ZLand.global_position = Vector3(position.x, 1, get_land_z())

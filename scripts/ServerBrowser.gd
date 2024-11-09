@@ -6,9 +6,9 @@ var roomInfo = {"name": "room name", "player_count": 0}
 var broadcaster : PacketPeerUDP
 var listener : PacketPeerUDP
 
-@export var listenPort : int = 5001 #49665
-@export var broadcastPort : int = 5002 #49666
-@export var broadcastAddress : String = '26.255.255.255'
+@export var listenPort : int = 5001
+@export var broadcastPort : int = 5002
+@export var broadcastAddress : String = '255.255.255.255'
 @export var broadcastTimer : Timer
 @export var server_card_prefab : PackedScene
 @onready var UI = get_tree().get_first_node_in_group('UI_root')
@@ -16,7 +16,6 @@ var listener : PacketPeerUDP
 
 func _ready():
 	set_process(false)
-	#listen_to_broadcast()
 
 func listen_to_broadcast():
 	listener = PacketPeerUDP.new()
@@ -24,11 +23,9 @@ func listen_to_broadcast():
 	if status == OK:
 		GameManager.print_debug_msg('Bound to listen port ' + str(listenPort) + ' successful')
 		GameManager.set_listen_port_bound_text('listen port bound: true')
-		#ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: true'
 	else:
 		GameManager.print_debug_msg('Failed to bind to listen port')
 		GameManager.set_listen_port_bound_text('listen port bound: false')
-		#ServerBrowserUI.get_node('ListenPortBound').text = 'listen port bound: false'
 	set_process(true)
 
 func broadcast(room_name):
@@ -60,9 +57,6 @@ func _process(_delta):
 		var data = packet.get_string_from_utf8()
 		var pRoomInfo = JSON.parse_string(data)
 		
-		#print('server ip: ', server_ip, ' server port: ', str(server_port))
-		#, ' room info: ', str(pRoomInfo))
-		
 		for i in ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').get_children():
 			if i.ip == server_ip:
 				i.port = server_port
@@ -84,9 +78,7 @@ func _process(_delta):
 		server_card.join_server.connect(join_by_ip)
 
 func _on_broadcast_timer_timeout():
-	#print('Broadcasting game')
 	roomInfo.player_count = GameManager.Players.size()
-	
 	var data = JSON.stringify(roomInfo)
 	var packet = data.to_utf8_buffer()
 	broadcaster.put_packet(packet)
