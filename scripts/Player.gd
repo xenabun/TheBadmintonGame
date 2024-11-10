@@ -140,16 +140,22 @@ func _physics_process(delta):
 			blend_amount = 1
 		else:
 			blend_amount = 0.5
+		if not input.action_hold:
+			$plrangletarget.look_at($plrangletarget.global_position + direction)
+			var currot = Quaternion($playermodel.transform.basis.orthonormalized())
+			var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
+			var newrot = currot.slerp(tarrot, 0.2)
+			$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	$AnimationTree['parameters/WalkSpeed/blend_amount'] = move_toward(
 		$AnimationTree['parameters/WalkSpeed/blend_amount'],
 		blend_amount,
 		0.1
 	)
-	if direction.length() > 0:
-		$plrangletarget.look_at($plrangletarget.global_position + direction)
+	if input.action_hold:
+		$plrangletarget.look_at($plrangletarget.global_position + VectorMath.look_vector($RacketArea))
 		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
 		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
-		var newrot = currot.slerp(tarrot, 0.2)
+		var newrot = currot.slerp(tarrot, 0.3)
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# stamina
@@ -178,4 +184,3 @@ func _physics_process(delta):
 	# camera
 	if Game.window_focus and !UI.get_node('Menu').visible:
 		update_camera_transform(0.2)
-	

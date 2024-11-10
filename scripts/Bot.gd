@@ -60,27 +60,19 @@ func _physics_process(delta):
 	if !Game.ball_ready:
 		if ball.last_interact != name:
 			## jumping
-			target_position = Vector3(ball.position.x,
-					position.y, ball.get_land_z())
+			target_position = Vector3(ball.position.x, position.y, ball.get_land_z())
 	else:
 		target_position = Vector3(player.position.x +
 				player.velocity.x * delta, position.y, (player.position.z +
 				player.velocity.z * delta) - PlayerVariables.MAX_POWER * 0.66)
 	if target_position:
-		var d = (position * Vector3(1, 0, 1)).distance_to(
-				target_position * Vector3(1, 0, 1))
-		if d > 0.05:
-			direction = (position.direction_to(target_position) * Vector3(1, 0, 1))
+		direction = position.direction_to(target_position)
 		$Debug_Dest.global_position = target_position
 	
-	# normalize direction
-	if abs(direction.x) <= 0.1: direction.x = 0
-	if abs(direction.z) <= 0.1: direction.z = 0
-	direction = direction.normalized()
-	
 	# racket
-	var ball_dist = position.distance_to(ball.position)
-	if not racket_cooldown and ball_dist <= 4.5:
+	var ball_dist = (position * Vector3(1, randf(), 1)).distance_to(
+			ball.position * Vector3(1, randf(), 1))
+	if not racket_cooldown and ball_dist <= 4:
 		racket_cooldown = true
 		$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 	
@@ -91,16 +83,22 @@ func _physics_process(delta):
 			blend_amount = 1
 		else:
 			blend_amount = 0.5
+		if not racket_cooldown:
+			$plrangletarget.look_at($plrangletarget.global_position + direction)
+			var currot = Quaternion($playermodel.transform.basis.orthonormalized())
+			var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
+			var newrot = currot.slerp(tarrot, 0.2)
+			$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	$AnimationTree['parameters/WalkSpeed/blend_amount'] = move_toward(
 		$AnimationTree['parameters/WalkSpeed/blend_amount'],
 		blend_amount,
 		0.1
 	)
-	if direction.length() > 0:
-		$plrangletarget.look_at($plrangletarget.global_position + direction)
+	if racket_cooldown:
+		$plrangletarget.look_at($plrangletarget.global_position + VectorMath.look_vector($RacketArea))
 		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
 		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
-		var newrot = currot.slerp(tarrot, 0.2)
+		var newrot = currot.slerp(tarrot, 0.3)
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# sprint
@@ -149,5 +147,10 @@ func _physics_process(delta):
 	
 	# position
 	move_and_slide()
+	if target_position:
+		if abs(target_position.x - position.x) <= 0.2:
+			position.x = target_position.x
+		if abs(target_position.z - position.z) <= 0.2:
+			position.z = target_position.z
 	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
 	position.z = clamp(position.z, -PlayerVariables.Z_LIMIT, -2)
