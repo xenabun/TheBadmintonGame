@@ -26,6 +26,10 @@ var title_rot_time = 1
 	set(value):
 		in_main_menu = value
 		get_node('MainMenu').visible = value
+		if value:
+			get_node('MainMenu/Menu').show()
+			get_node('MainMenu/Username').hide()
+			get_node('MainMenu/Port').hide()
 @export var editing_username : bool = true :
 	set(value):
 		editing_username = value
@@ -39,6 +43,8 @@ var title_rot_time = 1
 		in_server_browser = value
 		get_node('ServerBrowser').visible = value
 		if value:
+			get_node('ServerBrowser/PortText').text = 'Порт: ' + str(Network.PORT)
+			ServerBrowser.listenPort = Network.PORT + 1
 			ServerBrowser.listen_to_broadcast()
 		else:
 			ServerBrowser.stop_listen()
@@ -46,6 +52,7 @@ var title_rot_time = 1
 func _ready():
 	get_node('MainMenu/Username').show()
 	get_node('MainMenu/Menu').hide()
+	get_node('MainMenu/Port').hide()
 	get_node('MainMenu').show()
 	
 	get_node('CurrentUsername').hide()
@@ -94,8 +101,23 @@ func _on_singleplayer_pressed():
 	Network.start_singleplayer()
 
 func _on_multiplayer_pressed():
-	in_main_menu = false
-	in_server_browser = true
+	#in_main_menu = false
+	#in_server_browser = true
+	get_node('MainMenu/Menu').hide()
+	get_node('MainMenu/Port').show()
+
+func _on_port_menu_close_pressed():
+	get_node('MainMenu/Port').hide()
+	get_node('MainMenu/Menu').show()
+
+func _on_button_pressed():
+	var port_text = get_node('MainMenu/Port/VBoxContainer/LineEdit').text
+	var port_num = port_text.to_int()
+	if port_num and port_num >= 1024 and port_num <= 49151:
+		Network.PORT = port_num
+		in_main_menu = false
+		in_server_browser = true
+		get_node('MainMenu/Port').hide()
 
 func _on_exit_pressed():
 	get_tree().quit()
@@ -103,3 +125,5 @@ func _on_exit_pressed():
 func _physics_process(_delta):
 	if Game.window_focus:
 		menu_camera_pivot.rotation.y += 0.0005
+
+

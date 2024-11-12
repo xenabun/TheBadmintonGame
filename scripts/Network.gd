@@ -1,7 +1,7 @@
 extends Node
 
 const ADDRESS = '127.0.0.1'
-const PORT = 5000
+@export var PORT = 5000
 var peer
 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
@@ -94,6 +94,7 @@ func _on_host_pressed():
 	multiplayer.set_multiplayer_peer(peer)
 	send_player_information(UI.get_node('CurrentUsername/VBoxContainer/Username').text,
 			multiplayer.get_unique_id())
+	ServerBrowser.broadcastPort = PORT + 2
 	ServerBrowser.broadcast(UI.get_node('CurrentUsername/VBoxContainer/Username').text + "'s server")
 	UI.in_menu = false
 	UI.in_server_browser = false
@@ -118,14 +119,15 @@ func quit_server():
 	if multiplayer.server_disconnected.is_connected(quit_server):
 		multiplayer.server_disconnected.disconnect(quit_server)
 	Game.current_game_type = Game.game_type.NONE
-	if peer: peer.close()
+	if peer:
+		peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	GameManager.Players = {}
 	Game.game_in_progress = true
 	Game.reset_ball()
 	UI.in_menu = true
-	UI.in_server_browser = false
 	UI.in_main_menu = true
+	UI.in_server_browser = false
 	if multiplayer.is_server():
 		ServerBrowser.stop_broadcast()
 		for player in get_tree().get_nodes_in_group('Player'):

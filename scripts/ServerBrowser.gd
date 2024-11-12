@@ -6,8 +6,8 @@ var roomInfo = {"name": "room name", "player_count": 0}
 var broadcaster : PacketPeerUDP
 var listener : PacketPeerUDP
 
-@export var listenPort : int = 5001
-@export var broadcastPort : int = 5002
+@export var listenPort : int #= 5001
+@export var broadcastPort : int #= 5002
 @export var broadcastAddress : String = '255.255.255.255'
 @export var broadcastTimer : Timer
 @export var server_card_prefab : PackedScene
