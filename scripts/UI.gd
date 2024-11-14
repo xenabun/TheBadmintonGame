@@ -20,6 +20,7 @@ var title_rot_time = 1
 			get_node('GameUI').hide()
 			get_node('Menu').hide()
 			get_node('GameResult').hide()
+			get_node('GameControls').hide()
 			get_node('Connecting').hide()
 			player_camera.set_current(false)
 @export var in_main_menu : bool = true :
@@ -60,6 +61,7 @@ func _ready():
 	get_node('GameUI').hide()
 	get_node('Menu').hide()
 	get_node('GameResult').hide()
+	get_node('GameControls').hide()
 	get_node('Connecting').hide()
 	
 	get_node('ServerBrowser/Back').pressed.connect(_on_server_browser_back_pressed)
@@ -118,6 +120,9 @@ func _on_button_pressed():
 		in_main_menu = false
 		in_server_browser = true
 		get_node('MainMenu/Port').hide()
+
+func _on_controls_close():
+	get_node('GameControls').hide()
 
 func _on_exit_pressed():
 	get_tree().quit()

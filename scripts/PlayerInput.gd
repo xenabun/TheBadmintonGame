@@ -62,13 +62,16 @@ func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
 	
 	if event.is_action_pressed('ui_cancel'):
-		var menu = UI.get_node('Menu')
-		menu.visible = not menu.visible
-		if Game.current_game_type == Game.game_type.SINGLEPLAYER:
-			Game.game_in_progress = not menu.visible
+		if UI.get_node('GameControls').visible:
+			UI.get_node('GameControls').visible = false
+		else:
+			var menu = UI.get_node('Menu')
+			menu.visible = not menu.visible
+			if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+				Game.game_in_progress = not menu.visible
 	
 	if not Game.game_in_progress: return
-	if UI.get_node('Menu').visible: return
+	if UI.get_node('Menu').visible or UI.get_node('GameControls').visible: return
 	
 	if event.is_action_pressed('action'):
 		if Game.ball_ready and Game.game_in_progress:
@@ -134,7 +137,7 @@ func _on_action_pressed_timeout():
 	last_movement_action_pressed = null
 
 func _process(_delta):
-	if UI.get_node('Menu').visible: return
+	if UI.get_node('Menu').visible or UI.get_node('GameControls').visible: return
 	
 	#direction
 	var input_dir = Input.get_vector("left", "right", "up", "down")

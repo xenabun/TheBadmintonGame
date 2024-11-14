@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=47 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
 [ext_resource type="PackedScene" uid="uid://c0mrf3fj2l4fq" path="res://prefabs/control.tscn" id="12_hm06h"]
+[ext_resource type="Texture2D" uid="uid://bfy0ucogy3lda" path="res://images/controls.png" id="14_frpfu"]
+[ext_resource type="Shader" path="res://shaders/texture_outline.gdshader" id="15_274xj"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_17rgp"]
 sky_top_color = Color(0.0850372, 0.348454, 0.717237, 1)
@@ -160,6 +162,21 @@ outline_color = Color(0, 0, 0, 1)
 font_size = 100
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wlmk5"]
+bg_color = Color(1, 1, 1, 0.886275)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ovtta"]
+shader = ExtResource("15_274xj")
+shader_parameter/color = Color(1, 1, 1, 1)
+shader_parameter/width = 2.003
+shader_parameter/pattern = 0
+shader_parameter/inside = false
+shader_parameter/add_margins = true
 
 [node name="Scene" type="Node3D"]
 
@@ -413,7 +430,6 @@ layout_mode = 2
 text = "Подтвердить"
 
 [node name="Menu" type="VBoxContainer" parent="UI/MainMenu"]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -440,6 +456,7 @@ layout_mode = 2
 text = "Выйти"
 
 [node name="Port" type="Panel" parent="UI/MainMenu"]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -742,6 +759,56 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Establishing connection..."
 
+[node name="GameControls" type="Control" parent="UI"]
+visible = false
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="UI/GameControls"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -254.0
+offset_top = -139.5
+offset_right = 254.0
+offset_bottom = 139.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_wlmk5")
+
+[node name="TextureRect" type="TextureRect" parent="UI/GameControls/Panel"]
+material = SubResource("ShaderMaterial_ovtta")
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -125.0
+offset_right = 230.0
+offset_bottom = 125.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("14_frpfu")
+
+[node name="Close" type="Button" parent="UI/GameControls/Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -32.0
+offset_bottom = 31.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0.493545, 0.493546, 0.493546, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.129412)
+theme_override_constants/outline_size = 6
+text = "X"
+flat = true
+
 [node name="DebugUI" type="Control" parent="." groups=["Debug_root"]]
 visible = false
 clip_contents = true
@@ -810,3 +877,4 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_close_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="UI" method="_on_back_pressed"]
 [connection signal="pressed" from="UI/GameResult/Back" to="UI" method="_on_back_pressed"]
+[connection signal="pressed" from="UI/GameControls/Panel/Close" to="UI" method="_on_controls_close"]

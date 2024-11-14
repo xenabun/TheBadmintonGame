@@ -70,8 +70,8 @@ func _physics_process(delta):
 		$Debug_Dest.global_position = target_position
 	
 	# racket
-	var ball_dist = (position * Vector3(1, randf(), 1)).distance_to(
-			ball.position * Vector3(1, randf(), 1))
+	var ball_dist = (position * Vector3(1, randf() * 0.8, 1)).distance_to(
+			ball.position * Vector3(1, randf() * 0.8, 1))
 	if not racket_cooldown and ball_dist <= 4:
 		racket_cooldown = true
 		$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE

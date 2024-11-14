@@ -49,6 +49,7 @@ func _ready():
 	camera.global_rotation = menu_camera.global_rotation
 	update_camera_transform(0.2)
 	GameUI.show()
+	UI.get_node('GameControls').show()
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina
@@ -109,7 +110,12 @@ func _physics_process(delta):
 				$AnimationTree['parameters/WalkScale/scale'], 1, 0.1)
 	
 	# jump
-	if !UI.get_node('Menu').visible and Input.is_action_just_pressed("ui_accept") and is_on_floor():
+	if (
+		not UI.get_node('Menu').visible
+		and not UI.get_node('GameControls').visible
+		and Input.is_action_just_pressed("ui_accept")
+		and is_on_floor()
+	):
 		velocity.y = PlayerVariables.JUMP_VELOCITY
 	
 	# direction
@@ -182,5 +188,9 @@ func _physics_process(delta):
 	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# camera
-	if Game.window_focus and !UI.get_node('Menu').visible:
+	if (
+		Game.window_focus
+		and not UI.get_node('Menu').visible
+		and not UI.get_node('GameControls').visible
+	):
 		update_camera_transform(0.2)
