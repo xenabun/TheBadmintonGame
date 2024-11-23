@@ -3,32 +3,12 @@ extends Node
 var window_focus = true
 var debug = false
 
-var data = {}
-var path = "res://BadmintonData.json"
-func save_json_file():
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	file.store_string(JSON.stringify(data))
-	file.close()
-	file = null
-func load_json_file():
-	var file
-	if FileAccess.file_exists(path):
-		file = FileAccess.open(path, FileAccess.READ)
-	else:
-		file = FileAccess.open(path, FileAccess.WRITE_READ)
-	var filetext = file.get_as_text()
-	var res
-	if filetext.length() > 0:
-		var parsed_result = JSON.parse_string(filetext)
-		if parsed_result is Dictionary:
-			res = parsed_result
-	if not res:
-		var _data = { 'score_data': [] }
-		file.store_string(JSON.stringify(_data))
-		res = _data
-	file.close()
-	file = null
-	return res
+enum game_type {
+	NONE,
+	SINGLEPLAYER,
+	MULTIPLAYER
+}
+@export var current_game_type : game_type = game_type.NONE
 
 const WIN_TEXT = 'Победа!'
 const LOSE_TEXT = 'Поражение'
@@ -40,70 +20,14 @@ var game_in_progress = true
 @onready var ball = Level.get_node('World/Ball')
 @onready var ServerBrowser = get_tree().get_first_node_in_group('ServerBrowser_root')
 
-enum game_type {
-	NONE,
-	SINGLEPLAYER,
-	MULTIPLAYER
-}
-@export var current_game_type : game_type = game_type.NONE
-
-var ball_ready = true:
-	set(value):
-		ball_ready = value
-		if value == true and Game.game_in_progress:
-			ball.ignored_area = null
-			ball.velocity = Vector3.ZERO
-			ball.position = Vector3(0, -10, 0)
-			for player in get_tree().get_nodes_in_group('Player'):
-				player.reset_position.emit()
-			for bot in get_tree().get_nodes_in_group('Bot'):
-				bot._reset_position()
-@rpc('any_peer', 'call_local')
-func set_ball_ready(value):
-	ball_ready = value
-
-@rpc("any_peer", 'call_local')
-func throw_ball(peer_id, pos, dir):
-	if not peer_id or peer_id < 1 or current_game_type == game_type.SINGLEPLAYER:
-		peer_id = 1
-	
-	Game.ball_ready = false
-	ball.position = pos
-	ball.direction = dir
-	ball.power = PlayerVariables.MAX_POWER
-	ball.launch_y = pos.y
-	ball.launch_z = pos.z
-	ball.last_interact = name
-	ball.set_multiplayer_authority(peer_id)
-@rpc('any_peer', 'call_local')
-func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
-	if not peer_id or peer_id < 1 or current_game_type == game_type.SINGLEPLAYER:
-		peer_id = 1
-	
-	ball.velocity.x = x
-	ball.direction = dir
-	ball.power = new_power
-	ball.launch_y = y
-	ball.launch_z = z
-	ball.last_interact = player_name
-	ball.ignored_area = oarea
-	ball.set_multiplayer_authority(peer_id)
-func reset_ball():
-	ball_ready = true
-	ball.ignored_area = null
-	ball.velocity = Vector3.ZERO
-	ball.position = Vector3(0, -10, 0)
-
 func get_opponent_peer_id(peer_id):
 	var opponent_id = null
 	for id in GameManager.Players:
 		if id == peer_id: continue
 		opponent_id = id
 		break
-	
 	if !opponent_id:
 		opponent_id = peer_id
-	
 	return opponent_id
 
 func get_score_str():
@@ -158,7 +82,8 @@ func grant_point(p):
 		game_result_ui.show()
 		UI.get_node('GameUI').hide()
 		reset_score()
-		reset_ball()
+		ball.set_ball_ready()
+		ball.reset_ball()
 		if multiplayer.is_server():
 			ServerBrowser.stop_broadcast()
 	update_score_text()

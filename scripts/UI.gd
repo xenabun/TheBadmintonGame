@@ -103,8 +103,6 @@ func _on_singleplayer_pressed():
 	Network.start_singleplayer()
 
 func _on_multiplayer_pressed():
-	#in_main_menu = false
-	#in_server_browser = true
 	get_node('MainMenu/Menu').hide()
 	get_node('MainMenu/Port').show()
 
@@ -130,5 +128,3 @@ func _on_exit_pressed():
 func _physics_process(_delta):
 	if Game.window_focus:
 		menu_camera_pivot.rotation.y += 0.0005
-
-

@@ -124,7 +124,8 @@ func quit_server():
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	GameManager.Players = {}
 	Game.game_in_progress = true
-	Game.reset_ball()
+	Game.ball.set_ball_ready()
+	Game.ball.reset_ball()
 	UI.in_menu = true
 	UI.in_main_menu = true
 	UI.in_server_browser = false

@@ -16,7 +16,6 @@ var racket_cooldown = false:
 			$RacketCooldown.start()
 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var ball = Game.ball
 @export var player : Node = null
 
 func _on_sprint_timeout():
@@ -57,10 +56,10 @@ func _physics_process(delta):
 	# get direction
 	var direction = Vector3.ZERO
 	var target_position = null
-	if !Game.ball_ready:
-		if ball.last_interact != name:
+	if !Game.ball.ball_ready:
+		if Game.ball.last_interact != name:
 			## jumping
-			target_position = Vector3(ball.position.x, position.y, ball.get_land_z())
+			target_position = Vector3(Game.ball.position.x, position.y, Game.ball.get_land_z())
 	else:
 		target_position = Vector3(player.position.x +
 				player.velocity.x * delta, position.y, (player.position.z +
@@ -71,7 +70,7 @@ func _physics_process(delta):
 	
 	# racket
 	var ball_dist = (position * Vector3(1, randf() * 0.8, 1)).distance_to(
-			ball.position * Vector3(1, randf() * 0.8, 1))
+			Game.ball.position * Vector3(1, randf() * 0.8, 1))
 	if not racket_cooldown and ball_dist <= 4:
 		racket_cooldown = true
 		$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
@@ -106,7 +105,7 @@ func _physics_process(delta):
 	if target_position != null:
 		dist = position.distance_to(target_position)
 	if (PlayerVariables.MAX_SPEED <= dist and
-			not Game.ball_ready and
+			not Game.ball.ball_ready and
 			not sprinting and not exhausted and stamina > 0):
 		sprinting = true
 		$Sprint.start()

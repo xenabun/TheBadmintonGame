@@ -74,10 +74,10 @@ func _input(event):
 	if UI.get_node('Menu').visible or UI.get_node('GameControls').visible: return
 	
 	if event.is_action_pressed('action'):
-		if Game.ball_ready and Game.game_in_progress:
+		if Game.ball.ball_ready and Game.game_in_progress:
 			var dir = VectorMath.look_vector(player.get_node('RacketArea')).z
 			var pos = player.get_node('Ball').global_position
-			Game.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()), pos, dir)
+			Game.ball.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()), pos, dir)
 			player.get_node('Ball').visible = false
 			throw_ready.rpc()
 		else:

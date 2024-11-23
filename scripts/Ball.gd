@@ -39,6 +39,47 @@ func get_land_x():
 	
 	pass
 
+var ball_ready = true:
+	set(value):
+		ball_ready = value
+		if value == true and Game.game_in_progress:
+			reset_ball()
+			for player in get_tree().get_nodes_in_group('Player'):
+				player.reset_position.emit()
+			for bot in get_tree().get_nodes_in_group('Bot'):
+				bot._reset_position()
+@rpc('any_peer', 'call_local')
+func set_ball_ready(value = true):
+	ball_ready = value
+@rpc("any_peer", 'call_local')
+func throw_ball(peer_id, pos, dir):
+	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
+		peer_id = 1
+	ball_ready = false
+	position = pos
+	direction = dir
+	power = PlayerVariables.MAX_POWER
+	launch_y = pos.y
+	launch_z = pos.z
+	last_interact = name
+	set_multiplayer_authority(peer_id)
+@rpc('any_peer', 'call_local')
+func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
+	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
+		peer_id = 1
+	velocity.x = x
+	direction = dir
+	power = new_power
+	launch_y = y
+	launch_z = z
+	last_interact = player_name
+	ignored_area = oarea
+	set_multiplayer_authority(peer_id)
+func reset_ball():
+	ignored_area = null
+	velocity = Vector3.ZERO
+	position = Vector3(0, -10, 30)
+
 func _ready():
 	$Debug_MaxHeight.visible = Game.debug
 	$Debug_Z.visible = Game.debug
@@ -46,17 +87,18 @@ func _ready():
 	$Debug_LaunchHeight.visible = Game.debug
 
 func _physics_process(_delta):
-	if Game.debug and Game.ball_ready:
+	# reset debug
+	if Game.debug and ball_ready:
 		for node in get_children():
 			if node.name.contains('Debug'):
-				node.position = Vector3(0, 0, 0)
+				node.position = Vector3.ZERO
 	
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
-	if not Game.game_in_progress or Game.ball_ready: return
+	if not Game.game_in_progress or ball_ready: return
 	
 	# reset when leaves field area
 	if not $Area.overlaps_area(FieldArea):
-		Game.set_ball_ready.rpc(true)
+		set_ball_ready.rpc()
 		return
 	
 	# floor interact
@@ -70,7 +112,7 @@ func _physics_process(_delta):
 				Game.grant_point.rpc(1)
 			else:
 				Game.grant_point.rpc(0)
-		Game.set_ball_ready.rpc(true)
+		set_ball_ready.rpc()
 		return
 	
 	# racket interact
@@ -88,7 +130,7 @@ func _physics_process(_delta):
 		var player_name = oarea.get_parent().name
 		var dir = VectorMath.look_vector(oarea).z
 		
-		Game.bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
+		bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
 				velocity_x, dir, new_power, position.y, position.z, player_name, oarea)
 		break
 	
