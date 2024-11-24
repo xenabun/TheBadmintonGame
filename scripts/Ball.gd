@@ -8,38 +8,26 @@ const BASE_PLAYER_POS_Y = 4.824 / 2
 @onready var Player1Area = Level.get_node('World/Player1Area')
 @onready var Player2Area = Level.get_node('World/Player2Area')
 
-var direction : float = 0.0
-var power : float = 0.0
-var launch_pos : Vector3 = Vector3.ZERO
-var ignored_area : Area3D = null
-var last_interact : String = ''
+var direction :float = 0.0
+var power :float = 0.0
+var launch_pos :Vector3 = Vector3.ZERO
+var ignored_area :Area3D = null
+var last_interact :String = ''
 func get_launch_height():
-	var power_frac = ((power - PlayerVariables.BASE_POWER) /
-			(PlayerVariables.MAX_POWER - PlayerVariables.BASE_POWER))
-	var height = (BallVariables.BASE_Y + (BallVariables.MAX_Y -
-			BallVariables.BASE_Y) * power_frac)
-	return height
+	return (BallVariables.BASE_Y + (BallVariables.MAX_Y -
+			BallVariables.BASE_Y) * ((power - PlayerVariables.BASE_POWER) /
+			(PlayerVariables.MAX_POWER - PlayerVariables.BASE_POWER)))
 func get_max_height():
 	return launch_pos.y + get_launch_height()
 func get_height(z):
-	var lz = launch_pos.z
-	var y = get_launch_height()
-	var my = get_max_height()
-	var p = power
-	return my - (4.0 * y * ((abs(lz - z) - (p / 2.0)) ** 2.0)) / (p ** 2.0)
+	return (get_max_height() - (4.0 * get_launch_height() *
+			((abs(launch_pos.z - z) - (power / 2.0)) ** 2.0)) /
+			(power ** 2.0))
 func get_land_z():
-	var lz = launch_pos.z
-	var y = get_launch_height()
-	var my = get_max_height()
-	var by = BASE_PLAYER_POS_Y
-	var p = power
-	var d = direction
-	return (p / 2.0) * (1.0 + sqrt((my - by) / y)) * d + lz
+	return ((power / 2.0) * (1.0 + sqrt((get_max_height() -
+			BASE_PLAYER_POS_Y) / get_launch_height())) *
+			direction + launch_pos.z)
 func get_land_x():
-	
-	
-	
-	
 	return position.x
 
 var ball_ready = true:
@@ -56,7 +44,7 @@ var ball_ready = true:
 func set_ball_ready(value = true):
 	ball_ready = value
 @rpc("any_peer", 'call_local')
-func throw_ball(peer_id : int, new_position : Vector3, new_direction : float):
+func throw_ball(peer_id :int, new_position :Vector3, new_direction :float, aim_direction :Vector2):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
@@ -68,9 +56,9 @@ func throw_ball(peer_id : int, new_position : Vector3, new_direction : float):
 	get_node('Trail').emitting = true
 	set_multiplayer_authority(peer_id)
 @rpc('any_peer', 'call_local')
-func bounce_ball(peer_id : int, new_velocity_x : float, new_direction : float,
-		new_power : float, new_launch_pos : Vector3, player_name : String,
-		oarea : Area3D):
+func bounce_ball(peer_id :int, new_velocity_x :float, new_direction :float,
+		new_power :float, new_launch_pos :Vector3, player_name :String,
+		oarea :Area3D):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	velocity.x = new_velocity_x

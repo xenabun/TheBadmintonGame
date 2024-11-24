@@ -8,6 +8,7 @@ transparency = 2
 alpha_scissor_threshold = 0.25
 alpha_antialiasing_mode = 0
 albedo_texture = ExtResource("2_jnea1")
+texture_filter = 0
 
 [node name="playermodel" instance=ExtResource("1_qf2kh")]
 

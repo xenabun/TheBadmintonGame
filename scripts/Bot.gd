@@ -5,6 +5,8 @@ var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
 var prev_direction = Vector3.ZERO
 var stamina = PlayerVariables.MAX_STAMINA
+var desired_position = null
+var target_position = null
 var exhausted = false
 var sprinting = false
 var racket_cooldown = false:
@@ -16,7 +18,7 @@ var racket_cooldown = false:
 			$RacketCooldown.start()
 
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
-@export var player : Node = null
+@export var player :Node = null
 
 func _on_sprint_timeout():
 	sprinting = false
@@ -34,9 +36,11 @@ func _ready():
 
 func _physics_process(delta):
 	if not Game.game_in_progress:
-		$AnimationTree.active = false
+		if $AnimationTree.active:
+			$AnimationTree.active = false
 		return
-	$AnimationTree.active = true
+	if not $AnimationTree.active:
+		$AnimationTree.active = true
 	
 	# racket hold
 	var hold_mult = abs(position.z) / PlayerVariables.Z_LIMIT
@@ -55,16 +59,28 @@ func _physics_process(delta):
 	
 	# get direction
 	var direction = Vector3.ZERO
-	var target_position = null
-	if !Game.ball.ball_ready:
+	var momentum = 1
+	if not Game.ball.ball_ready:
 		if Game.ball.last_interact != name:
 			## jumping
-			target_position = Vector3(Game.ball.get_land_x(), position.y, Game.ball.get_land_z())
+			momentum = 0.1
+			desired_position = Vector3(Game.ball.get_land_x(), position.y, Game.ball.get_land_z())
+		else:
+			if desired_position:
+				desired_position = null
+			if target_position:
+				target_position = null
 	else:
-		target_position = Vector3(player.position.x +
+		desired_position = Vector3(player.position.x +
 				player.velocity.x * delta, position.y, (player.position.z +
 				player.velocity.z * delta) - PlayerVariables.MAX_POWER * 0.66)
-	if target_position:
+	if desired_position:
+		target_position = lerp(position, desired_position, momentum)
+		if abs(desired_position.x - target_position.x) <= 0.1:
+			target_position.x = desired_position.x
+		if abs(desired_position.z - target_position.z) <= 0.1:
+			target_position.z = desired_position.z
+		
 		direction = position.direction_to(target_position)
 		$Debug_Dest.global_position = target_position
 	
@@ -101,10 +117,10 @@ func _physics_process(delta):
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# sprint
-	var dist = 0
-	if target_position != null:
-		dist = position.distance_to(target_position)
-	if (PlayerVariables.MAX_SPEED <= dist and
+	var dist_to_tar_pos = 0
+	if target_position:
+		dist_to_tar_pos = position.distance_to(target_position)
+	if (PlayerVariables.MAX_SPEED <= dist_to_tar_pos and
 			not Game.ball.ball_ready and
 			not sprinting and not exhausted and stamina > 0):
 		sprinting = true

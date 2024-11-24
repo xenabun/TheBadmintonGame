@@ -33,6 +33,7 @@ func _reset_position():
 func _ready():
 	GameManager.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
 	set_physics_process(multiplayer.get_unique_id() == player_id)
+	$AimArrow.hide()
 	if multiplayer.get_unique_id() != player_id: return
 	
 	var player_data = GameManager.Players.get(player_id)
@@ -53,6 +54,7 @@ func _ready():
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina
+	$AimArrow.show()
 
 func get_camera_transform_info():
 	var side = get_player_side()
@@ -95,9 +97,10 @@ func update_camera_transform(t):
 
 func _physics_process(delta):
 	if not Game.game_in_progress:
-		$AnimationTree.active = false
+		if $AnimationTree.active:
+			$AnimationTree.active = false
 		return
-	if $AnimationTree.active == false:
+	if not $AnimationTree.active:
 		$AnimationTree.active = true
 	
 	# gravity
@@ -186,6 +189,7 @@ func _physics_process(delta):
 	var side = get_player_side()
 	var z_clamp = [2 * side, PlayerVariables.Z_LIMIT * side]
 	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
+	$AimArrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 	
 	# camera
 	if (
@@ -194,3 +198,8 @@ func _physics_process(delta):
 		and not UI.get_node('GameControls').visible
 	):
 		update_camera_transform(0.2)
+		var aim_dir = input.aim_direction
+		$AimArrow/Sprite.scale.x = aim_dir.y * 20
+		$AimArrow/Sprite.scale.y = aim_dir.y * 5
+		$AimArrow/Sprite.position.z = -aim_dir.y * 10
+		$AimArrow.rotation.y = aim_dir.x * 0.7

@@ -1,5 +1,7 @@
 extends MultiplayerSynchronizer
 
+@onready var UI = get_tree().get_first_node_in_group('UI_root')
+
 @export var direction := Vector3()
 @export var player : Node
 @export var sprinting : bool = false
@@ -13,7 +15,7 @@ extends MultiplayerSynchronizer
 		player.stamina_bar.get("theme_override_styles/fill").bg_color = Color.html(
 				PlayerVariables.STAMINA_BAR_COLOR_LOCKED if value else
 				PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
+@export var aim_direction : Vector2 = Vector2.ZERO
 
 var action_ready = true
 var action_hold = false:
@@ -77,7 +79,7 @@ func _input(event):
 		if Game.ball.ball_ready and Game.game_in_progress:
 			var dir = VectorMath.look_vector(player.get_node('RacketArea')).z
 			var pos = player.get_node('Ball').global_position
-			Game.ball.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()), pos, dir)
+			Game.ball.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()), pos, dir, aim_direction)
 			player.get_node('Ball').visible = false
 			throw_ready.rpc()
 		else:
@@ -142,6 +144,13 @@ func _process(_delta):
 	#direction
 	var input_dir = Input.get_vector("left", "right", "up", "down")
 	direction = (get_parent().transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	
+	#aim direction
+	var window_size = get_viewport().get_visible_rect().size
+	var mouse_pos = get_viewport().get_mouse_position()
+	var aim_x = -(clamp(mouse_pos.x / window_size.x, 0, 1) - 0.5)
+	var aim_y = 0.35 + abs(clamp(mouse_pos.y / window_size.y, 0, 1) - 1) * 0.65
+	aim_direction = Vector2(aim_x, aim_y)
 	
 	# racket hold
 	if action_hold:
