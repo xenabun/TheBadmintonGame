@@ -1,18 +1,18 @@
 extends CharacterBody3D
 
-var BASE_PLAYER_POS_Y = 4.824 / 2
+const BASE_PLAYER_POS_Y = 4.824 / 2
+
 @onready var Level = get_tree().get_first_node_in_group('Level_root')
 @onready var FieldArea = Level.get_node('World/FieldArea')
 @onready var FloorArea = Level.get_node('World/Floor/Area')
 @onready var Player1Area = Level.get_node('World/Player1Area')
 @onready var Player2Area = Level.get_node('World/Player2Area')
 
-var direction = 0.0
-var power = 0.0
-var launch_y = 0.0
-var launch_z = 0.0
-var ignored_area = null
-var last_interact = null
+var direction : float = 0.0
+var power : float = 0.0
+var launch_pos : Vector3 = Vector3.ZERO
+var ignored_area : Area3D = null
+var last_interact : String = ''
 func get_launch_height():
 	var power_frac = ((power - PlayerVariables.BASE_POWER) /
 			(PlayerVariables.MAX_POWER - PlayerVariables.BASE_POWER))
@@ -20,15 +20,15 @@ func get_launch_height():
 			BallVariables.BASE_Y) * power_frac)
 	return height
 func get_max_height():
-	return launch_y + get_launch_height()
+	return launch_pos.y + get_launch_height()
 func get_height(z):
-	var lz = launch_z
+	var lz = launch_pos.z
 	var y = get_launch_height()
 	var my = get_max_height()
 	var p = power
 	return my - (4.0 * y * ((abs(lz - z) - (p / 2.0)) ** 2.0)) / (p ** 2.0)
 func get_land_z():
-	var lz = launch_z
+	var lz = launch_pos.z
 	var y = get_launch_height()
 	var my = get_max_height()
 	var by = BASE_PLAYER_POS_Y
@@ -37,11 +37,15 @@ func get_land_z():
 	return (p / 2.0) * (1.0 + sqrt((my - by) / y)) * d + lz
 func get_land_x():
 	
-	pass
+	
+	
+	
+	return position.x
 
 var ball_ready = true:
 	set(value):
 		ball_ready = value
+		#get_node('Trail').emitting = not value
 		if value == true and Game.game_in_progress:
 			reset_ball()
 			for player in get_tree().get_nodes_in_group('Player'):
@@ -52,30 +56,33 @@ var ball_ready = true:
 func set_ball_ready(value = true):
 	ball_ready = value
 @rpc("any_peer", 'call_local')
-func throw_ball(peer_id, pos, dir):
+func throw_ball(peer_id : int, new_position : Vector3, new_direction : float):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
-	position = pos
-	direction = dir
+	position = new_position
+	launch_pos = new_position
+	direction = new_direction
 	power = PlayerVariables.MAX_POWER
-	launch_y = pos.y
-	launch_z = pos.z
 	last_interact = name
+	get_node('Trail').emitting = true
 	set_multiplayer_authority(peer_id)
 @rpc('any_peer', 'call_local')
-func bounce_ball(peer_id, x, dir, new_power, y, z, player_name, oarea):
+func bounce_ball(peer_id : int, new_velocity_x : float, new_direction : float,
+		new_power : float, new_launch_pos : Vector3, player_name : String,
+		oarea : Area3D):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
-	velocity.x = x
-	direction = dir
+	velocity.x = new_velocity_x
+	launch_pos = new_launch_pos
+	direction = new_direction
 	power = new_power
-	launch_y = y
-	launch_z = z
 	last_interact = player_name
 	ignored_area = oarea
 	set_multiplayer_authority(peer_id)
 func reset_ball():
+	get_node('Trail').emitting = false
+	get_node('Trail').restart()
 	ignored_area = null
 	velocity = Vector3.ZERO
 	position = Vector3(0, -10, 30)
@@ -131,7 +138,7 @@ func _physics_process(_delta):
 		var dir = VectorMath.look_vector(oarea).z
 		
 		bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
-				velocity_x, dir, new_power, position.y, position.z, player_name, oarea)
+				velocity_x, dir, new_power, position, player_name, oarea)
 		break
 	
 	# shadow
@@ -159,7 +166,7 @@ func _physics_process(_delta):
 	velocity.z = power * direction * height_frac
 	
 	if Game.debug:
-		$Debug_LaunchHeight.global_position = Vector3(position.x, launch_y + get_launch_height(), launch_z)
+		$Debug_LaunchHeight.global_position = launch_pos + Vector3(0, get_launch_height(), 0)
 		$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
-		$Debug_Z.global_position = Vector3(position.x, 1, launch_z)
-		$Debug_ZLand.global_position = Vector3(position.x, 1, get_land_z())
+		$Debug_Z.global_position = Vector3(launch_pos.x, 1, launch_pos.z)
+		$Debug_ZLand.global_position = Vector3(get_land_x(), 1, get_land_z())

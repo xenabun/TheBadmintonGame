@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=55 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -8,10 +8,15 @@
 [ext_resource type="Script" path="res://scripts/ServerBrowser.gd" id="7_4w53d"]
 [ext_resource type="Texture2D" uid="uid://bka37re8brfsp" path="res://images/round-gradient.png" id="7_gu05u"]
 [ext_resource type="Script" path="res://scripts/Ball.gd" id="8_d4rec"]
+[ext_resource type="Shader" path="res://addons/GPUTrail-main/shaders/trail.gdshader" id="8_svnxn"]
 [ext_resource type="Shader" path="res://shaders/outline.gdshader" id="9_jrner"]
+[ext_resource type="Shader" path="res://addons/GPUTrail-main/shaders/trail_draw_pass.gdshader" id="9_xc4xc"]
+[ext_resource type="Texture2D" uid="uid://crk6pkb7e5rwc" path="res://addons/GPUTrail-main/defaults/texture.tres" id="10_toyj1"]
+[ext_resource type="Texture2D" uid="uid://ct31fhxvcragr" path="res://addons/GPUTrail-main/defaults/curve.tres" id="11_4wxie"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
 [ext_resource type="PackedScene" uid="uid://c0mrf3fj2l4fq" path="res://prefabs/control.tscn" id="12_hm06h"]
+[ext_resource type="Script" path="res://addons/GPUTrail-main/GPUTrail3D.gd" id="12_qwsn2"]
 [ext_resource type="Texture2D" uid="uid://bfy0ucogy3lda" path="res://images/controls.png" id="14_frpfu"]
 [ext_resource type="Shader" path="res://shaders/texture_outline.gdshader" id="15_274xj"]
 
@@ -34,7 +39,6 @@ ambient_light_source = 3
 ambient_light_color = Color(0.802947, 0.80637, 0.415385, 1)
 ambient_light_sky_contribution = 0.64
 reflected_light_source = 2
-ssil_enabled = true
 sdfgi_use_occlusion = true
 fog_density = 0.0947
 fog_height_density = -6.0632
@@ -104,6 +108,22 @@ albedo_color = Color(0.488667, 0.48, 1, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rjn21"]
 albedo_color = Color(0.315, 0.75, 0.32225, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5xe6"]
+shader = ExtResource("8_svnxn")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e0aow"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("9_xc4xc")
+shader_parameter/uv_offset = Vector2(0, 0)
+shader_parameter/emmission_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+shader_parameter/flags = 44
+shader_parameter/color_ramp = ExtResource("10_toyj1")
+shader_parameter/curve = ExtResource("11_4wxie")
+
+[sub_resource type="QuadMesh" id="QuadMesh_7q4ig"]
+material = SubResource("ShaderMaterial_e0aow")
 
 [sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
 font_size = 121
@@ -322,6 +342,22 @@ material = SubResource("StandardMaterial3D_wq3n2")
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_rjn21")
 material = SubResource("StandardMaterial3D_wq3n2")
+
+[node name="Trail" type="GPUParticles3D" parent="Level/World/Ball"]
+emitting = false
+amount = 30
+lifetime = 30.0
+explosiveness = 1.0
+fixed_fps = 120
+process_material = SubResource("ShaderMaterial_v5xe6")
+draw_pass_1 = SubResource("QuadMesh_7q4ig")
+script = ExtResource("12_qwsn2")
+length = 30
+length_seconds = 0.25
+color_ramp = ExtResource("10_toyj1")
+curve = ExtResource("11_4wxie")
+billboard = true
+_defaults_have_been_set = true
 
 [node name="Players" type="Node3D" parent="Level"]
 

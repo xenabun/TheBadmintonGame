@@ -59,7 +59,7 @@ func _physics_process(delta):
 	if !Game.ball.ball_ready:
 		if Game.ball.last_interact != name:
 			## jumping
-			target_position = Vector3(Game.ball.position.x, position.y, Game.ball.get_land_z())
+			target_position = Vector3(Game.ball.get_land_x(), position.y, Game.ball.get_land_z())
 	else:
 		target_position = Vector3(player.position.x +
 				player.velocity.x * delta, position.y, (player.position.z +
