@@ -162,6 +162,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40104, 0.0206308)
 
 [node name="Ball" type="CSGSphere3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0213909, 2.09325, -0.0132618)
+visible = false
 
 [node name="RacketArea" type="Area3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0213909, 2.2119, -0.0132618)

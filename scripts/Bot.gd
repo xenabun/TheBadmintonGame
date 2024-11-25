@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+@export var aim_x = 0
+
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER

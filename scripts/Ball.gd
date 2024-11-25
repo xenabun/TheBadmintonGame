@@ -11,7 +11,7 @@ const BASE_PLAYER_POS_Y = 4.824 / 2
 var direction :float = 0.0
 var power :float = 0.0
 var launch_pos :Vector3 = Vector3.ZERO
-var ignored_area :Area3D = null
+var ignored_area = null
 var last_interact :String = ''
 func get_launch_height():
 	return (BallVariables.BASE_Y + (BallVariables.MAX_Y -
@@ -49,19 +49,21 @@ func throw_ball(peer_id :int, new_position :Vector3, new_direction :float, aim_d
 		peer_id = 1
 	ball_ready = false
 	position = new_position
+	velocity.x = aim_direction.x * 20 * -new_direction
 	launch_pos = new_position
 	direction = new_direction
-	power = PlayerVariables.MAX_POWER
+	power = (PlayerVariables.BASE_POWER + (PlayerVariables.MAX_POWER -
+			PlayerVariables.BASE_POWER) * aim_direction.y)
 	last_interact = name
 	get_node('Trail').emitting = true
 	set_multiplayer_authority(peer_id)
+	set_physics_process(true)
 @rpc('any_peer', 'call_local')
 func bounce_ball(peer_id :int, new_velocity_x :float, new_direction :float,
-		new_power :float, new_launch_pos :Vector3, player_name :String,
-		oarea :Area3D):
+		new_power :float, new_launch_pos :Vector3, player_name :String, oarea):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
-	velocity.x = new_velocity_x
+	velocity.x = new_velocity_x * -new_direction
 	launch_pos = new_launch_pos
 	direction = new_direction
 	power = new_power
@@ -69,6 +71,7 @@ func bounce_ball(peer_id :int, new_velocity_x :float, new_direction :float,
 	ignored_area = oarea
 	set_multiplayer_authority(peer_id)
 func reset_ball():
+	set_physics_process(false)
 	get_node('Trail').emitting = false
 	get_node('Trail').restart()
 	ignored_area = null
@@ -76,6 +79,7 @@ func reset_ball():
 	position = Vector3(0, -10, 30)
 
 func _ready():
+	set_physics_process(false)
 	$Debug_MaxHeight.visible = Game.debug
 	$Debug_Z.visible = Game.debug
 	$Debug_ZLand.visible = Game.debug
@@ -116,17 +120,23 @@ func _physics_process(_delta):
 		if oarea.name != 'RacketArea': continue
 		if oarea == ignored_area: continue
 		
-		var new_power = oarea.get_parent().get('throw_power')
-		var power_frac = new_power / PlayerVariables.MAX_POWER
+		var player = oarea.get_parent()
+		var player_name = player.name
+		var is_bot = player.is_in_group('Bot')
 		
-		var offset_x = position.x - oarea.global_position.x
-		var area_velocity_x = oarea.get_parent().velocity.x
-		var velocity_x = ((offset_x * 1.5) + (area_velocity_x * 0.25)) * (1 + power_frac * 0.5)
-		var player_name = oarea.get_parent().name
-		var dir = VectorMath.look_vector(oarea).z
+		var new_power = player.throw_power
+		var new_direction = VectorMath.look_vector(oarea).z
+		var velocity_x = null
+		if is_bot:
+			var power_frac = new_power / PlayerVariables.MAX_POWER
+			var offset_x = position.x - oarea.global_position.x
+			var area_velocity_x = oarea.get_parent().velocity.x
+			velocity_x = ((offset_x * 1.5) + (area_velocity_x * 0.25)) * (1 + power_frac * 0.5)
+		else:
+			velocity_x = player.aim_x * 30
 		
 		bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
-				velocity_x, dir, new_power, position, player_name, oarea)
+				velocity_x, new_direction, new_power, position, player_name, oarea)
 		break
 	
 	# shadow

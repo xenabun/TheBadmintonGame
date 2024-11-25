@@ -344,7 +344,6 @@ material_override = SubResource("StandardMaterial3D_rjn21")
 material = SubResource("StandardMaterial3D_wq3n2")
 
 [node name="Trail" type="GPUParticles3D" parent="Level/World/Ball"]
-emitting = false
 amount = 30
 lifetime = 30.0
 explosiveness = 1.0
