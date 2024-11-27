@@ -12,7 +12,7 @@ const STAMINA_BAR_COLOR_NORMAL = '#dfac50'
 const STAMINA_BAR_COLOR_LOCKED = '#992b2b'
 
 const BASE_POWER = 20.0
-const MAX_POWER = 40.0
+const MAX_POWER = 35.0
 
 const JUMP_VELOCITY = 18.0
 

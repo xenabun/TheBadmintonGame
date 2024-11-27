@@ -30,7 +30,7 @@ func get_opponent_peer_id(peer_id):
 		opponent_id = peer_id
 	return opponent_id
 
-func get_score_str():
+func get_full_score_str():
 	if multiplayer.is_server():
 		return str(score[0], ' : ', score[1])
 	else:
@@ -47,9 +47,12 @@ func get_player_usernames():
 @rpc("any_peer")
 func update_score_text():
 	var score_control = UI.get_node('GameUI/ScoreControl')
-	var score_str = get_score_str()
+	#var score_str = get_score_str()
 	var usernames = get_player_usernames()
-	score_control.get_node('Score').text = score_str
+	var my_score_id = 0 if multiplayer.is_server() else 1
+	var op_score_id = i(my_score_id)
+	score_control.get_node('Player1Score').text = str(score[my_score_id])
+	score_control.get_node('Player2Score').text = str(score[op_score_id])
 	score_control.get_node('Player1').text = usernames[0]
 	score_control.get_node('Player2').text = usernames[1]
 @rpc("any_peer", 'call_local')
@@ -69,16 +72,33 @@ func check_win(p):
 	else:
 		if score[p] >= 21:
 			return true
+func score_point_effect(p):
+	var score_control = UI.get_node('GameUI/ScoreControl')
+	var score_label = score_control.get_node('Player' + str(p + 1) + 'Score')
+	var score_effect = score_label.duplicate()
+	var label_settings = score_label.label_settings.duplicate()
+	label_settings.font_color = '#ffffff80'
+	label_settings.outline_color = '#00000080'
+	score_effect.label_settings = label_settings
+	score_effect.position.y += score_effect.size.y / 2
+	score_effect.text = '1'
+	score_control.add_child(score_effect)
+	var tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_property(score_effect, 'position', score_label.position, 0.5)
+	await get_tree().create_timer(0.5).timeout
+	score_effect.queue_free()
+	update_score_text()
 @rpc('any_peer', 'call_local')
 func grant_point(p):
 	score[p] += 1
+	score_point_effect(p)
 	if check_win(p):
 		game_in_progress = false
 		var game_result_ui = UI.get_node('GameResult')
 		var score_index = peer_id_to_score_index(multiplayer.get_unique_id())
 		var result_text = WIN_TEXT if p == score_index else LOSE_TEXT
 		game_result_ui.get_node('Result').text = result_text
-		game_result_ui.get_node('Score').text = get_score_str()
+		game_result_ui.get_node('Score').text = get_full_score_str()
 		game_result_ui.show()
 		UI.get_node('GameUI').hide()
 		reset_score()
@@ -86,7 +106,7 @@ func grant_point(p):
 		ball.reset_ball()
 		if multiplayer.is_server():
 			ServerBrowser.stop_broadcast()
-	update_score_text()
+	#update_score_text()
 func reset_score():
 	score = [ 0, 0 ]
 	update_score_text()

@@ -12,7 +12,6 @@ func get_player_num():
 	return 1 if player_id == 1 else 2
 
 @export var throw_power = PlayerVariables.MAX_POWER
-#@export var action_hold_progress = 1
 @export var aim_x = 0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -167,8 +166,8 @@ func _physics_process(delta):
 		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
 		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.3)
-		newrot.y += -input.aim_direction.x / 6
-		newrot.w += -input.aim_direction.x / 6
+		newrot.y += -input.aim_direction.x / 4
+		newrot.w += -input.aim_direction.x / 4
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# stamina
@@ -196,12 +195,12 @@ func _physics_process(delta):
 	
 	# aim arrow
 	if Game.ball.ball_ready or input.action_hold:
+		$AimArrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 		if not $AimArrow.visible:
 			$AimArrow/Sprite.scale.x = 0
 			$AimArrow/Sprite.scale.y = 0
 			$AimArrow/Sprite.position.z = 0
 			$AimArrow.show()
-		$AimArrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 	
 	if (
 		Game.window_focus
@@ -220,9 +219,8 @@ func _physics_process(delta):
 			$AimArrow/Sprite.scale.x = hold_mult * 20
 			$AimArrow/Sprite.scale.y = hold_mult * 5
 			$AimArrow/Sprite.position.z = -hold_mult * 10
-			$AimArrow.rotation.y = -aim_dir.x
 		else:
 			$AimArrow/Sprite.scale.x = aim_dir.y * 20
 			$AimArrow/Sprite.scale.y = aim_dir.y * 5
 			$AimArrow/Sprite.position.z = -aim_dir.y * 10
-			$AimArrow.rotation.y = -aim_dir.x * 0.7
+		$AimArrow.rotation.y = -sin((aim_dir.x * PI) / 2)

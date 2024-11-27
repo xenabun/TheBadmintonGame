@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://blx58dx1jig7h"]
+[gd_scene load_steps=27 format=3 uid="uid://blx58dx1jig7h"]
 
 [ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
@@ -12,7 +12,7 @@ radius = 1.00449
 height = 4.82426
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
-size = Vector3(12.8984, 23.9078, 14.8733)
+size = Vector3(16.4297, 23.9078, 14.8733)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
 animation = &"playeranims/Walk"
@@ -26,12 +26,17 @@ animation = &"playeranims/RacketSwing"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_gk47n"]
 animation = &"playeranims/Throw"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_v56u3"]
+animation = &"playeranims/RacketHoldIdle"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uy41n"]
 animation = &"playeranims/Idle"
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_v7dkl"]
 filter_enabled = true
 filters = ["Armature/Skeleton3D:Bone.003.R", "Armature/Skeleton3D:Bone.004.R"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_o5faw"]
 
 [sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_un7uq"]
 filter_enabled = true
@@ -43,6 +48,8 @@ filter_enabled = true
 filters = ["Armature/Skeleton3D:Bone.003.L", "Armature/Skeleton3D:Bone.004.L"]
 fadeout_time = 0.1
 
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_br64j"]
+
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_8sbg3"]
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_r5sud"]
@@ -53,29 +60,35 @@ filters = ["Armature/Skeleton3D:Bone", "Armature/Skeleton3D:Bone.016.L", "Armatu
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_6mkkh"]
 nodes/Animation/node = SubResource("AnimationNodeAnimation_uy41n")
-nodes/Animation/position = Vector2(-1120, -380)
+nodes/Animation/position = Vector2(-1480, -500)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_mlw0r")
 "nodes/Animation 2/position" = Vector2(-480, 200)
 "nodes/Animation 3/node" = SubResource("AnimationNodeAnimation_vdjdj")
-"nodes/Animation 3/position" = Vector2(-760, 80)
+"nodes/Animation 3/position" = Vector2(-1120, -40)
 "nodes/Animation 4/node" = SubResource("AnimationNodeAnimation_vl02x")
-"nodes/Animation 4/position" = Vector2(-880, -60)
+"nodes/Animation 4/position" = Vector2(-1240, -180)
 "nodes/Animation 5/node" = SubResource("AnimationNodeAnimation_gk47n")
-"nodes/Animation 5/position" = Vector2(-1120, -220)
+"nodes/Animation 5/position" = Vector2(-1480, -340)
+"nodes/Animation 6/node" = SubResource("AnimationNodeAnimation_v56u3")
+"nodes/Animation 6/position" = Vector2(-860, 80)
 nodes/RacketHold/node = SubResource("AnimationNodeOneShot_v7dkl")
-nodes/RacketHold/position = Vector2(-360, -60)
+nodes/RacketHold/position = Vector2(-680, -180)
+nodes/RacketHoldIdle/node = SubResource("AnimationNodeOneShot_o5faw")
+nodes/RacketHoldIdle/position = Vector2(-400, -40)
 nodes/RacketSwing/node = SubResource("AnimationNodeOneShot_un7uq")
-nodes/RacketSwing/position = Vector2(-620, -200)
+nodes/RacketSwing/position = Vector2(-980, -320)
 nodes/Throw/node = SubResource("AnimationNodeOneShot_vagdm")
-nodes/Throw/position = Vector2(-880, -340)
+nodes/Throw/position = Vector2(-1240, -460)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_8sbg3")
-nodes/TimeScale/position = Vector2(-520, 40)
+nodes/TimeScale/position = Vector2(-880, -80)
+"nodes/TimeScale 2/node" = SubResource("AnimationNodeTimeScale_br64j")
+"nodes/TimeScale 2/position" = Vector2(-580, 60)
 nodes/WalkScale/node = SubResource("AnimationNodeTimeScale_r5sud")
 nodes/WalkScale/position = Vector2(-260, 200)
 nodes/WalkSpeed/node = SubResource("AnimationNodeBlend2_qg37g")
 nodes/WalkSpeed/position = Vector2(-100, 100)
 nodes/output/position = Vector2(160, 140)
-node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHold", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
+node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketHoldIdle", 0, &"RacketHold", &"RacketHoldIdle", 1, &"TimeScale 2", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"TimeScale 2", 0, &"Animation 6", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHoldIdle", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kwohg"]
 properties/0/path = NodePath(".:player_id")
@@ -177,7 +190,7 @@ shape = SubResource("BoxShape3D_i5pof")
 [node name="CSGBox3D" type="CSGBox3D" parent="RacketArea"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.20022, -2.86776)
 visible = false
-size = Vector3(12.8984, 23.9078, 14.8733)
+size = Vector3(16.2578, 23.9078, 14.8733)
 material = ExtResource("3_s24ti")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -194,6 +207,9 @@ anim_player = NodePath("../AnimationPlayer")
 parameters/RacketHold/active = false
 parameters/RacketHold/internal_active = false
 parameters/RacketHold/request = 0
+parameters/RacketHoldIdle/active = false
+parameters/RacketHoldIdle/internal_active = false
+parameters/RacketHoldIdle/request = 0
 parameters/RacketSwing/active = false
 parameters/RacketSwing/internal_active = false
 parameters/RacketSwing/request = 0
@@ -201,6 +217,7 @@ parameters/Throw/active = false
 parameters/Throw/internal_active = false
 parameters/Throw/request = 0
 parameters/TimeScale/scale = 1.5
+"parameters/TimeScale 2/scale" = 0.0
 parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 

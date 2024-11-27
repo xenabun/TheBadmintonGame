@@ -1,9 +1,10 @@
-[gd_scene load_steps=20 format=3 uid="uid://1xlbegfmg65d"]
+[gd_scene load_steps=22 format=3 uid="uid://1xlbegfmg65d"]
 
 [ext_resource type="Script" path="res://scripts/Bot.gd" id="1_0an7d"]
 [ext_resource type="PackedScene" uid="uid://bjehaep4xmt3c" path="res://prefabs/bot_model.tscn" id="2_y3rjh"]
 [ext_resource type="Material" uid="uid://5ikr8dl3gf0d" path="res://materials/test.material" id="3_e147w"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="4_q5ot3"]
+[ext_resource type="Texture2D" uid="uid://bubjsct8lo2e5" path="res://images/arrow.png" id="5_tis4t"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qmixw"]
 radius = 1.00449
@@ -80,6 +81,12 @@ node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeSc
 no_depth_test = true
 shading_mode = 0
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pdi34"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.584314)
+albedo_texture = ExtResource("5_tis4t")
+texture_filter = 0
+
 [node name="Bot" type="CharacterBody3D" groups=["Bot"]]
 script = ExtResource("1_0an7d")
 
@@ -155,7 +162,15 @@ one_shot = true
 
 [node name="Debug_Dest" type="CSGSphere3D" parent="."]
 transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, 0, 1.40104, 0.0206308)
+visible = false
 material = SubResource("StandardMaterial3D_bo71e")
+
+[node name="AimArrow" type="Node3D" parent="."]
+
+[node name="Sprite" type="Sprite3D" parent="AimArrow"]
+transform = Transform3D(-3.60706e-07, -3.33, -8.79036e-08, 0, -1.45559e-07, 2.011, -8.252, 1.45559e-07, 3.84239e-15, 0, 0, -2.355)
+material_override = SubResource("StandardMaterial3D_pdi34")
+texture = ExtResource("5_tis4t")
 
 [connection signal="timeout" from="Sprint" to="." method="_on_sprint_timeout"]
 [connection signal="timeout" from="RacketCooldown" to="." method="_on_racket_cooldown_timeout"]

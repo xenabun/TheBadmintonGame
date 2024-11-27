@@ -52,6 +52,7 @@ albedo_color = Color(0.730331, 1, 0.832115, 1)
 albedo_texture = ExtResource("4_1apb5")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xvpac"]
+albedo_color = Color(0.834614, 0.834614, 0.834614, 1)
 albedo_texture = ExtResource("4_1apb5")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_01mkf"]
@@ -392,6 +393,7 @@ player_camera = NodePath("../Level/World/PlayerCamera")
 title_label = NodePath("MainMenu/Title")
 
 [node name="CurrentUsername" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UI/CurrentUsername"]
@@ -413,6 +415,7 @@ size_flags_horizontal = 8
 text = "Изменить"
 
 [node name="MainMenu" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/MainMenu"]
@@ -540,7 +543,6 @@ visible = false
 layout_mode = 2
 
 [node name="GameUI" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -586,7 +588,7 @@ offset_right = 20.0
 offset_bottom = -192.0
 grow_horizontal = 2
 
-[node name="Score" type="Label" parent="UI/GameUI/ScoreControl"]
+[node name="ScoreSemicolon" type="Label" parent="UI/GameUI/ScoreControl"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -599,10 +601,44 @@ offset_right = 133.0
 offset_bottom = 55.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "3 : 1
-"
+text = ":"
 label_settings = SubResource("LabelSettings_20vvk")
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Player1Score" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -291.0
+offset_top = -54.5
+offset_right = -25.0
+offset_bottom = 55.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_20vvk")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Player2Score" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 25.0
+offset_top = -54.5
+offset_right = 291.0
+offset_bottom = 55.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_20vvk")
 vertical_alignment = 1
 
 [node name="Player1" type="Label" parent="UI/GameUI/ScoreControl"]

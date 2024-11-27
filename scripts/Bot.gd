@@ -34,6 +34,7 @@ func _reset_position():
 
 func _ready():
 	$Debug_Dest.visible = Game.debug
+	$AimArrow.visible = Game.debug
 	$RacketArea/CSGBox3D.hide()
 
 func _physics_process(delta):
@@ -73,7 +74,7 @@ func _physics_process(delta):
 			if target_position:
 				target_position = null
 	else:
-		desired_position = Vector3(player.position.x +
+		desired_position = Vector3(player.position.x + player.aim_x * 30 +
 				player.velocity.x * delta, position.y, (player.position.z +
 				player.velocity.z * delta) - PlayerVariables.MAX_POWER * 0.66)
 	if desired_position:
@@ -83,7 +84,7 @@ func _physics_process(delta):
 		if abs(desired_position.z - target_position.z) <= 0.1:
 			target_position.z = desired_position.z
 		
-		direction = position.direction_to(target_position)
+		direction = position.direction_to(target_position).normalized()
 		$Debug_Dest.global_position = target_position
 	
 	# racket
@@ -120,9 +121,9 @@ func _physics_process(delta):
 	
 	# sprint
 	var dist_to_tar_pos = 0
-	if target_position:
-		dist_to_tar_pos = position.distance_to(target_position)
-	if (PlayerVariables.MAX_SPEED <= dist_to_tar_pos and
+	if desired_position:
+		dist_to_tar_pos = position.distance_to(desired_position)
+	if (dist_to_tar_pos >= PlayerVariables.BASE_SPEED and
 			not Game.ball.ball_ready and
 			not sprinting and not exhausted and stamina > 0):
 		sprinting = true
@@ -159,7 +160,7 @@ func _physics_process(delta):
 			exhausted = false
 	
 	# velocity
-	var vel = Vector3(sign(direction.x), 0, sign(direction.z)).normalized() * speed
+	var vel = direction * Vector3(1, 0, 1) * speed
 	velocity = Vector3(vel.x, velocity.y, vel.z)
 	
 	# position
@@ -171,3 +172,8 @@ func _physics_process(delta):
 			position.z = target_position.z
 	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
 	position.z = clamp(position.z, -PlayerVariables.Z_LIMIT, -2)
+	
+	# aim arrow
+	var x_frac = (position.x - player.position.x) / PlayerVariables.X_LIMIT
+	aim_x = x_frac / 2
+	$AimArrow.rotation.y = -sin((aim_x * PI) / 2)

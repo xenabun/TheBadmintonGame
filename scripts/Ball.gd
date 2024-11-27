@@ -33,7 +33,6 @@ func get_land_x():
 var ball_ready = true:
 	set(value):
 		ball_ready = value
-		#get_node('Trail').emitting = not value
 		if value == true and Game.game_in_progress:
 			reset_ball()
 			for player in get_tree().get_nodes_in_group('Player'):
@@ -44,16 +43,17 @@ var ball_ready = true:
 func set_ball_ready(value = true):
 	ball_ready = value
 @rpc("any_peer", 'call_local')
-func throw_ball(peer_id :int, new_position :Vector3, new_direction :float, aim_direction :Vector2):
+func throw_ball(peer_id :int, new_position :Vector3, new_direction :float, new_velocity_x :float, 
+		aim_dir_y :float):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
 	position = new_position
-	velocity.x = aim_direction.x * 20 * -new_direction
+	velocity.x = new_velocity_x
 	launch_pos = new_position
 	direction = new_direction
 	power = (PlayerVariables.BASE_POWER + (PlayerVariables.MAX_POWER -
-			PlayerVariables.BASE_POWER) * aim_direction.y)
+			PlayerVariables.BASE_POWER) * aim_dir_y)
 	last_interact = name
 	get_node('Trail').emitting = true
 	set_multiplayer_authority(peer_id)
@@ -63,7 +63,7 @@ func bounce_ball(peer_id :int, new_velocity_x :float, new_direction :float,
 		new_power :float, new_launch_pos :Vector3, player_name :String, oarea):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
-	velocity.x = new_velocity_x * -new_direction
+	velocity.x = new_velocity_x
 	launch_pos = new_launch_pos
 	direction = new_direction
 	power = new_power
@@ -122,21 +122,13 @@ func _physics_process(_delta):
 		
 		var player = oarea.get_parent()
 		var player_name = player.name
-		var is_bot = player.is_in_group('Bot')
-		
 		var new_power = player.throw_power
 		var new_direction = VectorMath.look_vector(oarea).z
-		var velocity_x = null
-		if is_bot:
-			var power_frac = new_power / PlayerVariables.MAX_POWER
-			var offset_x = position.x - oarea.global_position.x
-			var area_velocity_x = oarea.get_parent().velocity.x
-			velocity_x = ((offset_x * 1.5) + (area_velocity_x * 0.25)) * (1 + power_frac * 0.5)
-		else:
-			velocity_x = player.aim_x * 30
+		var aim_x = sin((player.aim_x * PI) / 2)
+		var new_velocity_x = aim_x * 30 * -new_direction
 		
 		bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
-				velocity_x, new_direction, new_power, position, player_name, oarea)
+				new_velocity_x, new_direction, new_power, position, player_name, oarea)
 		break
 	
 	# shadow

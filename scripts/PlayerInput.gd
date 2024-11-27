@@ -16,7 +16,6 @@ extends MultiplayerSynchronizer
 				PlayerVariables.STAMINA_BAR_COLOR_LOCKED if value else
 				PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
 @export var aim_direction : Vector2 = Vector2.ZERO
-#@export var action_hold_progress = 1
 
 var action_ready = true
 var action_hold = false:
@@ -47,10 +46,17 @@ func throw_ready():
 @rpc("any_peer", "call_local")
 func racket_hold():
 	player.get_node('AnimationTree')['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+@rpc('any_peer', 'call_local')
+func racket_hold_idle():
+	player.get_node('AnimationTree')['parameters/RacketHoldIdle/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 @rpc("any_peer", "call_local")
 func racket_swing():
 	player.get_node('AnimationTree')['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	player.get_node('AnimationTree')['parameters/RacketHoldIdle/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
 	player.get_node('AnimationTree')['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+func _on_animation_finished(anim_name):
+	if anim_name == 'playeranims/RacketHold':
+		racket_hold_idle.rpc()
 
 @rpc('any_peer', 'call_local')
 func set_throw_power(value):
@@ -65,6 +71,8 @@ func _ready():
 	player = get_parent()
 	player.get_node('RacketArea/CSGBox3D').hide()
 	$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
+	if authority:
+		player.get_node('AnimationTree').animation_finished.connect(_on_animation_finished)
 
 func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
@@ -83,10 +91,13 @@ func _input(event):
 	
 	if event.is_action_pressed('action'):
 		if Game.ball.ball_ready and Game.game_in_progress:
-			var dir = VectorMath.look_vector(player.get_node('RacketArea')).z
 			var pos = player.get_node('Ball').global_position
+			var new_direction = VectorMath.look_vector(player.get_node('RacketArea')).z
+			var aim_x = sin((aim_direction.x * 2 * PI) / 2)
+			var aim_y = aim_direction.y
+			var new_velocity_x = aim_x * 30 * -new_direction
 			Game.ball.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()),
-					pos, dir, aim_direction)
+					pos, new_direction, new_velocity_x, aim_y)
 			player.get_node('AimArrow').hide()
 			throw_ready.rpc()
 		else:
@@ -162,7 +173,7 @@ func _process(_delta):
 	#aim direction
 	var window_size = get_viewport().get_visible_rect().size
 	var mouse_pos = get_viewport().get_mouse_position()
-	var aim_x = clamp(mouse_pos.x / window_size.x, 0, 1) - 0.5
+	var aim_x = (clamp(mouse_pos.x / window_size.x, 0, 1) - 0.5) * 2
 	var aim_y = 0.35 + abs(clamp(mouse_pos.y / window_size.y, 0, 1) - 1) * 0.65
 	aim_direction = Vector2(aim_x, aim_y)
 	set_aim_x.rpc(aim_x)
@@ -172,8 +183,6 @@ func _process(_delta):
 		var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
 				$RacketHold.time_left) /
 				PlayerVariables.ACTION_HOLD_TIME)
-		#set_action_hold_progress.rpc(hold_mult)
-		#action_hold_progress = hold_mult
 		set_throw_power.rpc(PlayerVariables.BASE_POWER +
 				(PlayerVariables.MAX_POWER -
 				PlayerVariables.BASE_POWER) * hold_mult)
