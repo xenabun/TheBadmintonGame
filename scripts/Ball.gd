@@ -43,8 +43,8 @@ var ball_ready = true:
 func set_ball_ready(value = true):
 	ball_ready = value
 @rpc("any_peer", 'call_local')
-func throw_ball(peer_id :int, new_position :Vector3, new_direction :float, new_velocity_x :float, 
-		aim_dir_y :float):
+func throw_ball(peer_id :int, player_name :String, new_position :Vector3,
+		new_direction :float, new_velocity_x :float, aim_dir_y :float):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
@@ -54,13 +54,13 @@ func throw_ball(peer_id :int, new_position :Vector3, new_direction :float, new_v
 	direction = new_direction
 	power = (PlayerVariables.BASE_POWER + (PlayerVariables.MAX_POWER -
 			PlayerVariables.BASE_POWER) * aim_dir_y)
-	last_interact = name
+	last_interact = player_name
 	get_node('Trail').emitting = true
 	set_multiplayer_authority(peer_id)
 	set_physics_process(true)
 @rpc('any_peer', 'call_local')
-func bounce_ball(peer_id :int, new_velocity_x :float, new_direction :float,
-		new_power :float, new_launch_pos :Vector3, player_name :String, oarea):
+func bounce_ball(peer_id :int, player_name :String, new_velocity_x :float, new_direction :float,
+		new_power :float, new_launch_pos :Vector3, oarea):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	velocity.x = new_velocity_x
@@ -128,7 +128,8 @@ func _physics_process(_delta):
 		var new_velocity_x = aim_x * 30 * -new_direction
 		
 		bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
-				new_velocity_x, new_direction, new_power, position, player_name, oarea)
+				player_name, new_velocity_x, new_direction, new_power,
+				position, oarea)
 		break
 	
 	# shadow
