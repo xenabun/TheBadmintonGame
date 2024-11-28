@@ -415,7 +415,6 @@ size_flags_horizontal = 8
 text = "Изменить"
 
 [node name="MainMenu" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/MainMenu"]

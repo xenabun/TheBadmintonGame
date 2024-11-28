@@ -34,8 +34,8 @@ func _reset_position():
 func _ready():
 	$Debug_Dest.visible = Game.debug
 	$AimArrow.visible = Game.debug
-	#$SprintingLabel.visible = Game.debug
-	#$StaminaLabel.visible = Game.debug
+	$SprintingLabel.visible = Game.debug
+	$StaminaLabel.visible = Game.debug
 	$RacketArea/CSGBox3D.hide()
 
 func _physics_process(delta):
