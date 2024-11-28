@@ -7,7 +7,6 @@ var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
 var prev_direction = Vector3.ZERO
 var stamina = PlayerVariables.MAX_STAMINA
-var desired_position = null
 var target_position = null
 var exhausted = false
 var sprinting = false
@@ -35,6 +34,8 @@ func _reset_position():
 func _ready():
 	$Debug_Dest.visible = Game.debug
 	$AimArrow.visible = Game.debug
+	#$SprintingLabel.visible = Game.debug
+	#$StaminaLabel.visible = Game.debug
 	$RacketArea/CSGBox3D.hide()
 
 func _physics_process(delta):
@@ -62,30 +63,21 @@ func _physics_process(delta):
 	
 	# get direction
 	var direction = Vector3.ZERO
-	var momentum = 1
 	if not Game.ball.ball_ready:
 		if Game.ball.last_interact != name:
 			## jumping
-			momentum = 0.1
-			desired_position = Vector3(Game.ball.get_land_x(), position.y, Game.ball.get_land_z())
+			target_position = Vector3(Game.ball.get_land_x(), position.y, Game.ball.get_land_z())
 		else:
-			if desired_position:
-				desired_position = null
 			if target_position:
 				target_position = null
 	else:
-		desired_position = Vector3(player.position.x + player.aim_x * 30 +
+		target_position = Vector3(player.position.x + player.aim_x * 30 +
 				player.velocity.x * delta, position.y, (player.position.z +
 				player.velocity.z * delta) - PlayerVariables.MAX_POWER * 0.66)
-	if desired_position:
-		target_position = lerp(position, desired_position, momentum)
-		if abs(desired_position.x - target_position.x) <= 0.1:
-			target_position.x = desired_position.x
-		if abs(desired_position.z - target_position.z) <= 0.1:
-			target_position.z = desired_position.z
-		
+	if target_position:
 		direction = position.direction_to(target_position).normalized()
-		$Debug_Dest.global_position = target_position
+		if Game.debug:
+			$Debug_Dest.global_position = target_position
 	
 	# racket
 	var ball_dist = (position * Vector3(1, randf() * 0.8, 1)).distance_to(
@@ -117,17 +109,33 @@ func _physics_process(delta):
 		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
 		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.3)
+		newrot.y += -aim_x / 4.0
+		newrot.w += -aim_x / 4.0
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# sprint
-	var dist_to_tar_pos = 0
-	if desired_position:
-		dist_to_tar_pos = position.distance_to(desired_position)
-	if (dist_to_tar_pos >= PlayerVariables.BASE_SPEED and
-			not Game.ball.ball_ready and
-			not sprinting and not exhausted and stamina > 0):
-		sprinting = true
-		$Sprint.start()
+	if (target_position and Game.ball.launch_pos != Vector3.ZERO and
+			not Game.ball.ball_ready and not sprinting and 
+			not exhausted and stamina > 0):
+		var time_to_reach_target = (position.distance_to(target_position) /
+				PlayerVariables.MAX_SPEED)
+		var time_for_ball_to_land = (Game.ball.position.distance_to(target_position) /
+				(Game.ball.power * (BallVariables.BASE_SPEED_MULT +
+				BallVariables.MAX_SPEED_MULT) / 2))
+		if time_to_reach_target > time_for_ball_to_land:
+			sprinting = true
+			$Sprint.start()
+	if Game.debug:
+		if exhausted:
+			$SprintingLabel.text = 'exhausted'
+			$SprintingLabel.modulate = '#ff0000'
+		else:
+			if sprinting:
+				$SprintingLabel.text = 'sprinting'
+				$SprintingLabel.modulate = '#00ff00'
+			else:
+				$SprintingLabel.text = 'not sprinting'
+				$SprintingLabel.modulate = '#676767'
 	
 	# speed
 	if (
@@ -155,9 +163,15 @@ func _physics_process(delta):
 			exhausted = true
 	else:
 		stamina = min(stamina + PlayerVariables.STAMINA_REGEN,
-				PlayerVariables.MAX_STAMINA)
-		if stamina >= PlayerVariables.MAX_STAMINA:
+				PlayerVariables.MAX_STAMINA / 2)
+		if stamina >= PlayerVariables.MAX_STAMINA / 2:
 			exhausted = false
+	if Game.debug:
+		var stamina_text = ''
+		var stamina_amount = floor(stamina + 0.5) / 5
+		for i in stamina_amount:
+			stamina_text += 'i'
+		$StaminaLabel.text = '[' + stamina_text + ']'
 	
 	# velocity
 	var vel = direction * Vector3(1, 0, 1) * speed
@@ -166,14 +180,15 @@ func _physics_process(delta):
 	# position
 	move_and_slide()
 	if target_position:
-		if abs(target_position.x - position.x) <= 0.2:
+		if abs(target_position.x - position.x) <= speed * delta:
 			position.x = target_position.x
-		if abs(target_position.z - position.z) <= 0.2:
+		if abs(target_position.z - position.z) <= speed * delta:
 			position.z = target_position.z
 	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
 	position.z = clamp(position.z, -PlayerVariables.Z_LIMIT, -2)
 	
 	# aim arrow
 	var x_frac = (position.x - player.position.x) / PlayerVariables.X_LIMIT
-	aim_x = x_frac / 2
-	$AimArrow.rotation.y = -sin((aim_x * PI) / 2)
+	aim_x = x_frac / 3
+	if Game.debug:
+		$AimArrow.rotation.y = -sin((aim_x * PI) / 2)

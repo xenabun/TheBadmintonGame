@@ -28,7 +28,9 @@ func get_land_z():
 			BASE_PLAYER_POS_Y) / get_launch_height())) *
 			direction + launch_pos.z)
 func get_land_x():
-	return position.x
+	return (launch_pos.x + velocity.x * abs(launch_pos.z - get_land_z()) / 
+			(power * (BallVariables.BASE_SPEED_MULT + 
+			BallVariables.MAX_SPEED_MULT) / 2))
 
 var ball_ready = true:
 	set(value):

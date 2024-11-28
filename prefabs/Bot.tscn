@@ -172,5 +172,27 @@ transform = Transform3D(-3.60706e-07, -3.33, -8.79036e-08, 0, -1.45559e-07, 2.01
 material_override = SubResource("StandardMaterial3D_pdi34")
 texture = ExtResource("5_tis4t")
 
+[node name="SprintingLabel" type="Label3D" parent="."]
+transform = Transform3D(0.175, 0, 0, 0, 0.175, 0, 0, 0, 0.175, 0, 2.29147, 0)
+offset = Vector2(150, 0)
+billboard = 1
+double_sided = false
+no_depth_test = true
+fixed_size = true
+modulate = Color(1, 0, 0, 1)
+text = "not sprinting"
+uppercase = true
+
+[node name="StaminaLabel" type="Label3D" parent="."]
+transform = Transform3D(0.175, 0, 0, 0, 0.175, 0, 0, 0, 0.175, 0, 2.29147, 0)
+offset = Vector2(150, -50)
+billboard = 1
+double_sided = false
+no_depth_test = true
+fixed_size = true
+modulate = Color(0.966667, 1, 0, 1)
+text = "iii"
+uppercase = true
+
 [connection signal="timeout" from="Sprint" to="." method="_on_sprint_timeout"]
 [connection signal="timeout" from="RacketCooldown" to="." method="_on_racket_cooldown_timeout"]

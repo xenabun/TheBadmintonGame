@@ -166,8 +166,8 @@ func _physics_process(delta):
 		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
 		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.3)
-		newrot.y += -input.aim_direction.x / 4
-		newrot.w += -input.aim_direction.x / 4
+		newrot.y += -input.aim_direction.x / 4.0
+		newrot.w += -input.aim_direction.x / 4.0
 		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
 	
 	# stamina
