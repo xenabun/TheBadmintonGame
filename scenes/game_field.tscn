@@ -119,7 +119,7 @@ render_priority = 0
 shader = ExtResource("9_xc4xc")
 shader_parameter/uv_offset = Vector2(0, 0)
 shader_parameter/emmission_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
-shader_parameter/flags = 44
+shader_parameter/flags = 4
 shader_parameter/color_ramp = ExtResource("10_toyj1")
 shader_parameter/curve = ExtResource("11_4wxie")
 
@@ -208,7 +208,7 @@ transform = Transform3D(1, 0, 0, 0, 0.943766, 0.330613, 0, -0.330613, 0.943766, 
 current = true
 fov = 60.0
 
-[node name="Level" type="Node" parent="." groups=["Level_root"]]
+[node name="Level" type="Node" parent="."]
 
 [node name="World" type="Node3D" parent="Level"]
 
@@ -294,11 +294,16 @@ collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.418967, -15.005)
 shape = SubResource("BoxShape3D_rfrsq")
 
-[node name="Ball" type="CharacterBody3D" parent="Level/World"]
+[node name="Ball" type="CharacterBody3D" parent="Level/World" node_paths=PackedStringArray("Level", "FieldArea", "FloorArea", "Player1Area", "Player2Area")]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -10, 30)
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("8_d4rec")
+Level = NodePath("../..")
+FieldArea = NodePath("../FieldArea")
+FloorArea = NodePath("../Floor/Area")
+Player1Area = NodePath("../Player1Area")
+Player2Area = NodePath("../Player2Area")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Ball"]
 shape = SubResource("SphereShape3D_scbn3")
@@ -367,17 +372,23 @@ _spawnable_scenes = PackedStringArray("res://prefabs/Player.tscn")
 spawn_path = NodePath("../Players")
 spawn_limit = 2
 
-[node name="Network" type="Node" parent="." groups=["Network_root"]]
+[node name="Network" type="Node" parent="." node_paths=PackedStringArray("Level", "UI", "ServerBrowserUI", "ServerBrowser")]
 script = ExtResource("6_h2wnu")
+Level = NodePath("../Level")
+UI = NodePath("../UI")
+ServerBrowserUI = NodePath("../UI/ServerBrowser")
+ServerBrowser = NodePath("../ServerBrowser")
 
-[node name="ServerBrowser" type="Node" parent="." node_paths=PackedStringArray("broadcastTimer") groups=["ServerBrowser_root"]]
+[node name="ServerBrowser" type="Node" parent="." node_paths=PackedStringArray("broadcastTimer", "UI", "ServerBrowserUI")]
 script = ExtResource("7_4w53d")
 broadcastTimer = NodePath("BroadcastTimer")
 server_card_prefab = ExtResource("11_dli3y")
+UI = NodePath("../UI")
+ServerBrowserUI = NodePath("../UI/ServerBrowser")
 
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
 
-[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label") groups=["UI_root"]]
+[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "Network", "ServerBrowser")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -391,6 +402,9 @@ script = ExtResource("12_2yf3a")
 menu_camera_pivot = NodePath("../MenuCameraPivot")
 player_camera = NodePath("../Level/World/PlayerCamera")
 title_label = NodePath("MainMenu/Title")
+username_box = NodePath("CurrentUsername/VBoxContainer/Username")
+Network = NodePath("../Network")
+ServerBrowser = NodePath("../ServerBrowser")
 
 [node name="CurrentUsername" type="Control" parent="UI"]
 visible = false
@@ -524,7 +538,7 @@ placeholder_text = "1024 - 49151"
 alignment = 1
 max_length = 5
 
-[node name="Button" type="Button" parent="UI/MainMenu/Port/VBoxContainer"]
+[node name="Confirm" type="Button" parent="UI/MainMenu/Port/VBoxContainer"]
 layout_mode = 2
 text = "Подтвердить"
 
@@ -727,7 +741,7 @@ grow_vertical = 2
 layout_mode = 2
 text = "Возобновить игру"
 
-[node name="Back" type="Button" parent="UI/Menu/VBoxContainer"]
+[node name="Exit" type="Button" parent="UI/Menu/VBoxContainer"]
 layout_mode = 2
 text = "Выйти в главное меню"
 
@@ -787,7 +801,7 @@ label_settings = SubResource("LabelSettings_r3h5r")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Back" type="Button" parent="UI/GameResult"]
+[node name="Exit" type="Button" parent="UI/GameResult"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -879,7 +893,7 @@ theme_override_constants/outline_size = 6
 text = "X"
 flat = true
 
-[node name="DebugUI" type="Control" parent="." groups=["Debug_root"]]
+[node name="DebugUI" type="Control" parent="."]
 visible = false
 clip_contents = true
 layout_mode = 3
@@ -941,10 +955,10 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/MainMenu/Username/Confirm" to="UI" method="_on_username_confirm_pressed"]
 [connection signal="pressed" from="UI/MainMenu/Menu/Singleplayer" to="UI" method="_on_singleplayer_pressed"]
 [connection signal="pressed" from="UI/MainMenu/Menu/Multiplayer" to="UI" method="_on_multiplayer_pressed"]
-[connection signal="pressed" from="UI/MainMenu/Menu/Exit" to="UI" method="_on_exit_pressed"]
-[connection signal="pressed" from="UI/MainMenu/Port/VBoxContainer/Button" to="UI" method="_on_button_pressed"]
+[connection signal="pressed" from="UI/MainMenu/Menu/Exit" to="UI" method="_on_app_exit_pressed"]
+[connection signal="pressed" from="UI/MainMenu/Port/VBoxContainer/Confirm" to="UI" method="_on_port_confirm"]
 [connection signal="pressed" from="UI/MainMenu/Port/Close" to="UI" method="_on_port_menu_close_pressed"]
-[connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_close_pressed"]
-[connection signal="pressed" from="UI/Menu/VBoxContainer/Back" to="UI" method="_on_back_pressed"]
-[connection signal="pressed" from="UI/GameResult/Back" to="UI" method="_on_back_pressed"]
+[connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_pause_menu_close"]
+[connection signal="pressed" from="UI/Menu/VBoxContainer/Exit" to="UI" method="_on_game_exit_pressed"]
+[connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/GameControls/Panel/Close" to="UI" method="_on_controls_close"]

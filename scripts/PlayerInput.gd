@@ -1,7 +1,5 @@
 extends MultiplayerSynchronizer
 
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
-
 @export var direction := Vector3()
 @export var player : Node
 @export var sprinting : bool = false
@@ -17,14 +15,21 @@ extends MultiplayerSynchronizer
 				PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
 @export var aim_direction : Vector2 = Vector2.ZERO
 
+@onready var UI = get_parent().UI
+@onready var animation_tree = player.get_node('AnimationTree')
+@onready var racket_active_timer = get_node('RacketActive')
+@onready var racket_cooldown_timer = get_node('RacketCooldown')
+@onready var racket_hold_timer = get_node('RacketHold')
+@onready var action_pressed_timer = get_node('ActionPressed')
+
 var action_ready = true
 var action_hold = false:
 	set(value):
 		action_hold = value
 		if value == false:
 			action_ready = false
-			$RacketActive.start()
-			$RacketCooldown.start()
+			racket_active_timer.start()
+			racket_cooldown_timer.start()
 			racket_swing.rpc()
 			player.get_node('AimArrow').hide()
 var action_active = false:
@@ -38,22 +43,23 @@ var shift_hold = false
 @rpc('any_peer', 'call_local')
 func racket_area_activate(value):
 	player.get_node('RacketArea').monitorable = value
-	if Game.debug: player.get_node('RacketArea/CSGBox3D').visible = value
+	if Game.debug:
+		player.get_node('RacketArea/CSGBox3D').visible = value
 
 @rpc("any_peer", "call_local")
 func throw_ready():
-	player.get_node('AnimationTree')['parameters/Throw/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	animation_tree['parameters/Throw/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 @rpc("any_peer", "call_local")
 func racket_hold():
-	player.get_node('AnimationTree')['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	animation_tree['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 @rpc('any_peer', 'call_local')
 func racket_hold_idle():
-	player.get_node('AnimationTree')['parameters/RacketHoldIdle/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	animation_tree['parameters/RacketHoldIdle/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 @rpc("any_peer", "call_local")
 func racket_swing():
-	player.get_node('AnimationTree')['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
-	player.get_node('AnimationTree')['parameters/RacketHoldIdle/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
-	player.get_node('AnimationTree')['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	animation_tree['parameters/RacketHold/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	animation_tree['parameters/RacketHoldIdle/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT
+	animation_tree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 func _on_animation_finished(anim_name):
 	if anim_name == 'playeranims/RacketHold':
 		racket_hold_idle.rpc()
@@ -65,14 +71,16 @@ func set_throw_power(value):
 func set_aim_x(value):
 	player.aim_x = value
 
+func is_game_paused():
+	return UI.get_node('Menu').visible or UI.get_node('GameControls').visible
+
 func _ready():
 	var authority = get_multiplayer_authority() == multiplayer.get_unique_id()
 	set_process(authority)
-	player = get_parent()
 	player.get_node('RacketArea/CSGBox3D').hide()
-	$RacketHold.wait_time = PlayerVariables.ACTION_HOLD_TIME
+	racket_hold_timer.wait_time = PlayerVariables.ACTION_HOLD_TIME
 	if authority:
-		player.get_node('AnimationTree').animation_finished.connect(_on_animation_finished)
+		animation_tree.animation_finished.connect(_on_animation_finished)
 
 func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
@@ -86,8 +94,7 @@ func _input(event):
 			if Game.current_game_type == Game.game_type.SINGLEPLAYER:
 				Game.game_in_progress = not menu.visible
 	
-	if not Game.game_in_progress: return
-	if UI.get_node('Menu').visible or UI.get_node('GameControls').visible: return
+	if not Game.game_in_progress or is_game_paused(): return
 	
 	if event.is_action_pressed('action'):
 		if Game.ball.ball_ready and Game.game_in_progress:
@@ -103,11 +110,11 @@ func _input(event):
 		else:
 			if action_ready and not action_active:
 				action_hold = true
-				$RacketHold.start()
+				racket_hold_timer.start()
 				action_active = true
 				racket_hold.rpc()
 	if event.is_action_released('action') and action_hold:
-		$RacketHold.stop()
+		racket_hold_timer.stop()
 		action_hold = false
 	if event.is_action_pressed('sprint'):
 		shift_hold = true
@@ -132,10 +139,10 @@ func _input(event):
 			movement_actions[0] = true
 		if (not sprinting and last_movement_action_pressed != null and
 				last_movement_action_pressed == current_action and
-				$ActionPressed.time_left > 0):
+				action_pressed_timer.time_left > 0):
 			sprinting = true
 		if not sprinting and last_movement_action_pressed != current_action:
-			$ActionPressed.start()
+			action_pressed_timer.start()
 		last_movement_action_pressed = current_action
 	if (event.is_action_released("left") or event.is_action_released('right') or
 			event.is_action_released('down') or event.is_action_released('up')):
@@ -164,7 +171,7 @@ func _on_action_pressed_timeout():
 	last_movement_action_pressed = null
 
 func _process(_delta):
-	if UI.get_node('Menu').visible or UI.get_node('GameControls').visible: return
+	if is_game_paused(): return
 	
 	#direction
 	var input_dir = Input.get_vector("left", "right", "up", "down")
@@ -181,7 +188,7 @@ func _process(_delta):
 	# racket hold
 	if action_hold:
 		var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
-				$RacketHold.time_left) /
+				racket_hold_timer.time_left) /
 				PlayerVariables.ACTION_HOLD_TIME)
 		set_throw_power.rpc(PlayerVariables.BASE_POWER +
 				(PlayerVariables.MAX_POWER -

@@ -1,29 +1,5 @@
 extends CharacterBody3D
 
-@export var player_id = 1 :
-	set(id):
-		player_id = id
-		$PlayerInput.set_multiplayer_authority(id)
-@export var username : String = ""
-@onready var input = $PlayerInput
-func get_player_side():
-	return 1 if player_id == 1 else -1
-func get_player_num():
-	return 1 if player_id == 1 else 2
-
-@export var throw_power = PlayerVariables.MAX_POWER
-@export var aim_x = 0
-
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-var speed = PlayerVariables.BASE_SPEED
-var prev_direction = Vector3.ZERO
-
-@onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var camera = Level.get_node('World/PlayerCamera')
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
-@onready var GameUI = UI.get_node('GameUI')
-@export var stamina_bar : Node
-
 signal reset_position
 func _reset_position():
 	var num = get_player_num()
@@ -32,16 +8,48 @@ func _reset_position():
 	rotation = spawn_point.rotation
 	update_camera_transform(1)
 
+@export var player_id = 1 :
+	set(id):
+		player_id = id
+		$PlayerInput.set_multiplayer_authority(id)
+@export var username : String = ""
+@export var stamina_bar : Node
+@export var throw_power = PlayerVariables.MAX_POWER
+@export var aim_x = 0
+@export var Level : Node
+@export var UI : Node
+
+@onready var camera = Level.get_node('World/PlayerCamera')
+@onready var GameUI = UI.get_node('GameUI')
+@onready var input = get_node('PlayerInput')
+@onready var racket_hold_timer = get_node('PlayerInput/RacketHold')
+@onready var animation_tree = get_node('AnimationTree')
+@onready var player_model = get_node('playermodel')
+@onready var player_angle_target = get_node('plrangletarget')
+@onready var racket_area = get_node('RacketArea')
+@onready var username_billboard = get_node('Username')
+@onready var aim_arrow = get_node('AimArrow')
+@onready var aim_arrow_sprite = get_node('AimArrow/Sprite')
+
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var speed = PlayerVariables.BASE_SPEED
+var prev_direction = Vector3.ZERO
+
+func get_player_side():
+	return 1 if player_id == 1 else -1
+func get_player_num():
+	return 1 if player_id == 1 else 2
+
 func _ready():
 	GameManager.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
 	set_physics_process(multiplayer.get_unique_id() == player_id)
-	$AimArrow.hide()
+	aim_arrow.hide()
 	if multiplayer.get_unique_id() != player_id: return
 	
 	var player_data = GameManager.Players.get(player_id)
 	if player_data:
 		username = player_data.username
-		$Username.text = player_data.username
+		username_billboard.text = player_data.username
 		GameManager.print_debug_msg('getting player data: username: ' + str(player_data.username))
 	else:
 		GameManager.print_debug_msg('getting player data: not found')
@@ -98,20 +106,20 @@ func update_camera_transform(t):
 
 func _physics_process(delta):
 	if not Game.game_in_progress:
-		if $AnimationTree.active:
-			$AnimationTree.active = false
+		if animation_tree.active:
+			animation_tree.active = false
 		return
-	if not $AnimationTree.active:
-		$AnimationTree.active = true
+	if not animation_tree.active:
+		animation_tree.active = true
 	
 	# gravity
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-		$AnimationTree['parameters/WalkScale/scale'] = move_toward(
-				$AnimationTree['parameters/WalkScale/scale'], 0, 0.02)
+		animation_tree['parameters/WalkScale/scale'] = move_toward(
+				animation_tree['parameters/WalkScale/scale'], 0, 0.02)
 	else:
-		$AnimationTree['parameters/WalkScale/scale'] = move_toward(
-				$AnimationTree['parameters/WalkScale/scale'], 1, 0.1)
+		animation_tree['parameters/WalkScale/scale'] = move_toward(
+				animation_tree['parameters/WalkScale/scale'], 1, 0.1)
 	
 	# jump
 	if (
@@ -151,24 +159,24 @@ func _physics_process(delta):
 		else:
 			blend_amount = 0.5
 		if not input.action_hold:
-			$plrangletarget.look_at($plrangletarget.global_position + direction)
-			var currot = Quaternion($playermodel.transform.basis.orthonormalized())
-			var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
+			player_angle_target.look_at(player_angle_target.global_position + direction)
+			var currot = Quaternion(player_model.transform.basis.orthonormalized())
+			var tarrot = Quaternion(player_angle_target.transform.basis.orthonormalized())
 			var newrot = currot.slerp(tarrot, 0.2)
-			$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
-	$AnimationTree['parameters/WalkSpeed/blend_amount'] = move_toward(
-		$AnimationTree['parameters/WalkSpeed/blend_amount'],
+			player_model.transform.basis = Basis(newrot).scaled(player_model.scale)
+	animation_tree['parameters/WalkSpeed/blend_amount'] = move_toward(
+		animation_tree['parameters/WalkSpeed/blend_amount'],
 		blend_amount,
 		0.1
 	)
 	if input.action_hold:
-		$plrangletarget.look_at($plrangletarget.global_position + VectorMath.look_vector($RacketArea))
-		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
-		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
+		player_angle_target.look_at(player_angle_target.global_position + VectorMath.look_vector(racket_area))
+		var currot = Quaternion(player_model.transform.basis.orthonormalized())
+		var tarrot = Quaternion(player_angle_target.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.3)
 		newrot.y += -input.aim_direction.x / 4.0
 		newrot.w += -input.aim_direction.x / 4.0
-		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
+		player_model.transform.basis = Basis(newrot).scaled(player_model.scale)
 	
 	# stamina
 	if input.sprinting and not input.exhausted and direction.length() > 0:
@@ -195,12 +203,12 @@ func _physics_process(delta):
 	
 	# aim arrow
 	if Game.ball.ball_ready or input.action_hold:
-		$AimArrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
-		if not $AimArrow.visible:
-			$AimArrow/Sprite.scale.x = 0
-			$AimArrow/Sprite.scale.y = 0
-			$AimArrow/Sprite.position.z = 0
-			$AimArrow.show()
+		aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
+		if not aim_arrow.visible:
+			aim_arrow_sprite.scale.x = 0
+			aim_arrow_sprite.scale.y = 0
+			aim_arrow.position.z = 0
+			aim_arrow.show()
 	
 	if (
 		Game.window_focus
@@ -214,13 +222,13 @@ func _physics_process(delta):
 		var aim_dir = input.aim_direction
 		if input.action_hold:
 			var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
-				input.get_node('RacketHold').time_left) /
+				racket_hold_timer.time_left) /
 				PlayerVariables.ACTION_HOLD_TIME)
-			$AimArrow/Sprite.scale.x = hold_mult * 20
-			$AimArrow/Sprite.scale.y = hold_mult * 5
-			$AimArrow/Sprite.position.z = -hold_mult * 10
+			aim_arrow_sprite.scale.x = hold_mult * 20
+			aim_arrow_sprite.scale.y = hold_mult * 5
+			aim_arrow_sprite.position.z = -hold_mult * 10
 		else:
-			$AimArrow/Sprite.scale.x = aim_dir.y * 20
-			$AimArrow/Sprite.scale.y = aim_dir.y * 5
-			$AimArrow/Sprite.position.z = -aim_dir.y * 10
-		$AimArrow.rotation.y = -sin((aim_dir.x * PI) / 2)
+			aim_arrow_sprite.scale.x = aim_dir.y * 20
+			aim_arrow_sprite.scale.y = aim_dir.y * 5
+			aim_arrow_sprite.position.z = -aim_dir.y * 10
+		aim_arrow.rotation.y = -sin((aim_dir.x * PI) / 2)

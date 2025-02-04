@@ -2,17 +2,18 @@ extends Node
 
 signal join_server(ip)
 
-var roomInfo = {"name": "room name", "player_count": 0}
-var broadcaster : PacketPeerUDP
-var listener : PacketPeerUDP
 
 @export var listenPort : int
 @export var broadcastPort : int
 @export var broadcastAddress : String = '255.255.255.255'
 @export var broadcastTimer : Timer
 @export var server_card_prefab : PackedScene
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
-@onready var ServerBrowserUI = UI.get_node('ServerBrowser')
+@export var UI : Node
+@export var ServerBrowserUI : Node
+
+var roomInfo = {"name": "room name", "player_count": 0}
+var broadcaster : PacketPeerUDP
+var listener : PacketPeerUDP
 
 func _ready():
 	set_process(false)

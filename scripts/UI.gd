@@ -1,15 +1,11 @@
 extends Control
 
-@onready var Network = get_tree().get_first_node_in_group('Network_root')
-@onready var ServerBrowser = get_tree().get_first_node_in_group('ServerBrowser_root')
-
 @export var menu_camera_pivot : Node
 @export var player_camera : Node
 @export var title_label : Node
-var title_tween = null
-var title_rot_deg = 1
-var title_rot_time = 1
-
+@export var username_box : Node
+@export var Network : Node
+@export var ServerBrowser : Node
 @export var in_menu : bool = true :
 	set(value):
 		in_menu = value
@@ -50,6 +46,10 @@ var title_rot_time = 1
 		else:
 			ServerBrowser.stop_listen()
 
+var title_tween = null
+var title_rot_deg = 1
+var title_rot_time = 1
+
 func _ready():
 	get_node('MainMenu/Username').show()
 	get_node('MainMenu/Menu').hide()
@@ -72,14 +72,14 @@ func _enter_tree():
 	title_tween.tween_property(title_label, 'rotation', deg_to_rad(title_rot_deg), title_rot_time)
 	title_tween.chain().tween_property(title_label, 'rotation', deg_to_rad(-title_rot_deg), title_rot_time)
 
-func _on_back_pressed():
+func _on_game_exit_pressed():
 	Network.quit_server()
 
 func _on_server_browser_back_pressed():
 	in_main_menu = true
 	in_server_browser = false
 
-func _on_close_pressed():
+func _on_pause_menu_close():
 	get_node('Menu').hide()
 	if Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		Game.game_in_progress = true
@@ -95,7 +95,6 @@ func _on_username_confirm_pressed():
 	if get_node('MainMenu/Username/UsernameBox').text.is_empty(): return
 	editing_username = false
 	get_node('CurrentUsername/VBoxContainer/Username').text = get_node('MainMenu/Username/UsernameBox').text
-
 func _on_username_change_pressed():
 	editing_username = true
 
@@ -110,7 +109,7 @@ func _on_port_menu_close_pressed():
 	get_node('MainMenu/Port').hide()
 	get_node('MainMenu/Menu').show()
 
-func _on_button_pressed():
+func _on_port_confirm():
 	var port_text = get_node('MainMenu/Port/VBoxContainer/LineEdit').text
 	var port_num = port_text.to_int()
 	if port_num and port_num >= 1024 and port_num <= 49151:
@@ -122,7 +121,7 @@ func _on_button_pressed():
 func _on_controls_close():
 	get_node('GameControls').hide()
 
-func _on_exit_pressed():
+func _on_app_exit_pressed():
 	get_tree().quit()
 
 func _physics_process(_delta):

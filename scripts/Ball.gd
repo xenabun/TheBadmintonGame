@@ -2,17 +2,18 @@ extends CharacterBody3D
 
 const BASE_PLAYER_POS_Y = 4.824 / 2
 
-@onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var FieldArea = Level.get_node('World/FieldArea')
-@onready var FloorArea = Level.get_node('World/Floor/Area')
-@onready var Player1Area = Level.get_node('World/Player1Area')
-@onready var Player2Area = Level.get_node('World/Player2Area')
+@export var Level : Node
+@export var FieldArea : Node
+@export var FloorArea : Node
+@export var Player1Area : Node
+@export var Player2Area : Node
 
-var direction :float = 0.0
-var power :float = 0.0
-var launch_pos :Vector3 = Vector3.ZERO
-var ignored_area = null
-var last_interact :String = ''
+var direction : float = 0.0
+var power : float = 0.0
+var launch_pos : Vector3 = Vector3.ZERO
+var ignored_area
+var last_interact : String = ''
+
 func get_launch_height():
 	return (BallVariables.BASE_Y + (BallVariables.MAX_Y -
 			BallVariables.BASE_Y) * ((power - PlayerVariables.BASE_POWER) /

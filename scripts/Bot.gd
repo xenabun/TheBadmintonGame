@@ -1,28 +1,34 @@
 extends CharacterBody3D
 
+@export var Level : Node
 @export var aim_x = 0
+@export var player : Node
+
+@onready var animation_tree = get_node('AnimationTree')
+@onready var player_model = get_node('playermodel')
+@onready var player_angle_target = get_node('plrangletarget')
+@onready var racket_area = get_node('RacketArea')
+@onready var racket_cooldown_timer = get_node('RacketCooldown')
+@onready var sprint_timer = get_node('Sprint')
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
 var prev_direction = Vector3.ZERO
 var stamina = PlayerVariables.MAX_STAMINA
-var target_position = null
+var target_position
 var exhausted = false
 var sprinting = false
+func _on_sprint_timeout():
+	sprinting = false
 var racket_cooldown = false:
 	set(value):
 		racket_cooldown = value
-		$RacketArea.monitorable = value
-		if Game.debug: $RacketArea/CSGBox3D.visible = value
+		racket_area.monitorable = value
+		if Game.debug:
+			$RacketArea/CSGBox3D.visible = value
 		if value:
-			$RacketCooldown.start()
-
-@onready var Level = get_tree().get_first_node_in_group('Level_root')
-@export var player :Node = null
-
-func _on_sprint_timeout():
-	sprinting = false
+			racket_cooldown_timer.start()
 func _on_racket_cooldown_timeout():
 	racket_cooldown = false
 
@@ -40,11 +46,11 @@ func _ready():
 
 func _physics_process(delta):
 	if not Game.game_in_progress:
-		if $AnimationTree.active:
-			$AnimationTree.active = false
+		if animation_tree.active:
+			animation_tree.active = false
 		return
-	if not $AnimationTree.active:
-		$AnimationTree.active = true
+	if not animation_tree.active:
+		animation_tree.active = true
 	
 	# racket hold
 	var hold_mult = abs(position.z) / PlayerVariables.Z_LIMIT
@@ -55,11 +61,11 @@ func _physics_process(delta):
 	# gravity
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-		$AnimationTree['parameters/WalkScale/scale'] = move_toward(
-				$AnimationTree['parameters/WalkScale/scale'], 0, 0.02)
+		animation_tree['parameters/WalkScale/scale'] = move_toward(
+				animation_tree['parameters/WalkScale/scale'], 0, 0.02)
 	else:
-		$AnimationTree['parameters/WalkScale/scale'] = move_toward(
-				$AnimationTree['parameters/WalkScale/scale'], 1, 0.1)
+		animation_tree['parameters/WalkScale/scale'] = move_toward(
+				animation_tree['parameters/WalkScale/scale'], 1, 0.1)
 	
 	# get direction
 	var direction = Vector3.ZERO
@@ -84,7 +90,7 @@ func _physics_process(delta):
 			Game.ball.position * Vector3(1, randf() * 0.8, 1))
 	if not racket_cooldown and ball_dist <= 4:
 		racket_cooldown = true
-		$AnimationTree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+		animation_tree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 	
 	# animation
 	var blend_amount = 0
@@ -94,24 +100,26 @@ func _physics_process(delta):
 		else:
 			blend_amount = 0.5
 		if not racket_cooldown:
-			$plrangletarget.look_at($plrangletarget.global_position + direction)
-			var currot = Quaternion($playermodel.transform.basis.orthonormalized())
-			var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
+			player_angle_target.look_at(player_angle_target.global_position + direction)
+			var currot = Quaternion(player_model.transform.basis.orthonormalized())
+			var tarrot = Quaternion(player_angle_target.transform.basis.orthonormalized())
 			var newrot = currot.slerp(tarrot, 0.2)
-			$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
-	$AnimationTree['parameters/WalkSpeed/blend_amount'] = move_toward(
-		$AnimationTree['parameters/WalkSpeed/blend_amount'],
+			player_model.transform.basis = Basis(newrot).scaled(player_model.scale)
+	
+	animation_tree['parameters/WalkSpeed/blend_amount'] = move_toward(
+		animation_tree['parameters/WalkSpeed/blend_amount'],
 		blend_amount,
 		0.1
 	)
+	
 	if racket_cooldown:
-		$plrangletarget.look_at($plrangletarget.global_position + VectorMath.look_vector($RacketArea))
-		var currot = Quaternion($playermodel.transform.basis.orthonormalized())
-		var tarrot = Quaternion($plrangletarget.transform.basis.orthonormalized())
+		player_angle_target.look_at(player_angle_target.global_position + VectorMath.look_vector(racket_area))
+		var currot = Quaternion(player_model.transform.basis.orthonormalized())
+		var tarrot = Quaternion(player_angle_target.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.3)
 		newrot.y += -aim_x / 4.0
 		newrot.w += -aim_x / 4.0
-		$playermodel.transform.basis = Basis(newrot).scaled($playermodel.scale)
+		player_model.transform.basis = Basis(newrot).scaled(player_model.scale)
 	
 	# sprint
 	if (target_position and Game.ball.launch_pos != Vector3.ZERO and
@@ -124,7 +132,7 @@ func _physics_process(delta):
 				BallVariables.MAX_SPEED_MULT) / 2))
 		if time_to_reach_target > time_for_ball_to_land:
 			sprinting = true
-			$Sprint.start()
+			sprint_timer.start()
 	if Game.debug:
 		if exhausted:
 			$SprintingLabel.text = 'exhausted'

@@ -1,24 +1,25 @@
 extends Node
 
-var window_focus = true
-var debug = false
-
 enum game_type {
 	NONE,
 	SINGLEPLAYER,
 	MULTIPLAYER
 }
-@export var current_game_type : game_type = game_type.NONE
 
 const WIN_TEXT = 'Победа!'
 const LOSE_TEXT = 'Поражение'
 
+@export var current_game_type : game_type = game_type.NONE
+
+@onready var Level = get_tree().get_root().get_node('Scene/Level')
+@onready var UI = get_tree().get_root().get_node('Scene/UI')
+@onready var ServerBrowser = get_tree().get_root().get_node('Scene/ServerBrowser')
+@onready var ball = Level.get_node('World/Ball')
+
+var window_focus = true
+var debug = false
 var score = [ 0, 0 ]
 var game_in_progress = true
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
-@onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var ball = Level.get_node('World/Ball')
-@onready var ServerBrowser = get_tree().get_first_node_in_group('ServerBrowser_root')
 
 func get_opponent_peer_id(peer_id):
 	var opponent_id = null
@@ -29,6 +30,10 @@ func get_opponent_peer_id(peer_id):
 	if !opponent_id:
 		opponent_id = peer_id
 	return opponent_id
+func get_opponent_index(index):
+	return abs(index - 1)
+func peer_id_to_score_index(id):
+	return 0 if id == 1 else 1
 
 func get_full_score_str():
 	if multiplayer.is_server():
@@ -50,7 +55,7 @@ func update_score_text():
 	#var score_str = get_score_str()
 	var usernames = get_player_usernames()
 	var my_score_id = 0 if multiplayer.is_server() else 1
-	var op_score_id = i(my_score_id)
+	var op_score_id = get_opponent_index(my_score_id)
 	score_control.get_node('Player1Score').text = str(score[my_score_id])
 	score_control.get_node('Player2Score').text = str(score[op_score_id])
 	score_control.get_node('Player1').text = usernames[0]
@@ -58,16 +63,13 @@ func update_score_text():
 @rpc("any_peer", 'call_local')
 func update_score_text_for_all():
 	update_score_text()
-func i(p): return abs(p - 1)
-func peer_id_to_score_index(id):
-	return 0 if id == 1 else 1
 func check_win(p):
-	if score[p] >= 20 and score[i(p)] >= 20:
-		if score[p] >= 29 and score[i(p)] >= 29:
+	if score[p] >= 20 and score[get_opponent_index(p)] >= 20:
+		if score[p] >= 29 and score[get_opponent_index(p)] >= 29:
 			if score[p] >= 30:
 				return true
 		else:
-			if score[p] - score[i(p)] >= 2:
+			if score[p] - score[get_opponent_index(p)] >= 2:
 				return true
 	else:
 		if score[p] >= 21:
@@ -114,6 +116,7 @@ func reset_score():
 func start_game():
 	reset_score()
 	game_in_progress = true
+
 func _ready():
 	debug = get_tree().get_root().get_node('Scene/DebugUI').visible
 	for argument in OS.get_cmdline_args():

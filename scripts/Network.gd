@@ -1,13 +1,14 @@
 extends Node
 
 const ADDRESS = '127.0.0.1'
-@export var PORT = 5000
-var peer
 
-@onready var Level = get_tree().get_first_node_in_group('Level_root')
-@onready var UI = get_tree().get_first_node_in_group('UI_root')
-@onready var ServerBrowserUI = UI.get_node('ServerBrowser')
-@onready var ServerBrowser = get_tree().get_first_node_in_group('ServerBrowser_root')
+@export var PORT = 5000
+@export var Level : Node
+@export var UI : Node
+@export var ServerBrowserUI : Node
+@export var ServerBrowser : Node
+
+var peer
 
 func _ready():
 	multiplayer.server_relay = false
@@ -41,11 +42,11 @@ func connected_to_server():
 	GameManager.print_debug_msg('Connected to server')
 	var peer_id = multiplayer.get_unique_id()
 	GameManager.Players[peer_id] = {
-		'username': UI.get_node('CurrentUsername/VBoxContainer/Username').text,
+		'username': UI.username_box.text,
 		'id': peer_id,
 	}
 	send_player_information.rpc_id(1, 
-			UI.get_node('CurrentUsername/VBoxContainer/Username').text, peer_id)
+			UI.username_box.text, peer_id)
 	UI.get_node('Connecting').hide()
 	multiplayer.server_disconnected.connect(quit_server)
 
@@ -92,10 +93,10 @@ func _on_host_pressed():
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)
-	send_player_information(UI.get_node('CurrentUsername/VBoxContainer/Username').text,
+	send_player_information(UI.username_box.text,
 			multiplayer.get_unique_id())
 	ServerBrowser.broadcastPort = PORT + 2
-	ServerBrowser.broadcast(UI.get_node('CurrentUsername/VBoxContainer/Username').text + "'s server")
+	ServerBrowser.broadcast(UI.username_box.text + "'s server")
 	UI.in_menu = false
 	UI.in_server_browser = false
 	add_player()
@@ -142,7 +143,7 @@ func start_singleplayer():
 	UI.in_main_menu = false
 	var bot_username = 'Компьютер'
 	GameManager.Players[1] = {
-		'username': UI.get_node('CurrentUsername/VBoxContainer/Username').text,
+		'username': UI.username_box.text,
 		'id': 1,
 	}
 	GameManager.Players[2] = {
@@ -160,17 +161,22 @@ func add_player(id: int = 1):
 	var character = preload("res://prefabs/Player.tscn").instantiate()
 	character.player_id = id
 	character.name = str(id)
+	character.Level = Level
+	character.UI = UI
+	character.get_node('PlayerInput').player = character
 	var num = 1 if id == 1 else 2
 	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
 	character.position = spawn_point.position
 	character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
 	Game.update_score_text_for_all.rpc()
+
 	return character
 
 func add_bot(player_char, bot_username):
 	var character = preload("res://prefabs/Bot.tscn").instantiate()
 	character.player = player_char
+	character.Level = Level
 	character.get_node('Username').text = bot_username
 	var spawn_point = Level.get_node('World/Player2Spawn')
 	character.position = spawn_point.position
