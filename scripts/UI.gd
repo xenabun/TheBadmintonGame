@@ -4,6 +4,7 @@ extends Control
 @export var player_camera : Node
 @export var title_label : Node
 @export var username_box : Node
+@export var lobby_player_list : Node
 @export var Network : Node
 @export var ServerBrowser : Node
 @export var in_menu : bool = true :
@@ -23,6 +24,7 @@ extends Control
 	set(value):
 		in_main_menu = value
 		get_node('MainMenu').visible = value
+		get_node('CurrentUsername').visible = value
 		if value:
 			get_node('MainMenu/Menu').show()
 			get_node('MainMenu/Username').hide()
@@ -45,8 +47,12 @@ extends Control
 			ServerBrowser.listen_to_broadcast()
 		else:
 			ServerBrowser.stop_listen()
+@export var in_server_lobby : bool = false :
+	set(value):
+		in_server_lobby = value
+		get_node('Lobby').visible = value
 
-var title_tween = null
+var title_tween
 var title_rot_deg = 1
 var title_rot_time = 1
 
@@ -63,6 +69,7 @@ func _ready():
 	get_node('GameResult').hide()
 	get_node('GameControls').hide()
 	get_node('Connecting').hide()
+	get_node('Lobby').hide()
 	
 	get_node('ServerBrowser/Back').pressed.connect(_on_server_browser_back_pressed)
 
@@ -71,6 +78,20 @@ func _enter_tree():
 	title_tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	title_tween.tween_property(title_label, 'rotation', deg_to_rad(title_rot_deg), title_rot_time)
 	title_tween.chain().tween_property(title_label, 'rotation', deg_to_rad(-title_rot_deg), title_rot_time)
+
+func clear_lobby_player_list():
+	for child in lobby_player_list.get_children():
+		child.queue_free()
+func update_lobby_player_list():
+	# GameManager.print_debug_msg('update lobby player list called')
+	clear_lobby_player_list()
+	# print(GameManager.Players)
+	for i in GameManager.Players:
+		var player_info = GameManager.Players[i]
+		# print(player_info)
+		var player_label = preload("res://prefabs/player_label.tscn").instantiate()
+		player_label.text = player_info.username
+		lobby_player_list.add_child(player_label)
 
 func _on_game_exit_pressed():
 	Network.quit_server()
@@ -94,7 +115,7 @@ func _on_title_visibility_changed():
 func _on_username_confirm_pressed():
 	if get_node('MainMenu/Username/UsernameBox').text.is_empty(): return
 	editing_username = false
-	get_node('CurrentUsername/VBoxContainer/Username').text = get_node('MainMenu/Username/UsernameBox').text
+	username_box.text = get_node('MainMenu/Username/UsernameBox').text
 func _on_username_change_pressed():
 	editing_username = true
 
@@ -102,10 +123,12 @@ func _on_singleplayer_pressed():
 	Network.start_singleplayer()
 
 func _on_multiplayer_pressed():
+	get_node('CurrentUsername').hide()
 	get_node('MainMenu/Menu').hide()
 	get_node('MainMenu/Port').show()
 
 func _on_port_menu_close_pressed():
+	get_node('CurrentUsername').show()
 	get_node('MainMenu/Port').hide()
 	get_node('MainMenu/Menu').show()
 

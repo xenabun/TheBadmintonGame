@@ -2,11 +2,11 @@ extends Node
 
 signal join_server(ip)
 
-
 @export var listenPort : int
 @export var broadcastPort : int
 @export var broadcastAddress : String = '255.255.255.255'
 @export var broadcastTimer : Timer
+@export var in_lobby : bool = false
 @export var server_card_prefab : PackedScene
 @export var UI : Node
 @export var ServerBrowserUI : Node

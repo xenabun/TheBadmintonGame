@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=56 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -125,6 +125,11 @@ shader_parameter/curve = ExtResource("11_4wxie")
 
 [sub_resource type="QuadMesh" id="QuadMesh_7q4ig"]
 material = SubResource("ShaderMaterial_e0aow")
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_u8k48"]
+properties/0/path = NodePath(".:in_lobby")
+properties/0/spawn = true
+properties/0/replication_mode = 1
 
 [sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
 font_size = 121
@@ -388,7 +393,10 @@ ServerBrowserUI = NodePath("../UI/ServerBrowser")
 
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
 
-[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "Network", "ServerBrowser")]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="ServerBrowser"]
+replication_config = SubResource("SceneReplicationConfig_u8k48")
+
+[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "lobby_player_list", "Network", "ServerBrowser")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -403,6 +411,7 @@ menu_camera_pivot = NodePath("../MenuCameraPivot")
 player_camera = NodePath("../Level/World/PlayerCamera")
 title_label = NodePath("MainMenu/Title")
 username_box = NodePath("CurrentUsername/VBoxContainer/Username")
+lobby_player_list = NodePath("Lobby/Panel/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer")
 Network = NodePath("../Network")
 ServerBrowser = NodePath("../ServerBrowser")
 
@@ -429,6 +438,7 @@ size_flags_horizontal = 8
 text = "Изменить"
 
 [node name="MainMenu" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/MainMenu"]
@@ -553,6 +563,54 @@ text = "X"
 
 [node name="ServerBrowser" parent="UI" instance=ExtResource("12_hm06h")]
 visible = false
+layout_mode = 2
+
+[node name="Lobby" type="Control" parent="UI"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="UI/Lobby"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -201.5
+offset_top = -109.0
+offset_right = 201.5
+offset_bottom = 109.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Lobby/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="UI/Lobby/Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+text = "Список игроков"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Lobby/Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/Lobby/Panel/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Lobby/Panel/VBoxContainer/ScrollContainer/MarginContainer"]
 layout_mode = 2
 
 [node name="GameUI" type="Control" parent="UI"]

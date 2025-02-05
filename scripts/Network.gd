@@ -24,8 +24,8 @@ func _ready():
 
 func peer_connected(id):
 	GameManager.print_debug_msg('Player connected ' + str(id))
-	if multiplayer.is_server():
-		add_player(id)
+	#if multiplayer.is_server():
+		# add_player(id)
 
 func peer_disconnected(id):
 	GameManager.print_debug_msg('Player disconnected ' + str(id))
@@ -59,19 +59,30 @@ func connection_failed():
 	Game.game_in_progress = true
 	UI.in_menu = true
 	UI.in_main_menu = false
+	UI.in_server_lobby = false
 	UI.in_server_browser = true
 
 @rpc('any_peer')
 func send_player_information(username, id):
+	# print('1')
 	if !GameManager.Players.has(id):
 		GameManager.Players[id] = {
 			'username': username,
 			'id': id,
 		}
 		Game.update_score_text_for_all.rpc()
+		# print('2', UI.in_server_lobby)
+		if UI.in_server_lobby:
+			UI.update_lobby_player_list()
 	if multiplayer.is_server():
 		for player_id in GameManager.Players:
 			send_player_information.rpc(GameManager.Players[player_id].username, player_id)
+#@rpc('any_peer')
+#func set_server_lobby_state(value):
+	#GameManager.in_lobby = value
+	# if multiplayer.is_server():
+	# 	for player_id in GameManager.Players:
+	# 		set_server_lobby_state.rpc(value)
 @rpc('any_peer')
 func del_player_information(id):
 	if !GameManager.Players.has(id): return
@@ -93,14 +104,18 @@ func _on_host_pressed():
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)
-	send_player_information(UI.username_box.text,
-			multiplayer.get_unique_id())
+	# set_server_lobby_state(true)
+	ServerBrowser.in_lobby = true
 	ServerBrowser.broadcastPort = PORT + 2
 	ServerBrowser.broadcast(UI.username_box.text + "'s server")
-	UI.in_menu = false
+	# UI.in_menu = false
+	UI.in_server_lobby = true
 	UI.in_server_browser = false
-	add_player()
-	Game.start_game()
+
+	send_player_information(UI.username_box.text,
+			multiplayer.get_unique_id())
+	# add_player()
+	# Game.start_game()
 
 func join_by_ip(ip):
 	GameManager.print_debug_msg('trying to join by ip: ' + ip)
@@ -112,7 +127,8 @@ func join_by_ip(ip):
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)
-	UI.in_menu = false
+	# UI.in_menu = false
+	UI.in_server_lobby = true
 	UI.in_server_browser = false
 	UI.get_node('Connecting').show()
 
