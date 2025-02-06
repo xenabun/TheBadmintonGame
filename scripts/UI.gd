@@ -1,5 +1,7 @@
 extends Control
 
+var ui_state_class = load("res://classes/ui_state.gd")
+
 @export var menu_camera_pivot : Node
 @export var player_camera : Node
 @export var title_label : Node
@@ -7,6 +9,9 @@ extends Control
 @export var lobby_player_list : Node
 @export var Network : Node
 @export var ServerBrowser : Node
+
+
+
 @export var in_menu : bool = true :
 	set(value):
 		in_menu = value
@@ -57,19 +62,22 @@ var title_rot_deg = 1
 var title_rot_time = 1
 
 func _ready():
-	get_node('MainMenu/Username').show()
-	get_node('MainMenu/Menu').hide()
-	get_node('MainMenu/Port').hide()
-	get_node('MainMenu').show()
+	var ui_state = ui_state_class.new()
+	ui_state.init(self)
+
+	# get_node('MainMenu/Username').show()
+	# get_node('MainMenu/Menu').hide()
+	# get_node('MainMenu/Port').hide()
+	# get_node('MainMenu').show()
 	
-	get_node('CurrentUsername').hide()
-	get_node('ServerBrowser').hide()
-	get_node('GameUI').hide()
-	get_node('Menu').hide()
-	get_node('GameResult').hide()
-	get_node('GameControls').hide()
-	get_node('Connecting').hide()
-	get_node('Lobby').hide()
+	# get_node('CurrentUsername').hide()
+	# get_node('ServerBrowser').hide()
+	# get_node('GameUI').hide()
+	# get_node('Menu').hide()
+	# get_node('GameResult').hide()
+	# get_node('GameControls').hide()
+	# get_node('Connecting').hide()
+	# get_node('Lobby').hide()
 	
 	get_node('ServerBrowser/Back').pressed.connect(_on_server_browser_back_pressed)
 
