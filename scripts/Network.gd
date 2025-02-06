@@ -12,7 +12,7 @@ var peer
 
 func _ready():
 	multiplayer.server_relay = false
-	ServerBrowserUI.host_pressed.connect(_on_host_pressed)
+	# ServerBrowserUI.host_pressed.connect(_on_host_pressed)
 	
 	if !multiplayer.is_server(): return
 	
@@ -57,10 +57,10 @@ func connection_failed():
 	peer.close()
 	GameManager.Players = {}
 	Game.game_in_progress = true
-	UI.in_menu = true
-	UI.in_main_menu = false
-	UI.in_server_lobby = false
-	UI.in_server_browser = true
+	UI.state.in_menu.set_state(true)
+	UI.state.in_main_menu.set_state(false)
+	UI.state.in_server_browser.set_state(true)
+	UI.state.in_server_lobby.set_state(false)
 
 @rpc('any_peer')
 func send_player_information(username, id):
@@ -72,7 +72,8 @@ func send_player_information(username, id):
 		}
 		Game.update_score_text_for_all.rpc()
 		# print('2', UI.in_server_lobby)
-		if UI.in_server_lobby:
+		# if UI.in_server_lobby:
+		if UI.state.in_server_lobby.get_state():
 			UI.update_lobby_player_list()
 	if multiplayer.is_server():
 		for player_id in GameManager.Players:
@@ -107,15 +108,30 @@ func _on_host_pressed():
 	# set_server_lobby_state(true)
 	ServerBrowser.in_lobby = true
 	ServerBrowser.broadcastPort = PORT + 2
-	ServerBrowser.broadcast(UI.username_box.text + "'s server")
+	ServerBrowser.broadcast("Сервер " + UI.username_box.text + "-а")
 	# UI.in_menu = false
-	UI.in_server_lobby = true
-	UI.in_server_browser = false
+	# UI.in_server_lobby = true
+	UI.state.in_server_lobby.set_state(true, {is_host = true})
+	# UI.in_server_browser = false
+	UI.state.in_server_browser.set_state(false)
 
 	send_player_information(UI.username_box.text,
 			multiplayer.get_unique_id())
 	# add_player()
 	# Game.start_game()
+
+func _on_start_game_pressed():
+	if not multiplayer.is_server(): return
+
+	UI.state.in_menu.set_state(false)
+	UI.state.in_server_lobby.set_state(false)
+	# add_player()
+
+	for player_id in GameManager.Players:
+		# if player_id == 1: continue
+		add_player(player_id)
+
+	pass # Replace with function body.
 
 func join_by_ip(ip):
 	GameManager.print_debug_msg('trying to join by ip: ' + ip)
@@ -128,8 +144,10 @@ func join_by_ip(ip):
 	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)
 	# UI.in_menu = false
-	UI.in_server_lobby = true
-	UI.in_server_browser = false
+	# UI.in_server_lobby = true
+	UI.state.in_server_lobby.set_state(true, {is_host = false})
+	# UI.in_server_browser = false
+	UI.state.in_server_browser.set_state(false)
 	UI.get_node('Connecting').show()
 
 func quit_server():
@@ -143,9 +161,12 @@ func quit_server():
 	Game.game_in_progress = true
 	Game.ball.set_ball_ready()
 	Game.ball.reset_ball()
-	UI.in_menu = true
-	UI.in_main_menu = true
-	UI.in_server_browser = false
+	# UI.in_menu = true
+	UI.state.in_menu.set_state(true)
+	# UI.in_main_menu = true
+	UI.state.in_main_menu.set_state(true)
+	# UI.in_server_browser = false
+	UI.state.in_server_browser.set_state(false)
 	if multiplayer.is_server():
 		ServerBrowser.stop_broadcast()
 		for player in get_tree().get_nodes_in_group('Player'):
@@ -155,8 +176,10 @@ func quit_server():
 
 func start_singleplayer():
 	Game.current_game_type = Game.game_type.SINGLEPLAYER
-	UI.in_menu = false
-	UI.in_main_menu = false
+	# UI.in_menu = false
+	UI.state.in_menu.set_state(false)
+	# UI.in_main_menu = false
+	UI.state.in_main_menu.set_state(false)
 	var bot_username = 'Компьютер'
 	GameManager.Players[1] = {
 		'username': UI.username_box.text,

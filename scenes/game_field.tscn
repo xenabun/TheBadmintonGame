@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=55 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -15,7 +15,6 @@
 [ext_resource type="Texture2D" uid="uid://ct31fhxvcragr" path="res://addons/GPUTrail-main/defaults/curve.tres" id="11_4wxie"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
-[ext_resource type="PackedScene" uid="uid://c0mrf3fj2l4fq" path="res://prefabs/control.tscn" id="12_hm06h"]
 [ext_resource type="Script" path="res://addons/GPUTrail-main/GPUTrail3D.gd" id="12_qwsn2"]
 [ext_resource type="Texture2D" uid="uid://bfy0ucogy3lda" path="res://images/controls.png" id="14_frpfu"]
 [ext_resource type="Shader" path="res://shaders/texture_outline.gdshader" id="15_274xj"]
@@ -561,9 +560,108 @@ offset_bottom = 28.0
 theme_override_font_sizes/font_size = 12
 text = "X"
 
-[node name="ServerBrowser" parent="UI" instance=ExtResource("12_hm06h")]
+[node name="ServerBrowser" type="Control" parent="UI"]
 visible = false
 layout_mode = 2
+size_flags_vertical = 0
+
+[node name="Host" type="Button" parent="UI/ServerBrowser"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -155.0
+offset_top = 86.0
+offset_right = 156.0
+offset_bottom = 117.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Создать сервер
+"
+
+[node name="ServerList" type="Panel" parent="UI/ServerBrowser"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -156.0
+offset_top = -162.0
+offset_right = 156.001
+offset_bottom = 81.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/ServerBrowser/ServerList"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = -0.111
+anchor_right = 1.0
+offset_left = 116.0
+offset_top = -0.0269985
+offset_right = -115.0
+offset_bottom = -4.0
+grow_horizontal = 2
+text = "Список серверов
+"
+
+[node name="Scanning" type="Panel" parent="UI/ServerBrowser/ServerList"]
+visible = false
+layout_mode = 0
+offset_right = 313.0
+offset_bottom = 242.0
+
+[node name="Label" type="Label" parent="UI/ServerBrowser/ServerList/Scanning"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -42.5
+offset_top = -11.0
+offset_right = 41.5
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Загрузка..."
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/ServerBrowser/ServerList"]
+layout_mode = 0
+offset_right = 312.0
+offset_bottom = 244.0
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/ServerBrowser/ServerList/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Back" type="Button" parent="UI/ServerBrowser"]
+layout_mode = 0
+offset_left = -155.0
+offset_top = 121.0
+offset_right = 156.0
+offset_bottom = 152.0
+text = "Вернуться в главное меню"
+
+[node name="PortText" type="Label" parent="UI/ServerBrowser"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = 154.0
+offset_right = 150.0
+offset_bottom = 177.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Порт: хххх"
 
 [node name="Lobby" type="Control" parent="UI"]
 layout_mode = 2
@@ -612,6 +710,22 @@ theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UI/Lobby/Panel/VBoxContainer/ScrollContainer/MarginContainer"]
 layout_mode = 2
+
+[node name="StartGame" type="Button" parent="UI/Lobby"]
+layout_mode = 0
+offset_left = -202.0
+offset_top = 117.0
+offset_right = -7.0
+offset_bottom = 148.0
+text = "Начать игру"
+
+[node name="Back" type="Button" parent="UI/Lobby"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 117.0
+offset_right = 201.0
+offset_bottom = 148.0
+text = "Вернуться назад"
 
 [node name="GameUI" type="Control" parent="UI"]
 layout_mode = 2
@@ -1016,6 +1130,10 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/MainMenu/Menu/Exit" to="UI" method="_on_app_exit_pressed"]
 [connection signal="pressed" from="UI/MainMenu/Port/VBoxContainer/Confirm" to="UI" method="_on_port_confirm"]
 [connection signal="pressed" from="UI/MainMenu/Port/Close" to="UI" method="_on_port_menu_close_pressed"]
+[connection signal="pressed" from="UI/ServerBrowser/Host" to="Network" method="_on_host_pressed"]
+[connection signal="pressed" from="UI/ServerBrowser/Back" to="UI" method="_on_server_browser_back_pressed"]
+[connection signal="pressed" from="UI/Lobby/StartGame" to="Network" method="_on_start_game_pressed"]
+[connection signal="pressed" from="UI/Lobby/Back" to="UI" method="_on_lobby_exit_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_pause_menu_close"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
