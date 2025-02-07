@@ -26,13 +26,25 @@ func _enter_tree():
 func clear_lobby_player_list():
 	for child in lobby_player_list.get_children():
 		child.queue_free()
-func update_lobby_player_list():
+@rpc('any_peer')
+func update_lobby_player_list(players):
+	if not state.in_server_lobby.get_state(): return
+
 	clear_lobby_player_list()
-	for i in GameManager.Players:
-		var player_info = GameManager.Players[i]
+	# for i in GameManager.Players:
+	for player_id in players: # Network.Players:
+		# var player_info = GameManager.Players[i]
+		var player_data = players[player_id] # Network.Players[player_id]
 		var player_label = preload("res://prefabs/player_label.tscn").instantiate()
-		player_label.text = player_info.username
+		player_label.text = player_data.username
 		lobby_player_list.add_child(player_label)
+# @rpc("any_peer", 'call_local')
+# func update_lobby_player_list_for_all():
+# 	update_lobby_player_list()
+@rpc('any_peer')
+func close_lobby_player_list():
+	state.in_menu.set_state(false)
+	state.in_server_lobby.set_state(false)
 
 func _on_game_exit_pressed():
 	Network.quit_server()
@@ -82,7 +94,6 @@ func _on_lobby_exit_pressed():
 	# state.in_server_lobby.set_state(false)
 	# state.in_server_browser.set_state(true)
 	Network.quit_server()
-	# TODO: close hosting and start server listen
 
 func _on_controls_close():
 	get_node('GameControls').hide()

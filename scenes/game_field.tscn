@@ -125,10 +125,16 @@ shader_parameter/curve = ExtResource("11_4wxie")
 [sub_resource type="QuadMesh" id="QuadMesh_7q4ig"]
 material = SubResource("ShaderMaterial_e0aow")
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_u8k48"]
-properties/0/path = NodePath(".:in_lobby")
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_wierg"]
+properties/0/path = NodePath(".:Players")
 properties/0/spawn = true
 properties/0/replication_mode = 1
+properties/1/path = NodePath(".:server_state")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:Matches")
+properties/2/spawn = true
+properties/2/replication_mode = 1
 
 [sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
 font_size = 121
@@ -383,17 +389,18 @@ UI = NodePath("../UI")
 ServerBrowserUI = NodePath("../UI/ServerBrowser")
 ServerBrowser = NodePath("../ServerBrowser")
 
-[node name="ServerBrowser" type="Node" parent="." node_paths=PackedStringArray("broadcastTimer", "UI", "ServerBrowserUI")]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="Network"]
+replication_config = SubResource("SceneReplicationConfig_wierg")
+
+[node name="ServerBrowser" type="Node" parent="." node_paths=PackedStringArray("broadcastTimer", "UI", "ServerBrowserUI", "Network")]
 script = ExtResource("7_4w53d")
 broadcastTimer = NodePath("BroadcastTimer")
 server_card_prefab = ExtResource("11_dli3y")
 UI = NodePath("../UI")
 ServerBrowserUI = NodePath("../UI/ServerBrowser")
+Network = NodePath("../Network")
 
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="ServerBrowser"]
-replication_config = SubResource("SceneReplicationConfig_u8k48")
 
 [node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "lobby_player_list", "Network", "ServerBrowser")]
 anchors_preset = 8
@@ -543,6 +550,7 @@ text = "Введите порт:"
 
 [node name="LineEdit" type="LineEdit" parent="UI/MainMenu/Port/VBoxContainer"]
 layout_mode = 2
+text = "3333"
 placeholder_text = "1024 - 49151"
 alignment = 1
 max_length = 5

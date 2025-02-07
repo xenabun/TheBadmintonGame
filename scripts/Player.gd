@@ -21,6 +21,7 @@ func _reset_position():
 
 @onready var Level = get_tree().get_root().get_node('Scene/Level')
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
+@onready var Network = get_tree().get_root().get_node('Scene/Network')
 
 # @onready var camera = Level.get_node('World/PlayerCamera')
 # @onready var GameUI = UI.get_node('GameUI')
@@ -51,7 +52,8 @@ func _ready():
 	aim_arrow.hide()
 	if multiplayer.get_unique_id() != player_id: return
 	
-	var player_data = GameManager.Players.get(player_id)
+	# var player_data = GameManager.Players.get(player_id)
+	var player_data = Network.Players.get(player_id)
 	if player_data:
 		username = player_data.username
 		username_billboard.text = player_data.username
@@ -67,7 +69,6 @@ func _ready():
 	camera.global_position = menu_camera.global_position
 	camera.global_rotation = menu_camera.global_rotation
 	update_camera_transform(0.2)
-	UI.state.in_server_lobby.set_state(false)
 	GameUI.show()
 	GameControls.show()
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')

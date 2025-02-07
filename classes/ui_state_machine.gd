@@ -10,9 +10,9 @@ var in_server_lobby : State = State.new(false)
 var entering_port : State = State.new(false)
 
 func _init(_ui):
-	ui = _ui
-
 	print('Initializing ', ui, ' state machine')
+
+	ui = _ui
 
 	ui.get_node('MainMenu/Username').show()
 	ui.get_node('MainMenu/Menu').hide()

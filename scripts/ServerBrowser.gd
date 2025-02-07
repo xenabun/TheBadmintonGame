@@ -6,10 +6,11 @@ signal join_server(ip)
 @export var broadcastPort : int
 @export var broadcastAddress : String = '255.255.255.255'
 @export var broadcastTimer : Timer
-@export var in_lobby : bool = false
+# @export var in_lobby : bool = false
 @export var server_card_prefab : PackedScene
 @export var UI : Node
 @export var ServerBrowserUI : Node
+@export var Network : Node
 
 var roomInfo = {"name": "room name", "player_count": 0}
 var broadcaster : PacketPeerUDP
@@ -31,7 +32,8 @@ func listen_to_broadcast():
 
 func broadcast(room_name):
 	roomInfo.name = room_name
-	roomInfo.player_count = GameManager.Players.size()
+	# roomInfo.player_count = GameManager.Players.size()
+	roomInfo.player_count = Network.Players.size()
 	
 	broadcaster = PacketPeerUDP.new()
 	broadcaster.set_dest_address(broadcastAddress, listenPort)
@@ -47,7 +49,7 @@ func broadcast(room_name):
 	broadcastTimer.start()
 
 func _process(_delta):
-	if !listener: return
+	if not listener: return
 	
 	if listener.get_available_packet_count() > 0:
 		var server_ip = listener.get_packet_ip()
@@ -79,7 +81,8 @@ func _process(_delta):
 		server_card.join_server.connect(join_by_ip)
 
 func _on_broadcast_timer_timeout():
-	roomInfo.player_count = GameManager.Players.size()
+	# roomInfo.player_count = GameManager.Players.size()
+	roomInfo.player_count = Network.Players.size()
 	var data = JSON.stringify(roomInfo)
 	var packet = data.to_utf8_buffer()
 	broadcaster.put_packet(packet)
