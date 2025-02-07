@@ -437,7 +437,6 @@ size_flags_horizontal = 8
 text = "Изменить"
 
 [node name="MainMenu" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/MainMenu"]
@@ -502,6 +501,7 @@ offset_right = 126.0
 offset_bottom = 94.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 30
 
 [node name="Singleplayer" type="Button" parent="UI/MainMenu/Menu"]
 layout_mode = 2
@@ -1066,7 +1066,6 @@ text = "X"
 flat = true
 
 [node name="DebugUI" type="Control" parent="."]
-visible = false
 clip_contents = true
 layout_mode = 3
 anchors_preset = 2

@@ -16,11 +16,14 @@ func _reset_position():
 @export var stamina_bar : Node
 @export var throw_power = PlayerVariables.MAX_POWER
 @export var aim_x = 0
-@export var Level : Node
-@export var UI : Node
+# @export var Level : Node
+# @export var UI : Node
 
-@onready var camera = Level.get_node('World/PlayerCamera')
-@onready var GameUI = UI.get_node('GameUI')
+@onready var Level = get_tree().get_root().get_node('Scene/Level')
+@onready var UI = get_tree().get_root().get_node('Scene/UI')
+
+# @onready var camera = Level.get_node('World/PlayerCamera')
+# @onready var GameUI = UI.get_node('GameUI')
 @onready var input = get_node('PlayerInput')
 @onready var racket_hold_timer = get_node('PlayerInput/RacketHold')
 @onready var animation_tree = get_node('AnimationTree')
@@ -34,6 +37,7 @@ func _reset_position():
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var prev_direction = Vector3.ZERO
+var camera
 
 func get_player_side():
 	return 1 if player_id == 1 else -1
@@ -43,6 +47,7 @@ func get_player_num():
 func _ready():
 	GameManager.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
 	set_physics_process(multiplayer.get_unique_id() == player_id)
+	# UI = get_tree().get_root().get_node('Scene/UI')
 	aim_arrow.hide()
 	if multiplayer.get_unique_id() != player_id: return
 	
@@ -54,13 +59,17 @@ func _ready():
 	else:
 		GameManager.print_debug_msg('getting player data: not found')
 	reset_position.connect(_reset_position)
-	camera.make_current()
+	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
+	var GameUI = UI.get_node('GameUI')
+	var GameControls = UI.get_node('GameControls')
+	camera.make_current()
 	camera.global_position = menu_camera.global_position
 	camera.global_rotation = menu_camera.global_rotation
 	update_camera_transform(0.2)
+	UI.state.in_server_lobby.set_state(false)
 	GameUI.show()
-	UI.get_node('GameControls').show()
+	GameControls.show()
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina

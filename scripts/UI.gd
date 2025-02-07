@@ -1,6 +1,6 @@
 extends Control
 
-@export var state : UI_State = null # UI_State.new(self)
+@export var state : UI_State
 
 @export var menu_camera_pivot : Node
 @export var player_camera : Node
@@ -79,8 +79,9 @@ func _on_port_confirm():
 		state.in_server_browser.set_state(true)
 
 func _on_lobby_exit_pressed():
-	state.in_server_lobby.set_state(false)
-	state.in_server_browser.set_state(true)
+	# state.in_server_lobby.set_state(false)
+	# state.in_server_browser.set_state(true)
+	Network.quit_server()
 	# TODO: close hosting and start server listen
 
 func _on_controls_close():

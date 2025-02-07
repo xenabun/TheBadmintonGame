@@ -2,6 +2,7 @@ extends MultiplayerSynchronizer
 
 @export var direction := Vector3()
 @export var player : Node
+@export var animation_tree : Node
 @export var sprinting : bool = false
 @export var stamina : float = PlayerVariables.MAX_STAMINA:
 	set(value):
@@ -15,8 +16,10 @@ extends MultiplayerSynchronizer
 				PlayerVariables.STAMINA_BAR_COLOR_NORMAL)
 @export var aim_direction : Vector2 = Vector2.ZERO
 
-@onready var UI = get_parent().UI
-@onready var animation_tree = player.get_node('AnimationTree')
+# @onready var UI = get_parent().UI
+@onready var UI = get_tree().get_root().get_node('Scene/UI')
+# @onready var UI = 
+# @onready var animation_tree = player.get_node('AnimationTree')
 @onready var racket_active_timer = get_node('RacketActive')
 @onready var racket_cooldown_timer = get_node('RacketCooldown')
 @onready var racket_hold_timer = get_node('RacketHold')
@@ -77,6 +80,8 @@ func is_game_paused():
 func _ready():
 	var authority = get_multiplayer_authority() == multiplayer.get_unique_id()
 	set_process(authority)
+	player = get_parent()
+	animation_tree = player.get_node('AnimationTree')
 	player.get_node('RacketArea/CSGBox3D').hide()
 	racket_hold_timer.wait_time = PlayerVariables.ACTION_HOLD_TIME
 	if authority:

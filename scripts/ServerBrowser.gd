@@ -88,9 +88,11 @@ func stop_broadcast():
 	broadcastTimer.stop()
 	if broadcaster != null:
 		broadcaster.close()
+		broadcaster = null
 func stop_listen():
 	if listener != null:
 		listener.close()
+		listener = null
 		set_process(false)
 		GameManager.print_debug_msg('Listener closed')
 		GameManager.set_listen_port_bound_text('listen port bound: -')

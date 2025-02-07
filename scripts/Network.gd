@@ -166,6 +166,7 @@ func quit_server():
 	# UI.in_main_menu = true
 	UI.state.in_main_menu.set_state(true)
 	# UI.in_server_browser = false
+	UI.state.in_server_lobby.set_state(false)
 	UI.state.in_server_browser.set_state(false)
 	if multiplayer.is_server():
 		ServerBrowser.stop_broadcast()
@@ -193,6 +194,10 @@ func start_singleplayer():
 	add_bot(plr_char, bot_username)
 	Game.start_game()
 
+# @rpc('any_peer')
+# func init_player(character):
+	# print('ALO ', multiplayer.get_unique_id())
+	# character.get_node('PlayerInput').player = character
 func add_player(id: int = 1):
 	GameManager.print_debug_msg('adding player ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 	if Level.get_node('Players').has_node(str(id)): return
@@ -200,9 +205,13 @@ func add_player(id: int = 1):
 	var character = preload("res://prefabs/Player.tscn").instantiate()
 	character.player_id = id
 	character.name = str(id)
-	character.Level = Level
-	character.UI = UI
-	character.get_node('PlayerInput').player = character
+	# character.Level = Level
+	# character.UI = UI
+	# character.get_node('PlayerInput').player = character
+	# if id == 1:
+	# 	init_player(character)
+	# else:
+	# 	init_player.rpc_id(id, character)
 	var num = 1 if id == 1 else 2
 	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
 	character.position = spawn_point.position
