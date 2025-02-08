@@ -26,6 +26,7 @@ var peer
 
 func _ready():
 	multiplayer.server_relay = false
+	# %PlayerSpawner.set_spawn_function(add_player)
 	
 	if not multiplayer.is_server(): return
 	
@@ -36,6 +37,7 @@ func _ready():
 	ServerBrowser.join_server.connect(join_by_ip)
 
 func update_lobby_player_list_for_all():
+	if Game.current_game_type == Game.game_type.SINGLEPLAYER: return
 	for i in Players:
 		if multiplayer.get_unique_id() == i:
 			UI.update_lobby_player_list(Players)
@@ -50,7 +52,7 @@ func add_player_data(player_id, username):
 			'username': username,
 			'state': player_state_type.NONE,
 		}
-		Game.update_score_text_for_all.rpc()
+		# Game.update_score_text_for_all.rpc()
 		update_lobby_player_list_for_all()
 
 func del_player_data(player_id):
@@ -62,7 +64,7 @@ func remove_player(id):
 	if multiplayer.is_server():
 		Level.get_node('World/Ball').set_multiplayer_authority(1)
 		del_player_data(id)
-		Game.update_score_text_for_all.rpc()
+		Game.update_score_text_for_all() # .rpc()
 		for player in get_tree().get_nodes_in_group('Player'):
 			if str(player.name) == str(id):
 				player.queue_free()
@@ -91,14 +93,8 @@ func connected_to_server():
 ##client
 func connection_failed():
 	Game.print_debug_msg('Connection failed')
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	peer.close()
-	Players = {}
-	Game.game_in_progress = true
-	UI.state.in_menu.set_state(true)
-	UI.state.in_main_menu.set_state(false)
-	UI.state.in_server_browser.set_state(true)
-	UI.state.in_server_lobby.set_state(false)
+	quit_server()
+	UI.show_message("Не удалось установить соединение")
 
 func _on_host_pressed():
 	Game.print_debug_msg('host pressed')
@@ -149,15 +145,14 @@ func join_by_ip(ip):
 @rpc('any_peer')
 func kicked():
 	quit_server()
-	UI.show_message("Вы были выгнаны из сервера")
+	UI.show_message("Вы были исключены")
 
 func quit_server():
 	if multiplayer.server_disconnected.is_connected(quit_server):
 		multiplayer.server_disconnected.disconnect(quit_server)
 	Game.current_game_type = Game.game_type.NONE
 	server_state = server_state_type.NONE
-	if peer:
-		peer.close()
+	if peer: peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	Players = {}
 	Game.game_in_progress = true
@@ -185,24 +180,45 @@ func start_singleplayer():
 	add_bot(plr_char, bot_username)
 	Game.start_game()
 
-func add_player(id: int = 1):
+@rpc('any_peer')
+func setup_player(character_name, data):
+	var character = Level.get_node('Players/' + character_name)
+	character.player_num = data.num
+	character.position = data.position
+	character.rotation = data.rotation
+
+func add_player(id : int = 1, num : int = 1):
 	Game.print_debug_msg('adding player ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 	if Level.get_node('Players').has_node(str(id)): return
 
 	var character = preload("res://prefabs/Player.tscn").instantiate()
-	character.player_id = id
+	# character.player_id = id
+	print('applying player num: ', num, ' to player ', id)
+	# character.player_num = num
 	character.name = str(id)
-	var num = 1 if id == 1 else 2
+	# var num = 1 if id == 1 else 2
 	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
-	character.position = spawn_point.position
-	character.rotation = spawn_point.rotation
+	print('applying spawn position ', 'World/Player' + str(num) + 'Spawn')
+	# character.position = spawn_point.position
+	# character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
-	Game.update_score_text_for_all.rpc()
+	if id == 1:
+		character.player_num = num
+		character.position = spawn_point.position
+		character.rotation = spawn_point.rotation
+	else:
+		setup_player.rpc_id(id, str(id), {
+			'num': num,
+			'position': spawn_point.position,
+			'rotation': spawn_point.rotation,
+		})
+	Game.update_score_text_for_all() # .rpc()
 
 	return character
 
 func add_bot(player_char, bot_username):
 	var character = preload("res://prefabs/Bot.tscn").instantiate()
+	character.name = '2'
 	character.player = player_char
 	character.Level = Level
 	character.get_node('Username').text = bot_username

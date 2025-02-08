@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=56 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -59,6 +59,9 @@ size = Vector3(147.88, 1.191, 210.24)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ff3cv"]
 size = Vector3(30.1602, 7.54124, 0.143555)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tdgut"]
+size = Vector3(30.1631, 3.71991, 1.22266)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_228nm"]
 size = Vector3(146.281, 63.0369, 206.596)
@@ -242,6 +245,16 @@ shadow_enabled = true
 transform = Transform3D(1, 0, 0, 0, 0.960303, 0.278958, 0, -0.278958, 0.960303, 0, 13.5088, 25)
 fov = 60.0
 
+[node name="SpectatorCamera" type="Node3D" parent="Level/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.76163, 0)
+
+[node name="HorizontalAxis" type="Node3D" parent="Level/World/SpectatorCamera"]
+
+[node name="VerticalAxis" type="Node3D" parent="Level/World/SpectatorCamera/HorizontalAxis"]
+
+[node name="Camera" type="Camera3D" parent="Level/World/SpectatorCamera/HorizontalAxis/VerticalAxis"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 30)
+
 [node name="Floor" type="StaticBody3D" parent="Level/World"]
 collision_layer = 11
 collision_mask = 11
@@ -273,9 +286,18 @@ collision_mask = 3
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Net"]
 shape = SubResource("BoxShape3D_ff3cv")
+disabled = true
 
 [node name="net" parent="Level/World/Net" instance=ExtResource("2_nvxwo")]
 transform = Transform3D(7.485, 0, 0, 0, 7.485, 0, 0, 0, 7.485, 0, -3.66, 0)
+
+[node name="Area" type="Area3D" parent="Level/World/Net"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Net/Area"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95096, 0)
+shape = SubResource("BoxShape3D_tdgut")
 
 [node name="FieldArea" type="Area3D" parent="Level/World"]
 collision_layer = 4
@@ -301,14 +323,16 @@ collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.418967, -15.005)
 shape = SubResource("BoxShape3D_rfrsq")
 
-[node name="Ball" type="CharacterBody3D" parent="Level/World" node_paths=PackedStringArray("Level", "FieldArea", "FloorArea", "Player1Area", "Player2Area")]
+[node name="Ball" type="CharacterBody3D" parent="Level/World" node_paths=PackedStringArray("Level", "Network", "FieldArea", "FloorArea", "NetArea", "Player1Area", "Player2Area")]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -10, 30)
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("8_d4rec")
 Level = NodePath("../..")
+Network = NodePath("../../../Network")
 FieldArea = NodePath("../FieldArea")
 FloorArea = NodePath("../Floor/Area")
+NetArea = NodePath("../Net/Area")
 Player1Area = NodePath("../Player1Area")
 Player2Area = NodePath("../Player2Area")
 
@@ -377,7 +401,6 @@ _defaults_have_been_set = true
 unique_name_in_owner = true
 _spawnable_scenes = PackedStringArray("res://prefabs/Player.tscn")
 spawn_path = NodePath("../Players")
-spawn_limit = 2
 
 [node name="Network" type="Node" parent="." node_paths=PackedStringArray("Level", "UI", "ServerBrowser", "ServerBrowserUI")]
 script = ExtResource("6_h2wnu")
@@ -1019,6 +1042,33 @@ offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "Устанавливаем соединение..."
+
+[node name="Loading" type="Control" parent="UI"]
+visible = false
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/Loading"]
+layout_mode = 2
+offset_left = -706.0
+offset_top = -467.0
+offset_right = 698.0
+offset_bottom = 445.0
+color = Color(0, 0, 0, 0.329412)
+
+[node name="Label" type="Label" parent="UI/Loading"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -98.0
+offset_top = -11.5
+offset_right = 98.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Загрузка..."
 
 [node name="GameControls" type="Control" parent="UI"]
 visible = false

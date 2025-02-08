@@ -3,10 +3,14 @@ extends CharacterBody3D
 const BASE_PLAYER_POS_Y = 4.824 / 2
 
 @export var Level : Node
+@export var Network : Node
 @export var FieldArea : Node
 @export var FloorArea : Node
+@export var NetArea : Node
 @export var Player1Area : Node
 @export var Player2Area : Node
+
+@onready var ball_hitbox : Area3D = get_node('Area')
 
 var direction : float = 0.0
 var power : float = 0.0
@@ -99,15 +103,15 @@ func _physics_process(_delta):
 	if not Game.game_in_progress or ball_ready: return
 	
 	# reset when leaves field area
-	if not $Area.overlaps_area(FieldArea):
+	if not ball_hitbox.overlaps_area(FieldArea):
 		set_ball_ready.rpc()
 		return
 	
 	# floor interact
-	if $Area.overlaps_area(FloorArea):
-		if $Area.overlaps_area(Player1Area):
+	if ball_hitbox.overlaps_area(FloorArea):
+		if ball_hitbox.overlaps_area(Player1Area):
 			Game.grant_point.rpc(1)
-		elif $Area.overlaps_area(Player2Area):
+		elif ball_hitbox.overlaps_area(Player2Area):
 			Game.grant_point.rpc(0)
 		else:
 			if last_interact == '1':
@@ -117,8 +121,19 @@ func _physics_process(_delta):
 		set_ball_ready.rpc()
 		return
 	
+	# net interact
+	if ball_hitbox.overlaps_area(NetArea) and NetArea != ignored_area:
+		# Game.print_debug_msg('ball hit net')
+		var player_name = Network.Players[Game.get_opponent_id(get_multiplayer_authority())].username
+		var new_power = power * 0.75
+		var new_direction = -direction
+		var new_velocity_x = -velocity.x
+		bounce_ball.rpc(get_multiplayer_authority(),
+				player_name, new_velocity_x, new_direction, new_power,
+				position, NetArea)
+
 	# racket interact
-	var overlapped_areas = $Area.get_overlapping_areas()
+	var overlapped_areas = ball_hitbox.get_overlapping_areas()
 	for oarea in overlapped_areas:
 		if oarea.name != 'RacketArea': continue
 		if oarea == ignored_area: continue
@@ -130,7 +145,7 @@ func _physics_process(_delta):
 		var aim_x = sin((player.aim_x * PI) / 2)
 		var new_velocity_x = aim_x * 30 * -new_direction
 		
-		bounce_ball.rpc(Game.get_opponent_peer_id(str(player_name).to_int()),
+		bounce_ball.rpc(Game.get_opponent_id(str(player_name).to_int()),
 				player_name, new_velocity_x, new_direction, new_power,
 				position, oarea)
 		break

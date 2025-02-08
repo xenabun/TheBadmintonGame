@@ -108,7 +108,7 @@ func _input(event):
 			var aim_x = sin((aim_direction.x * 2 * PI) / 2)
 			var aim_y = aim_direction.y
 			var new_velocity_x = aim_x * 30 * -new_direction
-			Game.ball.throw_ball.rpc(Game.get_opponent_peer_id(multiplayer.get_unique_id()),
+			Game.ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
 					player.name, pos, new_direction, new_velocity_x, aim_y)
 			player.get_node('AimArrow').hide()
 			throw_ready.rpc()

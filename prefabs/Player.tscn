@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://blx58dx1jig7h"]
+[gd_scene load_steps=28 format=3 uid="uid://blx58dx1jig7h"]
 
 [ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
@@ -90,6 +90,11 @@ nodes/WalkSpeed/position = Vector2(-100, 100)
 nodes/output/position = Vector2(160, 140)
 node_connections = [&"RacketHold", 0, &"RacketSwing", &"RacketHold", 1, &"TimeScale", &"RacketHoldIdle", 0, &"RacketHold", &"RacketHoldIdle", 1, &"TimeScale 2", &"RacketSwing", 0, &"Throw", &"RacketSwing", 1, &"Animation 4", &"Throw", 0, &"Animation", &"Throw", 1, &"Animation 5", &"TimeScale", 0, &"Animation 3", &"TimeScale 2", 0, &"Animation 6", &"WalkScale", 0, &"Animation 2", &"WalkSpeed", 0, &"RacketHoldIdle", &"WalkSpeed", 1, &"WalkScale", &"output", 0, &"WalkSpeed"]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_v8t2k"]
+properties/0/path = NodePath(".:player_num")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kwohg"]
 properties/0/path = NodePath(".:player_id")
 properties/0/spawn = true
@@ -103,6 +108,9 @@ properties/2/replication_mode = 0
 properties/3/path = NodePath("playermodel:rotation")
 properties/3/spawn = true
 properties/3/replication_mode = 0
+properties/4/path = NodePath(".:player_num")
+properties/4/spawn = false
+properties/4/replication_mode = 0
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lmu2p"]
 properties/0/path = NodePath("PlayerInput:direction")
@@ -221,11 +229,8 @@ parameters/TimeScale/scale = 1.5
 parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 
-[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_kwohg")
-
 [node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_lmu2p")
+replication_config = SubResource("SceneReplicationConfig_v8t2k")
 script = ExtResource("4_ipxnc")
 
 [node name="RacketActive" type="Timer" parent="PlayerInput"]
@@ -242,6 +247,14 @@ one_shot = true
 [node name="ActionPressed" type="Timer" parent="PlayerInput"]
 wait_time = 0.3
 one_shot = true
+
+[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+process_mode = 4
+replication_config = SubResource("SceneReplicationConfig_kwohg")
+
+[node name="PlayerInput1" type="MultiplayerSynchronizer" parent="."]
+process_mode = 4
+replication_config = SubResource("SceneReplicationConfig_lmu2p")
 
 [node name="AimArrow" type="Node3D" parent="."]
 

@@ -8,23 +8,20 @@ func _reset_position():
 	rotation = spawn_point.rotation
 	update_camera_transform(1)
 
-@export var player_id = 1 :
-	set(id):
-		player_id = id
-		$PlayerInput.set_multiplayer_authority(id)
+@export var player_id : int #:
+	# set(id):
+	# 	player_id = id
+		# $PlayerInput.set_multiplayer_authority(id)
+@export var player_num : int = 1
 @export var username : String = ""
 @export var stamina_bar : Node
 @export var throw_power = PlayerVariables.MAX_POWER
 @export var aim_x = 0
-# @export var Level : Node
-# @export var UI : Node
 
 @onready var Level = get_tree().get_root().get_node('Scene/Level')
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
 @onready var Network = get_tree().get_root().get_node('Scene/Network')
 
-# @onready var camera = Level.get_node('World/PlayerCamera')
-# @onready var GameUI = UI.get_node('GameUI')
 @onready var input = get_node('PlayerInput')
 @onready var racket_hold_timer = get_node('PlayerInput/RacketHold')
 @onready var animation_tree = get_node('AnimationTree')
@@ -41,18 +38,21 @@ var prev_direction = Vector3.ZERO
 var camera
 
 func get_player_side():
-	return 1 if player_id == 1 else -1
+	return 1 if player_num == 1 else -1
 func get_player_num():
-	return 1 if player_id == 1 else 2
+	return 1 if player_num == 1 else 2
 
 func _ready():
+	player_id = get_multiplayer_authority()
 	Game.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
+	Game.print_debug_msg('multiplayer authority: ' + str(get_multiplayer_authority()))
 	set_physics_process(multiplayer.get_unique_id() == player_id)
 	aim_arrow.hide()
 	if multiplayer.get_unique_id() != player_id: return
 	
-	var player_data = Network.Players.get(player_id)
+	var player_data = Network.Players[player_id]
 	if player_data:
+		# player_num = player_data.num
 		username = player_data.username
 		username_billboard.text = player_data.username
 		Game.print_debug_msg('getting player data: username: ' + str(player_data.username))
@@ -72,6 +72,9 @@ func _ready():
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina
+
+func _enter_tree():
+	set_multiplayer_authority(str(name).to_int())
 
 func get_camera_transform_info():
 	var side = get_player_side()
