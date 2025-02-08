@@ -1194,3 +1194,4 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/GameControls/Panel/Close" to="UI" method="_on_controls_close"]
+[connection signal="pressed" from="UI/Message/Panel/Button" to="UI" method="_on_message_close_pressed"]
