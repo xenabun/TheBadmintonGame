@@ -8,9 +8,10 @@ var editing_username : State = State.new(true)
 var in_server_browser : State = State.new(false)
 var in_server_lobby : State = State.new(false)
 var entering_port : State = State.new(false)
+var showing_message : State = State.new(false)
 
 func _init(_ui):
-	print('Initializing ', ui, ' state machine')
+	print('Initializing ', _ui, ' state machine')
 
 	ui = _ui
 
@@ -27,6 +28,7 @@ func _init(_ui):
 	ui.get_node('GameControls').hide()
 	ui.get_node('Connecting').hide()
 	ui.get_node('Lobby').hide()
+	ui.get_node('Message').hide()
 
 	in_menu.state_changed.connect(func(_old_state, new_state, _args):
 		ui.set_physics_process(new_state)
@@ -77,5 +79,10 @@ func _init(_ui):
 	entering_port.state_changed.connect(func(_old_state, new_state, _args):
 		ui.get_node('MainMenu/Port').visible = new_state
 		ui.get_node('CurrentUsername').visible = not new_state
+		ui.get_node('MainMenu/Menu').visible = not new_state
+		)
+	
+	showing_message.state_changed.connect(func(_old_state, new_state, _args):
+		ui.get_node('Message').visible = new_state
 		ui.get_node('MainMenu/Menu').visible = not new_state
 		)

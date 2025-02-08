@@ -125,6 +125,9 @@ func reset_score():
 func start_game():
 	reset_score()
 	game_in_progress = true
+	Network.server_state = Network.server_state_type.MATCH
+	for i in Network.Players:
+		Network.Players[i].state = Network.player_state_type.SPECTATOR
 
 func _ready():
 	debug = get_tree().get_root().get_node('Scene/DebugUI').visible

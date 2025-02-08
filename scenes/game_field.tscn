@@ -132,9 +132,6 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath(".:server_state")
 properties/1/spawn = true
 properties/1/replication_mode = 1
-properties/2/path = NodePath(".:Matches")
-properties/2/spawn = true
-properties/2/replication_mode = 1
 
 [sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
 font_size = 121
@@ -382,12 +379,12 @@ _spawnable_scenes = PackedStringArray("res://prefabs/Player.tscn")
 spawn_path = NodePath("../Players")
 spawn_limit = 2
 
-[node name="Network" type="Node" parent="." node_paths=PackedStringArray("Level", "UI", "ServerBrowserUI", "ServerBrowser")]
+[node name="Network" type="Node" parent="." node_paths=PackedStringArray("Level", "UI", "ServerBrowser", "ServerBrowserUI")]
 script = ExtResource("6_h2wnu")
 Level = NodePath("../Level")
 UI = NodePath("../UI")
-ServerBrowserUI = NodePath("../UI/ServerBrowser")
 ServerBrowser = NodePath("../ServerBrowser")
+ServerBrowserUI = NodePath("../UI/ServerBrowser")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="Network"]
 replication_config = SubResource("SceneReplicationConfig_wierg")
@@ -1021,7 +1018,7 @@ offset_right = 98.0
 offset_bottom = 11.5
 grow_horizontal = 2
 grow_vertical = 2
-text = "Establishing connection..."
+text = "Устанавливаем соединение..."
 
 [node name="GameControls" type="Control" parent="UI"]
 visible = false
@@ -1072,6 +1069,58 @@ theme_override_colors/font_outline_color = Color(1, 1, 1, 0.129412)
 theme_override_constants/outline_size = 6
 text = "X"
 flat = true
+
+[node name="Message" type="Control" parent="UI"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="UI/Message"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -193.0
+offset_top = -58.0
+offset_right = 193.0
+offset_bottom = 58.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="UI/Message/Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "Внимание"
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/Message/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 23
+
+[node name="MessageText" type="Label" parent="UI/Message/Panel/MarginContainer"]
+layout_mode = 2
+text = "Сообщение"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="UI/Message/Panel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 9.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Закрыть"
 
 [node name="DebugUI" type="Control" parent="."]
 clip_contents = true

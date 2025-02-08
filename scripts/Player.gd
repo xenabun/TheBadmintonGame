@@ -46,20 +46,18 @@ func get_player_num():
 	return 1 if player_id == 1 else 2
 
 func _ready():
-	GameManager.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
+	Game.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
 	set_physics_process(multiplayer.get_unique_id() == player_id)
-	# UI = get_tree().get_root().get_node('Scene/UI')
 	aim_arrow.hide()
 	if multiplayer.get_unique_id() != player_id: return
 	
-	# var player_data = GameManager.Players.get(player_id)
 	var player_data = Network.Players.get(player_id)
 	if player_data:
 		username = player_data.username
 		username_billboard.text = player_data.username
-		GameManager.print_debug_msg('getting player data: username: ' + str(player_data.username))
+		Game.print_debug_msg('getting player data: username: ' + str(player_data.username))
 	else:
-		GameManager.print_debug_msg('getting player data: not found')
+		Game.print_debug_msg('getting player data: not found')
 	reset_position.connect(_reset_position)
 	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')

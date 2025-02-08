@@ -31,16 +31,18 @@ func update_lobby_player_list(players):
 	if not state.in_server_lobby.get_state(): return
 
 	clear_lobby_player_list()
-	# for i in GameManager.Players:
-	for player_id in players: # Network.Players:
-		# var player_info = GameManager.Players[i]
-		var player_data = players[player_id] # Network.Players[player_id]
+	for player_id in players:
+		var player_data = players[player_id]
 		var player_label = preload("res://prefabs/player_label.tscn").instantiate()
-		player_label.text = player_data.username
+		player_label.player_id = player_data.id
+		player_label.get_node('Username').text = player_data.username
 		lobby_player_list.add_child(player_label)
-# @rpc("any_peer", 'call_local')
-# func update_lobby_player_list_for_all():
-# 	update_lobby_player_list()
+		if multiplayer.is_server() and multiplayer.get_unique_id() != player_data.id:
+			var kick_button = player_label.get_node('Kick')
+			kick_button.disabled = false
+			kick_button.pressed.connect(func():
+				Network.kick_peer(player_label.player_id))
+
 @rpc('any_peer')
 func close_lobby_player_list():
 	state.in_menu.set_state(false)
@@ -91,9 +93,13 @@ func _on_port_confirm():
 		state.in_server_browser.set_state(true)
 
 func _on_lobby_exit_pressed():
-	# state.in_server_lobby.set_state(false)
-	# state.in_server_browser.set_state(true)
 	Network.quit_server()
+
+func show_message(value):
+	get_node('Message/Panel/MarginContainer/MessageText').text = value
+	state.showing_message.set_state(true)
+func _on_message_close_pressed():
+	state.showing_message.set_state(false)
 
 func _on_controls_close():
 	get_node('GameControls').hide()
