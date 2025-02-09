@@ -1,5 +1,7 @@
 extends Node
 
+signal window_focus_changed
+
 enum game_type {
 	NONE,
 	SINGLEPLAYER,
@@ -55,31 +57,35 @@ func get_full_score_str():
 	else:
 		return str(score[1], ' : ', score[0])
 
-func get_player_usernames():
-	var my_id = multiplayer.get_unique_id()
-	var op_id = get_opponent_id(my_id)
-	var usernames = []
-	var my_info = Network.Players.get(my_id, {'username': ''})
-	var op_info = Network.Players.get(op_id, {'username': ''}) if op_id != my_id else {'username': ''}
-	usernames.insert(0, my_info.username)
-	usernames.insert(1, op_info.username)
-	return usernames
+func get_match_players_data(match_id):
+	var ids = {0: null, 1: null}
+	for i in Network.Players:
+		var pdata = Network.Players[i]
+		if (pdata.has('match_id') and pdata.match_id == match_id
+				and pdata.state == Network.player_state_type.PLAYER):
+			ids[pdata.num - 1] = pdata
+	for i in 2:
+		if ids[i] == null:
+			ids[i] = {'username': 'Неизвестен', 'num': i + 1}
+	return ids
 
 @rpc("any_peer")
 func update_score_text():
+	var pdata = Network.Players[multiplayer.get_unique_id()]
+	var match_id = pdata.match_id
+	var players_data = get_match_players_data(match_id)
 	var score_control = UI.get_node('GameUI/ScoreControl')
-	var usernames = get_player_usernames()
-	print(multiplayer.get_unique_id(), ' usernames: ', usernames, ' players: ', Network.Players)
-	var my_score_id = peer_id_to_score_index(multiplayer.get_unique_id())
-	var op_score_id = get_opponent_index(my_score_id)
-	score_control.get_node('Player1Score').text = str(score[my_score_id])
-	score_control.get_node('Player2Score').text = str(score[op_score_id])
-	score_control.get_node('Player1').text = usernames[0]
-	score_control.get_node('Player2').text = usernames[1]
+	if pdata.has('num') and pdata.num == 2:
+		score_control.get_node('Player1Score').text = str(score[players_data[1].num - 1])
+		score_control.get_node('Player2Score').text = str(score[players_data[0].num - 1])
+		score_control.get_node('Player1').text = players_data[1].username
+		score_control.get_node('Player2').text = players_data[0].username
+	else:
+		score_control.get_node('Player1Score').text = str(score[players_data[0].num - 1])
+		score_control.get_node('Player2Score').text = str(score[players_data[1].num - 1])
+		score_control.get_node('Player1').text = players_data[0].username
+		score_control.get_node('Player2').text = players_data[1].username
 
-# @rpc("any_peer", 'call_local')
-# func update_score_text_for_all():
-# 	update_score_text()
 func update_score_text_for_all():
 	for i in Network.Players:
 		if multiplayer.get_unique_id() == i:
@@ -135,7 +141,6 @@ func grant_point(p):
 
 func reset_score():
 	score = [ 0, 0 ]
-	update_score_text()
 
 @rpc('any_peer')
 func set_match_sync(player_id):
@@ -165,7 +170,6 @@ func set_loading_screen(value):
 	UI.get_node('Loading').visible = value
 
 func start_game():
-	reset_score()
 	game_in_progress = true
 	Network.server_state = Network.server_state_type.MATCH
 
@@ -183,6 +187,7 @@ func start_game():
 			var player_data = Network.Players[i]
 			player_data.match_id = next_match_id
 			player_data.num = next_player_num
+			player_data.state = Network.player_state_type.PLAYER
 			player_data.match_ready = true
 			next_player_num += 1
 			if i != 1:
@@ -191,20 +196,18 @@ func start_game():
 			else:
 				set_loading_screen(true)
 		
-		Network.Players[1].match_sync = true
-		print('server sync start')
-		while not check_match_sync():
-			await get_tree().create_timer(0.5).timeout
-		print('server sync end')
-
 		if next_match.size() == 1:
 			var spare_id = next_match[0]
 			var player_data = Network.Players[spare_id]
-			player_data.erase('match_id')
+			player_data.match_id = 0
 			player_data.erase('num')
 			player_data.state = Network.player_state_type.SPECTATOR
-			# Network.add_player(player_data.id, 1)
-			## TODO: add player as spectator
+
+		Network.Players[1].match_sync = true
+		print('server sync start')
+		while not check_match_sync():
+			await get_tree().create_timer(0.1).timeout
+		print('server sync end')
 		
 		for i in Network.Players:
 			if i != 1:
@@ -214,9 +217,10 @@ func start_game():
 			var player_data = Network.Players[i]
 			player_data.erase('match_ready')
 			player_data.erase('match_sync')
-			if player_data.has('match_id'):
-				player_data.state = Network.player_state_type.PLAYER
+			if player_data.state == Network.player_state_type.PLAYER:
 				Network.add_player(player_data.id, player_data.num)
+			elif player_data.state == Network.player_state_type.SPECTATOR:
+				Network.add_spectator(player_data.id)
 		
 		update_score_text_for_all()
 
@@ -226,6 +230,18 @@ func start_game():
 			player_data.match_id = 0
 			player_data.num = player_data.id
 			player_data.state = Network.player_state_type.PLAYER
+			
+			# if not player_data.is_bot:
+			# 	Network.add_spectator.call_deferred(player_data.id)
+
+			if player_data.is_bot:
+				Network.add_bot(player_data.username)
+			else:
+				Network.add_player(player_data.id, player_data.num)
+
+		update_score_text()
+
+	reset_score()
 
 func _ready():
 	debug = get_tree().get_root().get_node('Scene/DebugUI').visible
@@ -233,14 +249,16 @@ func _ready():
 		if argument.contains('-debug'):
 			get_tree().get_root().get_node('Scene/DebugUI').visible = true
 			debug = true
-	start_game()
+	# start_game()
 	get_viewport().focus_entered.connect(_on_window_focus_in)
 	get_viewport().focus_exited.connect(_on_window_focus_out)
 
 func _on_window_focus_in():
 	window_focus = true
+	window_focus_changed.emit(window_focus)
 func _on_window_focus_out():
 	window_focus = false
+	window_focus_changed.emit(window_focus)
 
 
 

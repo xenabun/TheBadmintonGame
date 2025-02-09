@@ -9,6 +9,7 @@ var in_server_browser : State = State.new(false)
 var in_server_lobby : State = State.new(false)
 var entering_port : State = State.new(false)
 var showing_message : State = State.new(false)
+var in_game_menu : State = State.new(false)
 
 func _init(_ui):
 	print('Initializing ', _ui, ' state machine')
@@ -85,4 +86,10 @@ func _init(_ui):
 	showing_message.state_changed.connect(func(_old_state, new_state, _args):
 		ui.get_node('Message').visible = new_state
 		ui.get_node('MainMenu/Menu').visible = not new_state
+		)
+	
+	in_game_menu.state_changed.connect(func(_old_state, new_state, _args):
+		ui.get_node('Menu').visible = new_state
+		if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+			Game.game_in_progress = not new_state
 		)

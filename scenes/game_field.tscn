@@ -245,16 +245,6 @@ shadow_enabled = true
 transform = Transform3D(1, 0, 0, 0, 0.960303, 0.278958, 0, -0.278958, 0.960303, 0, 13.5088, 25)
 fov = 60.0
 
-[node name="SpectatorCamera" type="Node3D" parent="Level/World"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.76163, 0)
-
-[node name="HorizontalAxis" type="Node3D" parent="Level/World/SpectatorCamera"]
-
-[node name="VerticalAxis" type="Node3D" parent="Level/World/SpectatorCamera/HorizontalAxis"]
-
-[node name="Camera" type="Camera3D" parent="Level/World/SpectatorCamera/HorizontalAxis/VerticalAxis"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 30)
-
 [node name="Floor" type="StaticBody3D" parent="Level/World"]
 collision_layer = 11
 collision_mask = 11
@@ -397,10 +387,15 @@ _defaults_have_been_set = true
 
 [node name="Players" type="Node3D" parent="Level"]
 
+[node name="Spectators" type="Node3D" parent="Level"]
+
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="Level"]
-unique_name_in_owner = true
 _spawnable_scenes = PackedStringArray("res://prefabs/Player.tscn")
 spawn_path = NodePath("../Players")
+
+[node name="SpectatorSpawner" type="MultiplayerSpawner" parent="Level"]
+_spawnable_scenes = PackedStringArray("res://prefabs/Spectator.tscn")
+spawn_path = NodePath("../Spectators")
 
 [node name="Network" type="Node" parent="." node_paths=PackedStringArray("Level", "UI", "ServerBrowser", "ServerBrowserUI")]
 script = ExtResource("6_h2wnu")
@@ -421,6 +416,7 @@ ServerBrowserUI = NodePath("../UI/ServerBrowser")
 Network = NodePath("../Network")
 
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
+wait_time = 0.1
 
 [node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "lobby_player_list", "Network", "ServerBrowser")]
 anchors_preset = 8

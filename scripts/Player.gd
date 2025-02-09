@@ -2,8 +2,7 @@ extends CharacterBody3D
 
 signal reset_position
 func _reset_position():
-	var num = get_player_num()
-	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
+	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn')
 	position = spawn_point.position
 	rotation = spawn_point.rotation
 	update_camera_transform(1)
@@ -17,6 +16,7 @@ func _reset_position():
 @export var stamina_bar : Node
 @export var throw_power = PlayerVariables.MAX_POWER
 @export var aim_x = 0
+@export var test : int = 0
 
 @onready var Level = get_tree().get_root().get_node('Scene/Level')
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
@@ -39,25 +39,27 @@ var camera
 
 func get_player_side():
 	return 1 if player_num == 1 else -1
-func get_player_num():
-	return 1 if player_num == 1 else 2
 
 func _ready():
 	player_id = get_multiplayer_authority()
 	Game.print_debug_msg('player _ready() call: uid: ' + str(multiplayer.get_unique_id()) + ' plr_id: ' + str(player_id))
 	Game.print_debug_msg('multiplayer authority: ' + str(get_multiplayer_authority()))
-	set_physics_process(multiplayer.get_unique_id() == player_id)
 	aim_arrow.hide()
+
+	set_physics_process(multiplayer.get_unique_id() == player_id)
 	if multiplayer.get_unique_id() != player_id: return
-	
+
+	test = 1
+
 	var player_data = Network.Players[player_id]
 	if player_data:
-		# player_num = player_data.num
+		player_num = player_data.num
 		username = player_data.username
 		username_billboard.text = player_data.username
 		Game.print_debug_msg('getting player data: username: ' + str(player_data.username))
 	else:
 		Game.print_debug_msg('getting player data: not found')
+
 	reset_position.connect(_reset_position)
 	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
@@ -72,13 +74,13 @@ func _ready():
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina
+	stamina_bar.show()
 
 func _enter_tree():
 	set_multiplayer_authority(str(name).to_int())
 
 func get_camera_transform_info():
 	var side = get_player_side()
-	var num = get_player_num()
 	var cam_pos_x = position.x
 	var cam_pos_z = position.z + (20 * side)
 	var player_pos_x_frac = position.x / PlayerVariables.X_LIMIT * side
@@ -95,7 +97,7 @@ func get_camera_transform_info():
 	return {
 		'cam_pos_x' = cam_pos_x,
 		'cam_pos_z' = cam_pos_z,
-		'cam_rot_y' = cam_rot_y + PI * (num - 1),
+		'cam_rot_y' = cam_rot_y + PI * (player_num - 1),
 	}
 func update_camera_transform(t):
 	var cam_info = get_camera_transform_info()
@@ -116,6 +118,7 @@ func update_camera_transform(t):
 	)
 
 func _physics_process(delta):
+	# print('physics step player_id: ', player_id, ' by ', multiplayer.get_unique_id())
 	if not Game.game_in_progress:
 		if animation_tree.active:
 			animation_tree.active = false

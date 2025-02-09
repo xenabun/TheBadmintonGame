@@ -1,10 +1,10 @@
 [gd_scene load_steps=2 format=3 uid="uid://cq8fekkvegusn"]
 
 [sub_resource type="GDScript" id="GDScript_jfdig"]
-script/source = "extends MarginContainer
+; script/source = "extends MarginContainer
 
-@export var player_id : int = 0
-"
+; @export var player_id : int = 0
+; "
 
 [node name="PlayerLabel" type="MarginContainer"]
 theme_override_constants/margin_left = 10

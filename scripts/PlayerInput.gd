@@ -94,10 +94,13 @@ func _input(event):
 		if UI.get_node('GameControls').visible:
 			UI.get_node('GameControls').visible = false
 		else:
-			var menu = UI.get_node('Menu')
-			menu.visible = not menu.visible
-			if Game.current_game_type == Game.game_type.SINGLEPLAYER:
-				Game.game_in_progress = not menu.visible
+			var current_state = UI.state.in_game_menu.get_state()
+			var new_state = not current_state
+			UI.state.in_game_menu.set_state(new_state)
+			# var menu = UI.get_node('Menu')
+			# menu.visible = not menu.visible
+			# if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+			# 	Game.game_in_progress = not menu.visible
 	
 	if not Game.game_in_progress or is_game_paused(): return
 	

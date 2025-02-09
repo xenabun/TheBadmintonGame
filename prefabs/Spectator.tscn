@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://dc8ehavhrlns5"]
+
+[ext_resource type="Script" path="res://scripts/Spectator.gd" id="1_q8jhr"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mk8ou"]
+
+[node name="Spectator" type="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.50722, 0)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_q8jhr")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_mk8ou")
+disabled = true
+
+[node name="HorizontalAxis" type="Node3D" parent="."]
+
+[node name="VerticalAxis" type="Node3D" parent="HorizontalAxis"]
+
+[node name="Camera" type="Camera3D" parent="HorizontalAxis/VerticalAxis"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 30)

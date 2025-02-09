@@ -25,7 +25,7 @@ enum player_state_type {
 var peer
 
 func _ready():
-	multiplayer.server_relay = false
+	multiplayer.server_relay = true # false
 	# %PlayerSpawner.set_spawn_function(add_player)
 	
 	if not multiplayer.is_server(): return
@@ -45,12 +45,13 @@ func update_lobby_player_list_for_all():
 			UI.update_lobby_player_list.rpc_id(i, Players)
 
 @rpc('any_peer')
-func add_player_data(player_id, username):
+func add_player_data(player_id, username, is_bot):
 	if not Players.has(player_id):
 		Players[player_id] = {
 			'id': player_id,
 			'username': username,
 			'state': player_state_type.NONE,
+			'is_bot': is_bot,
 		}
 		# Game.update_score_text_for_all.rpc()
 		update_lobby_player_list_for_all()
@@ -86,7 +87,7 @@ func peer_disconnected(id):
 func connected_to_server():
 	Game.print_debug_msg('Connected to server')
 	var peer_id = multiplayer.get_unique_id()
-	add_player_data.rpc_id(1, peer_id, UI.username_box.text)
+	add_player_data.rpc_id(1, peer_id, UI.username_box.text, false)
 	UI.get_node('Connecting').hide()
 	multiplayer.server_disconnected.connect(quit_server)
 
@@ -115,7 +116,7 @@ func _on_host_pressed():
 	UI.state.in_server_lobby.set_state(true, {is_host = true})
 	UI.state.in_server_browser.set_state(false)
 
-	add_player_data(1, UI.username_box.text)
+	add_player_data(1, UI.username_box.text, false)
 
 func _on_start_game_pressed():
 	if not multiplayer.is_server(): return
@@ -174,11 +175,12 @@ func start_singleplayer():
 	UI.state.in_menu.set_state(false)
 	UI.state.in_main_menu.set_state(false)
 	var bot_username = 'Компьютер'
-	add_player_data(1, UI.username_box.text)
-	add_player_data(2, bot_username)
-	var plr_char = add_player()
-	add_bot(plr_char, bot_username)
+	add_player_data(1, UI.username_box.text, false)
+	add_player_data(2, bot_username, true)
 	Game.start_game()
+	# add_spectator()
+	# var plr_char = add_player()
+	# add_bot(plr_char, bot_username)
 
 @rpc('any_peer')
 func setup_player(character_name, data):
@@ -193,12 +195,12 @@ func add_player(id : int = 1, num : int = 1):
 
 	var character = preload("res://prefabs/Player.tscn").instantiate()
 	# character.player_id = id
-	print('applying player num: ', num, ' to player ', id)
+	# print('applying player num: ', num, ' to player ', id)
 	# character.player_num = num
 	character.name = str(id)
 	# var num = 1 if id == 1 else 2
 	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
-	print('applying spawn position ', 'World/Player' + str(num) + 'Spawn')
+	# print('applying spawn position ', 'World/Player' + str(num) + 'Spawn')
 	# character.position = spawn_point.position
 	# character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
@@ -212,14 +214,22 @@ func add_player(id : int = 1, num : int = 1):
 			'position': spawn_point.position,
 			'rotation': spawn_point.rotation,
 		})
-	Game.update_score_text_for_all() # .rpc()
+	# Game.update_score_text_for_all() # .rpc()
 
 	return character
 
-func add_bot(player_char, bot_username):
+func add_spectator(id: int = 1):
+	Game.print_debug_msg('adding spectator ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
+	if Level.get_node('Spectators').has_node(str(id)): return
+
+	var spectator = preload("res://prefabs/Spectator.tscn").instantiate()
+	spectator.name = str(id)
+	Level.get_node('Spectators').add_child(spectator, true)
+
+func add_bot(bot_username):
 	var character = preload("res://prefabs/Bot.tscn").instantiate()
 	character.name = '2'
-	character.player = player_char
+	character.player = Level.get_node('Players/1')
 	character.Level = Level
 	character.get_node('Username').text = bot_username
 	var spawn_point = Level.get_node('World/Player2Spawn')

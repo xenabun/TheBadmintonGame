@@ -34,14 +34,14 @@ func update_lobby_player_list(players):
 	for player_id in players:
 		var player_data = players[player_id]
 		var player_label = preload("res://prefabs/player_label.tscn").instantiate()
-		player_label.player_id = player_data.id
+		# player_label.player_id = player_data.id
 		player_label.get_node('Username').text = player_data.username
 		lobby_player_list.add_child(player_label)
 		if multiplayer.is_server() and multiplayer.get_unique_id() != player_data.id:
 			var kick_button = player_label.get_node('Kick')
 			kick_button.disabled = false
 			kick_button.pressed.connect(func():
-				Network.kick_peer(player_label.player_id))
+				Network.kick_peer(player_data.id)) # player_label.player_id))
 
 @rpc('any_peer')
 func close_lobby_player_list():
@@ -56,9 +56,10 @@ func _on_server_browser_back_pressed():
 	state.in_server_browser.set_state(false)
 
 func _on_pause_menu_close():
-	get_node('Menu').hide()
-	if Game.current_game_type == Game.game_type.SINGLEPLAYER:
-		Game.game_in_progress = true
+	state.in_game_menu.set_state(false)
+	# get_node('Menu').hide()
+	# if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+	# 	Game.game_in_progress = true
 
 func _on_title_visibility_changed():
 	if title_label.visible:
