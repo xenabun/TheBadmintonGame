@@ -7,16 +7,13 @@ func _reset_position():
 	rotation = spawn_point.rotation
 	update_camera_transform(1)
 
-@export var player_id : int #:
-	# set(id):
-	# 	player_id = id
-		# $PlayerInput.set_multiplayer_authority(id)
+@export var player_id : int = 0
 @export var player_num : int = 1
+@export var match_id : int = 0
 @export var username : String = ""
 @export var stamina_bar : Node
-@export var throw_power = PlayerVariables.MAX_POWER
-@export var aim_x = 0
-@export var test : int = 0
+@export var throw_power : float = PlayerVariables.MAX_POWER
+@export var aim_x : float = 0
 
 @onready var Level = get_tree().get_root().get_node('Scene/Level')
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
@@ -49,11 +46,10 @@ func _ready():
 	set_physics_process(multiplayer.get_unique_id() == player_id)
 	if multiplayer.get_unique_id() != player_id: return
 
-	test = 1
-
 	var player_data = Network.Players[player_id]
 	if player_data:
 		player_num = player_data.num
+		match_id = player_data.match_id
 		username = player_data.username
 		username_billboard.text = player_data.username
 		Game.print_debug_msg('getting player data: username: ' + str(player_data.username))

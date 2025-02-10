@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=62 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -18,6 +18,7 @@
 [ext_resource type="Script" path="res://addons/GPUTrail-main/GPUTrail3D.gd" id="12_qwsn2"]
 [ext_resource type="Texture2D" uid="uid://bfy0ucogy3lda" path="res://images/controls.png" id="14_frpfu"]
 [ext_resource type="Shader" path="res://shaders/texture_outline.gdshader" id="15_274xj"]
+[ext_resource type="Shader" path="res://shaders/wavy_text.gdshader" id="17_p7lky"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_17rgp"]
 sky_top_color = Color(0.0850372, 0.348454, 0.717237, 1)
@@ -136,10 +137,35 @@ properties/1/path = NodePath(".:server_state")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uigf4"]
+shader = ExtResource("17_p7lky")
+shader_parameter/height = 5.0
+shader_parameter/frequency = 100.0
+shader_parameter/speed = 1.0
+
+[sub_resource type="FontVariation" id="FontVariation_rqevk"]
+variation_embolden = 0.2
+
 [sub_resource type="LabelSettings" id="LabelSettings_xyt14"]
-font_size = 121
-outline_size = 10
-outline_color = Color(0, 0, 0, 1)
+font = SubResource("FontVariation_rqevk")
+font_size = 113
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qpr0p"]
+shader = ExtResource("17_p7lky")
+shader_parameter/height = 5.0
+shader_parameter/frequency = 100.0
+shader_parameter/speed = 0.5
+
+[sub_resource type="FontVariation" id="FontVariation_kobnm"]
+variation_embolden = 2.0
+variation_transform = Transform2D(0.8, 0, 0, 1, 0, 0)
+spacing_glyph = -15
+spacing_top = 20
+
+[sub_resource type="LabelSettings" id="LabelSettings_ckuod"]
+font = SubResource("FontVariation_kobnm")
+font_size = 130
+font_color = Color(0, 0, 0, 0.784314)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yedmd"]
 bg_color = Color(0, 0, 0, 0.541176)
@@ -463,6 +489,7 @@ text = "Изменить"
 layout_mode = 2
 
 [node name="Title" type="Label" parent="UI/MainMenu"]
+material = SubResource("ShaderMaterial_uigf4")
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -478,6 +505,23 @@ grow_vertical = 2
 pivot_offset = Vector2(398, 83)
 text = "БАДМИНТОН"
 label_settings = SubResource("LabelSettings_xyt14")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Outline" type="Label" parent="UI/MainMenu/Title"]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_qpr0p")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "БАДМИНТОН
+"
+label_settings = SubResource("LabelSettings_ckuod")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Username" type="VBoxContainer" parent="UI/MainMenu"]
 visible = false
@@ -688,6 +732,7 @@ grow_vertical = 2
 text = "Порт: хххх"
 
 [node name="Lobby" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="UI/Lobby"]
@@ -752,6 +797,7 @@ offset_bottom = 148.0
 text = "Вернуться назад"
 
 [node name="GameUI" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -1117,6 +1163,7 @@ text = "X"
 flat = true
 
 [node name="Message" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="UI/Message"]
@@ -1169,6 +1216,7 @@ grow_vertical = 0
 text = "Закрыть"
 
 [node name="DebugUI" type="Control" parent="."]
+visible = false
 clip_contents = true
 layout_mode = 3
 anchors_preset = 2

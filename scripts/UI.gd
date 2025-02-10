@@ -12,7 +12,7 @@ extends Control
 
 var title_tween
 var title_rot_deg = 1
-var title_rot_time = 1
+var title_rot_time = 4
 
 func _ready():
 	state = UI_State.new(self)

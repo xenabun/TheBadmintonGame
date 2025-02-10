@@ -1,6 +1,6 @@
 extends Node
 
-const ADDRESS = '127.0.0.1'
+const ADDRESS : String = '127.0.0.1'
 
 enum server_state_type {
 	NONE,
@@ -13,7 +13,7 @@ enum player_state_type {
 	PLAYER
 }
 
-@export var PORT = 5000
+@export var PORT : int = 5000
 @export var Level : Node
 @export var UI : Node
 @export var ServerBrowser : Node
@@ -62,13 +62,17 @@ func del_player_data(player_id):
 	update_lobby_player_list_for_all()
 
 func remove_player(id):
-	if multiplayer.is_server():
-		Level.get_node('World/Ball').set_multiplayer_authority(1)
-		del_player_data(id)
-		Game.update_score_text_for_all() # .rpc()
-		for player in get_tree().get_nodes_in_group('Player'):
-			if str(player.name) == str(id):
-				player.queue_free()
+	if not multiplayer.is_server(): return
+	# Level.get_node('World/Ball').set_multiplayer_authority(1)
+	## TODO: find match id and reset the match ball
+	del_player_data(id)
+	Game.update_score_text_for_all()
+	for player in get_tree().get_nodes_in_group('Player'):
+		if str(player.name) == str(id):
+			player.queue_free()
+	for spectator in get_tree().get_nodes_in_group('Spectator'):
+		if str(spectator.name) == str(id):
+			spectator.queue_free()
 
 func kick_peer(id):
 	kicked.rpc_id(id)
@@ -124,7 +128,7 @@ func _on_start_game_pressed():
 	ServerBrowser.stop_broadcast()
 	Game.start_game()
 	for i in Players:
-		if multiplayer.get_unique_id() == i:
+		if i == 1:
 			UI.close_lobby_player_list()
 		else:
 			UI.close_lobby_player_list.rpc_id(i)
@@ -167,6 +171,8 @@ func quit_server():
 		ServerBrowser.stop_broadcast()
 		for player in get_tree().get_nodes_in_group('Player'):
 			player.queue_free()
+		for spectator in get_tree().get_nodes_in_group('Spectator'):
+			spectator.queue_free()
 		for bot in get_tree().get_nodes_in_group('Bot'):
 			bot.queue_free()
 
@@ -185,7 +191,7 @@ func start_singleplayer():
 @rpc('any_peer')
 func setup_player(character_name, data):
 	var character = Level.get_node('Players/' + character_name)
-	character.player_num = data.num
+	# character.player_num = data.num
 	character.position = data.position
 	character.rotation = data.rotation
 
@@ -204,16 +210,22 @@ func add_player(id : int = 1, num : int = 1):
 	# character.position = spawn_point.position
 	# character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
+	# setup_player.rpc(str(id), {
+	# 	# 'num': num,
+	# 	'position': spawn_point.position,
+	# 	'rotation': spawn_point.rotation,
+	# })
 	if id == 1:
-		character.player_num = num
+		# character.player_num = num
 		character.position = spawn_point.position
 		character.rotation = spawn_point.rotation
 	else:
 		setup_player.rpc_id(id, str(id), {
-			'num': num,
+			# 'num': num,
 			'position': spawn_point.position,
 			'rotation': spawn_point.rotation,
 		})
+
 	# Game.update_score_text_for_all() # .rpc()
 
 	return character
