@@ -21,12 +21,12 @@ enum player_state_type {
 
 @export var server_state : server_state_type = server_state_type.NONE
 @export var Players : Dictionary = {}
+@export var Balls : Dictionary = {}
 
 var peer
 
 func _ready():
-	multiplayer.server_relay = true # false
-	# %PlayerSpawner.set_spawn_function(add_player)
+	multiplayer.server_relay = true
 	
 	if not multiplayer.is_server(): return
 	
@@ -35,6 +35,12 @@ func _ready():
 	multiplayer.connected_to_server.connect(connected_to_server)
 	multiplayer.connection_failed.connect(connection_failed)
 	ServerBrowser.join_server.connect(join_by_ip)
+
+func find_first_player_by_match_id(match_id):
+	for i in Players:
+		var pdata = Players[i]
+		if pdata.has('match_id') and pdata.has('num') and pdata.match_id == match_id:
+			return pdata
 
 func update_lobby_player_list_for_all():
 	if Game.current_game_type == Game.game_type.SINGLEPLAYER: return
@@ -46,15 +52,15 @@ func update_lobby_player_list_for_all():
 
 @rpc('any_peer')
 func add_player_data(player_id, username, is_bot):
-	if not Players.has(player_id):
-		Players[player_id] = {
-			'id': player_id,
-			'username': username,
-			'state': player_state_type.NONE,
-			'is_bot': is_bot,
-		}
-		# Game.update_score_text_for_all.rpc()
-		update_lobby_player_list_for_all()
+	if Players.has(player_id):return
+	Players[player_id] = {
+		'id': player_id,
+		'username': username,
+		'state': player_state_type.NONE,
+		'is_bot': is_bot,
+	}
+	# Game.update_score_text_for_all.rpc()
+	update_lobby_player_list_for_all()
 
 func del_player_data(player_id):
 	if not Players.has(player_id): return
@@ -63,16 +69,26 @@ func del_player_data(player_id):
 
 func remove_player(id):
 	if not multiplayer.is_server(): return
-	# Level.get_node('World/Ball').set_multiplayer_authority(1)
-	## TODO: find match id and reset the match ball
+	var match_id
+	var pdata = Players[id]
+	if pdata.has('match_id'):
+		match_id = pdata.match_id
 	del_player_data(id)
+	if match_id:
+		var player = find_first_player_by_match_id(match_id)
+		var ball = Game.get_ball_by_match_id(match_id)
+		ball.set_multiplayer_authority(player.id)
 	Game.update_score_text_for_all()
-	for player in get_tree().get_nodes_in_group('Player'):
-		if str(player.name) == str(id):
-			player.queue_free()
-	for spectator in get_tree().get_nodes_in_group('Spectator'):
-		if str(spectator.name) == str(id):
-			spectator.queue_free()
+	if Level.get_node('Players').has_node(str(id)):
+		Level.get_node('Players/' + str(id)).queue_free()
+	if Level.get_node('Spectators').has_node(str(id)):
+		Level.get_node('Spectators/' + str(id)).queue_free()
+	# for player in get_tree().get_nodes_in_group('Player'):
+	# 	if str(player.name) == str(id):
+	# 		player.queue_free()
+	# for spectator in get_tree().get_nodes_in_group('Spectator'):
+	# 	if str(spectator.name) == str(id):
+	# 		spectator.queue_free()
 
 func kick_peer(id):
 	kicked.rpc_id(id)
@@ -160,15 +176,18 @@ func quit_server():
 	if peer: peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	Players = {}
+	Balls = {}
 	Game.game_in_progress = true
-	Game.ball.set_ball_ready()
-	Game.ball.reset_ball()
+	# Game.ball.set_ball_ready()
+	# Game.ball.reset_ball()
 	UI.state.in_menu.set_state(true)
 	UI.state.in_main_menu.set_state(true)
 	UI.state.in_server_lobby.set_state(false)
 	UI.state.in_server_browser.set_state(false)
 	if multiplayer.is_server():
 		ServerBrowser.stop_broadcast()
+		for ball in get_tree().get_nodes_in_group('Ball'):
+			ball.queue_free()
 		for player in get_tree().get_nodes_in_group('Player'):
 			player.queue_free()
 		for spectator in get_tree().get_nodes_in_group('Spectator'):
@@ -196,8 +215,8 @@ func setup_player(character_name, data):
 	character.rotation = data.rotation
 
 func add_player(id : int = 1, num : int = 1):
-	Game.print_debug_msg('adding player ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 	if Level.get_node('Players').has_node(str(id)): return
+	Game.print_debug_msg('adding player ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 
 	var character = preload("res://prefabs/Player.tscn").instantiate()
 	# character.player_id = id
@@ -225,14 +244,13 @@ func add_player(id : int = 1, num : int = 1):
 			'position': spawn_point.position,
 			'rotation': spawn_point.rotation,
 		})
-
 	# Game.update_score_text_for_all() # .rpc()
 
 	return character
 
 func add_spectator(id: int = 1):
-	Game.print_debug_msg('adding spectator ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 	if Level.get_node('Spectators').has_node(str(id)): return
+	Game.print_debug_msg('adding spectator ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 
 	var spectator = preload("res://prefabs/Spectator.tscn").instantiate()
 	spectator.name = str(id)
@@ -249,6 +267,41 @@ func add_bot(bot_username):
 	character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
 	Game.update_score_text()
+
+func add_ball(match_id):
+	if Balls.has(match_id): return
+	# if Level.get_node('Balls').has_node(str(match_id)): return
+	Game.print_debug_msg('adding ball with match id: ' + str(match_id) + ' by ' + str(multiplayer.get_unique_id()))
+
+	var ball = preload("res://prefabs/Ball.tscn").instantiate()
+	ball.name = str(match_id)
+	ball.match_id = match_id
+	Level.get_node('Balls').add_child(ball, true)
+	Balls[match_id] = {
+		'match_id': match_id,
+		'object': ball
+	}
+
+func remove_ball(match_id):
+	if not Balls.has(match_id): return
+	if Level.get_node('Balls').has_node(str(match_id)):
+		var ball = Level.get_node('Balls/' + str(match_id))
+
+		var multiplayer_authority = ball.get_multiplayer_authority()
+		if multiplayer_authority != multiplayer.get_unique_id():
+			ball.reset_authority.rpc_id(multiplayer_authority)
+
+		ball.queue_free()
+	for i in Players:
+		var pdata = Players[i]
+		if (Level.get_node('Players').has_node(str(pdata.id))
+				and pdata.has('match_id') and pdata.match_id == match_id):
+			var player = Level.get_node('Players/' + str(pdata.id))
+			if pdata.is_bot or i == 1:
+				player.reset_ball()
+			else:
+				player.reset_ball.rpc_id(pdata.id)
+	Balls.erase(match_id)
 
 func _process(_delta):
 	if not Game.debug:

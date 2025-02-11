@@ -1,16 +1,29 @@
 extends CharacterBody3D
 
-const BASE_PLAYER_POS_Y = 4.824 / 2
+const BASE_PLAYER_POS_Y = 2.412
+const SHADOW_SIZE = Vector3(15, 2, 15)
 
-@export var Level : Node
-@export var Network : Node
-@export var FieldArea : Node
-@export var FloorArea : Node
-@export var NetArea : Node
-@export var Player1Area : Node
-@export var Player2Area : Node
+@export var match_id : int = 0
 
+# @export var Level : Node
+# @export var Network : Node
+# @export var FieldArea : Node
+# @export var FloorArea : Node
+# @export var NetArea : Node
+# @export var Player1Area : Node
+# @export var Player2Area : Node
+
+@onready var Level = get_tree().get_root().get_node('Scene/Level')
+@onready var Network = get_tree().get_root().get_node('Scene/Network')
 @onready var ball_hitbox : Area3D = get_node('Area')
+@onready var shadow : Decal = get_node('Shadow')
+@onready var shadow_ray : RayCast3D = get_node('ShadowRaycast')
+
+var FieldArea
+var FloorArea
+var NetArea
+var Player1Area
+var Player2Area
 
 var direction : float = 0.0
 var power : float = 0.0
@@ -42,16 +55,17 @@ var ball_ready = true:
 		ball_ready = value
 		if value == true and Game.game_in_progress:
 			reset_ball()
-			for player in get_tree().get_nodes_in_group('Player'):
-				player.reset_position.emit()
-			for bot in get_tree().get_nodes_in_group('Bot'):
-				bot._reset_position()
+			if multiplayer.is_server():
+				Game.reset_player_positions()
+			else:
+				Game.reset_player_positions.rpc_id(1)
+
 @rpc('any_peer', 'call_local')
 func set_ball_ready(value = true):
 	ball_ready = value
 @rpc("any_peer", 'call_local')
-func throw_ball(peer_id :int, player_name :String, new_position :Vector3,
-		new_direction :float, new_velocity_x :float, aim_dir_y :float):
+func throw_ball(peer_id : int, player_name : String, new_position : Vector3,
+		new_direction : float, new_velocity_x : float, aim_dir_y : float):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
@@ -66,8 +80,8 @@ func throw_ball(peer_id :int, player_name :String, new_position :Vector3,
 	set_multiplayer_authority(peer_id)
 	set_physics_process(true)
 @rpc('any_peer', 'call_local')
-func bounce_ball(peer_id :int, player_name :String, new_velocity_x :float, new_direction :float,
-		new_power :float, new_launch_pos :Vector3, oarea):
+func bounce_ball(peer_id : int, player_name : String, new_velocity_x : float, new_direction : float,
+		new_power : float, new_launch_pos : Vector3, oarea):
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	velocity.x = new_velocity_x
@@ -84,20 +98,36 @@ func reset_ball():
 	ignored_area = null
 	velocity = Vector3.ZERO
 	position = Vector3(0, -10, 30)
+@rpc('any_peer')
+func reset_authority():
+	set_multiplayer_authority(1)
 
 func _ready():
+	FieldArea = Level.get_node('World/FieldArea')
+	FloorArea = Level.get_node('World/Floor/Area')
+	NetArea = Level.get_node('World/Net/Area')
+	Player1Area = Level.get_node('World/Player1Area')
+	Player2Area = Level.get_node('World/Player2Area')
+
 	set_physics_process(false)
-	$Debug_MaxHeight.visible = Game.debug
-	$Debug_Z.visible = Game.debug
-	$Debug_ZLand.visible = Game.debug
-	$Debug_LaunchHeight.visible = Game.debug
+	shadow.visible = false
+	# $Debug_MaxHeight.visible = Game.debug
+	# $Debug_Z.visible = Game.debug
+	# $Debug_ZLand.visible = Game.debug
+	# $Debug_LaunchHeight.visible = Game.debug
+
+	var current_authority = multiplayer.get_unique_id()
+	if Network.Players.has(current_authority):
+		var current_authority_player_data = Network.Players[current_authority]
+		if current_authority_player_data and current_authority_player_data.has('match_id'):
+			visible = match_id == current_authority_player_data.match_id
 
 func _physics_process(_delta):
 	# reset debug
-	if Game.debug and ball_ready:
-		for node in get_children():
-			if node.name.contains('Debug'):
-				node.position = Vector3.ZERO
+	# if Game.debug and ball_ready:
+	# 	for node in get_children():
+	# 		if node.name.contains('Debug'):
+	# 			node.position = Vector3.ZERO
 	
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
 	if not Game.game_in_progress or ball_ready: return
@@ -110,14 +140,17 @@ func _physics_process(_delta):
 	# floor interact
 	if ball_hitbox.overlaps_area(FloorArea):
 		if ball_hitbox.overlaps_area(Player1Area):
-			Game.grant_point.rpc(1)
+			Game.grant_point.rpc(1, match_id)
 		elif ball_hitbox.overlaps_area(Player2Area):
-			Game.grant_point.rpc(0)
+			Game.grant_point.rpc(0, match_id)
 		else:
-			if last_interact == '1':
-				Game.grant_point.rpc(1)
-			else:
-				Game.grant_point.rpc(0)
+			var pdata = Network.Players[str(last_interact).to_int()]
+			var num = pdata.num
+			Game.grant_point.rpc(Game.get_opponent_index(num - 1), match_id)
+			# if last_interact == '1':
+			# 	Game.grant_point.rpc(1, match_id)
+			# else:
+			# 	Game.grant_point.rpc(0, match_id)
 		set_ball_ready.rpc()
 		return
 	
@@ -150,32 +183,38 @@ func _physics_process(_delta):
 				position, oarea)
 		break
 	
-	# shadow
-	if $RayCast3D.is_colliding():
-		var floor_point = $RayCast3D.get_collision_point()
-		var floor_normal = $RayCast3D.get_collision_normal()
-		if floor_point + floor_normal / 2 != floor_point + floor_normal:
-			$Shadow.look_at_from_position(
-					floor_point + floor_normal / 2,
-					floor_point + floor_normal,
-					Vector3(0, 0, -1)
-			)
-		$Shadow.scale = Vector3.ONE * (0.5 + (position.y / 6))
-		$Shadow.visible = true
-	else:
-		$Shadow.visible = false
-	
 	# position
 	move_and_slide()
 	var height = get_height(position.z)
+	var max_height = get_max_height()
 	var height_frac = (BallVariables.BASE_SPEED_MULT +
 			(BallVariables.MAX_SPEED_MULT - BallVariables.BASE_SPEED_MULT) *
-			abs( 1 - (height - BASE_PLAYER_POS_Y) / get_max_height() ))
+			abs( 1 - (height - BASE_PLAYER_POS_Y) / max_height ))
 	position.y = height
 	velocity.z = power * direction * height_frac
 	
-	if Game.debug:
-		$Debug_LaunchHeight.global_position = launch_pos + Vector3(0, get_launch_height(), 0)
-		$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
-		$Debug_Z.global_position = Vector3(launch_pos.x, 1, launch_pos.z)
-		$Debug_ZLand.global_position = Vector3(get_land_x(), 1, get_land_z())
+	# shadow
+	if shadow_ray.is_colliding():
+		var floor_point = shadow_ray.get_collision_point()
+		# var floor_normal = $RayCast3D.get_collision_normal()
+		# if floor_point: # + floor_normal / 2 != floor_point + floor_normal:
+			# $Shadow.look_at_from_position(
+			# 		floor_point + floor_normal / 2,
+			# 		floor_point + floor_normal,
+			# 		Vector3(0, 0, -1)
+			# )
+		shadow.global_position = floor_point
+		# $Shadow.scale = Vector3.ONE * (0.5 + (position.y / 6))
+		var height_unit = height / max_height
+		shadow.size = SHADOW_SIZE * height_unit
+		# shadow.material_override.set_shader_parameter('cube_full_size', size)
+		shadow.albedo_mix = height_unit
+		shadow.visible = true
+	else:
+		shadow.visible = false
+	
+	# if Game.debug:
+	# 	$Debug_LaunchHeight.global_position = launch_pos + Vector3(0, get_launch_height(), 0)
+	# 	$Debug_MaxHeight.global_position = Vector3(position.x, get_max_height(), position.z)
+	# 	$Debug_Z.global_position = Vector3(launch_pos.x, 1, launch_pos.z)
+	# 	$Debug_ZLand.global_position = Vector3(get_land_x(), 1, get_land_z())

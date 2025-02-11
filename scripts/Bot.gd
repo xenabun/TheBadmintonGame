@@ -3,6 +3,7 @@ extends CharacterBody3D
 @export var Level : Node
 @export var aim_x = 0
 @export var player : Node
+@export var match_id : int = 0
 
 @onready var animation_tree = get_node('AnimationTree')
 @onready var player_model = get_node('playermodel')
@@ -11,6 +12,7 @@ extends CharacterBody3D
 @onready var racket_cooldown_timer = get_node('RacketCooldown')
 @onready var sprint_timer = get_node('Sprint')
 
+var ball
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
@@ -32,12 +34,16 @@ var racket_cooldown = false:
 func _on_racket_cooldown_timeout():
 	racket_cooldown = false
 
+func reset_ball():
+	ball = null
+
 func _reset_position():
 	var spawn_point = Level.get_node('World/Player2Spawn')
 	position = spawn_point.position
 	rotation = spawn_point.rotation
 
 func _ready():
+	ball = Game.get_ball_by_match_id(match_id)
 	$Debug_Dest.visible = Game.debug
 	$AimArrow.visible = Game.debug
 	$SprintingLabel.visible = Game.debug
@@ -69,10 +75,10 @@ func _physics_process(delta):
 	
 	# get direction
 	var direction = Vector3.ZERO
-	if not Game.ball.ball_ready:
-		if Game.ball.last_interact != name:
+	if ball != null and not ball.ball_ready:
+		if ball.last_interact != name:
 			## jumping
-			target_position = Vector3(Game.ball.get_land_x(), position.y, Game.ball.get_land_z())
+			target_position = Vector3(ball.get_land_x(), position.y, ball.get_land_z())
 		else:
 			if target_position:
 				target_position = null
@@ -86,11 +92,12 @@ func _physics_process(delta):
 			$Debug_Dest.global_position = target_position
 	
 	# racket
-	var ball_dist = (position * Vector3(1, randf() * 0.8, 1)).distance_to(
-			Game.ball.position * Vector3(1, randf() * 0.8, 1))
-	if not racket_cooldown and ball_dist <= 4:
-		racket_cooldown = true
-		animation_tree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
+	if ball != null:
+		var ball_dist = (position * Vector3(1, randf() * 0.8, 1)).distance_to(
+				ball.position * Vector3(1, randf() * 0.8, 1))
+		if not racket_cooldown and ball_dist <= 4:
+			racket_cooldown = true
+			animation_tree['parameters/RacketSwing/request'] = AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE
 	
 	# animation
 	var blend_amount = 0
@@ -122,13 +129,13 @@ func _physics_process(delta):
 		player_model.transform.basis = Basis(newrot).scaled(player_model.scale)
 	
 	# sprint
-	if (target_position and Game.ball.launch_pos != Vector3.ZERO and
-			not Game.ball.ball_ready and not sprinting and 
+	if (target_position and ball != null and ball.launch_pos != Vector3.ZERO and
+			not ball.ball_ready and not sprinting and 
 			not exhausted and stamina > 0):
 		var time_to_reach_target = (position.distance_to(target_position) /
 				PlayerVariables.MAX_SPEED)
-		var time_for_ball_to_land = (Game.ball.position.distance_to(target_position) /
-				(Game.ball.power * (BallVariables.BASE_SPEED_MULT +
+		var time_for_ball_to_land = (ball.position.distance_to(target_position) /
+				(ball.power * (BallVariables.BASE_SPEED_MULT +
 				BallVariables.MAX_SPEED_MULT) / 2))
 		if time_to_reach_target > time_for_ball_to_land:
 			sprinting = true

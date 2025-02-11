@@ -33,6 +33,11 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var prev_direction = Vector3.ZERO
 var camera
+var ball
+
+@rpc('any_peer')
+func reset_ball():
+	ball = null
 
 func get_player_side():
 	return 1 if player_num == 1 else -1
@@ -45,11 +50,13 @@ func _ready():
 
 	set_physics_process(multiplayer.get_unique_id() == player_id)
 
-	var current_authority = multiplayer.get_unique_id()
-	var current_authority_player_data = Network.Players[current_authority]
 	var player_data = Network.Players[player_id]
-	if player_data and current_authority_player_data:
-		visible = player_data.match_id == current_authority_player_data.match_id
+	var current_authority = multiplayer.get_unique_id()
+	if Network.Players.has(current_authority):
+		var current_authority_player_data = Network.Players[current_authority]
+		if (player_data and player_data.has('match_id') and current_authority_player_data
+				and current_authority_player_data.has('match_id')):
+			visible = player_data.match_id == current_authority_player_data.match_id
 
 	if multiplayer.get_unique_id() != player_id: return
 
@@ -62,6 +69,7 @@ func _ready():
 	else:
 		Game.print_debug_msg('getting player data: not found')
 
+	ball = Game.get_ball_by_match_id(match_id)
 	reset_position.connect(_reset_position)
 	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
@@ -77,6 +85,7 @@ func _ready():
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina
 	stamina_bar.show()
+	Input.set_mouse_mode(Input.MouseMode.MOUSE_MODE_VISIBLE)
 
 func _enter_tree():
 	set_multiplayer_authority(str(name).to_int())
@@ -218,7 +227,8 @@ func _physics_process(delta):
 	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# aim arrow
-	if Game.ball.ball_ready or input.action_hold:
+	## TODO: only draw arrow if its your turn
+	if (ball != null and ball.ball_ready) or input.action_hold:
 		aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 		if not aim_arrow.visible:
 			aim_arrow_sprite.scale.x = 0
@@ -228,8 +238,7 @@ func _physics_process(delta):
 	
 	if (
 		Game.window_focus
-		and not UI.get_node('Menu').visible
-		and not UI.get_node('GameControls').visible
+		and not input.is_game_paused()
 	):
 		# camera
 		update_camera_transform(0.2)

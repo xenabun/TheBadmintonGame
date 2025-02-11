@@ -105,13 +105,13 @@ func _input(event):
 	if not Game.game_in_progress or is_game_paused(): return
 	
 	if event.is_action_pressed('action'):
-		if Game.ball.ball_ready and Game.game_in_progress:
+		if player.ball != null and player.ball.ball_ready and Game.game_in_progress:
 			var pos = player.get_node('Ball').global_position
 			var new_direction = VectorMath.look_vector(player.get_node('RacketArea')).z
 			var aim_x = sin((aim_direction.x * 2 * PI) / 2)
 			var aim_y = aim_direction.y
 			var new_velocity_x = aim_x * 30 * -new_direction
-			Game.ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
+			player.ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
 					player.name, pos, new_direction, new_velocity_x, aim_y)
 			player.get_node('AimArrow').hide()
 			throw_ready.rpc()

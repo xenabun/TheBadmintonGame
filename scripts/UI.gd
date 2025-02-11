@@ -48,6 +48,10 @@ func close_lobby_player_list():
 	state.in_menu.set_state(false)
 	state.in_server_lobby.set_state(false)
 
+@rpc('any_peer')
+func set_loading_screen(value):
+	get_node('Loading').visible = value
+
 func _on_game_exit_pressed():
 	Network.quit_server()
 

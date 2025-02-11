@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://bx3mod8pqcrsd"]
+[gd_scene load_steps=17 format=3 uid="uid://bx3mod8pqcrsd"]
 
 [ext_resource type="Script" path="res://scripts/Ball.gd" id="1_0k7od"]
 [ext_resource type="Shader" path="res://shaders/outline.gdshader" id="2_8bpcg"]
@@ -25,29 +25,22 @@ next_pass = SubResource("ShaderMaterial_t3p6m")
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xd51s"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath("Shadow:position")
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:match_id")
 properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath("Shadow:rotation")
+properties/1/replication_mode = 2
+properties/2/path = NodePath("Shadow:size")
 properties/2/spawn = true
-properties/2/replication_mode = 1
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yjqqn"]
-albedo_color = Color(0.0886668, 0.76, 0, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pswn4"]
-albedo_color = Color(0, 0, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wq3n2"]
-no_depth_test = true
-shading_mode = 0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yk2jc"]
-albedo_color = Color(0.488667, 0.48, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rjn21"]
-albedo_color = Color(0.315, 0.75, 0.32225, 1)
+properties/2/replication_mode = 2
+properties/3/path = NodePath("Shadow:position")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+properties/4/path = NodePath("Shadow:albedo_mix")
+properties/4/spawn = true
+properties/4/replication_mode = 2
+properties/5/path = NodePath("Shadow:visible")
+properties/5/spawn = true
+properties/5/replication_mode = 1
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_v5xe6"]
 shader = ExtResource("4_8effn")
@@ -58,7 +51,7 @@ render_priority = 0
 shader = ExtResource("5_ihc8v")
 shader_parameter/uv_offset = Vector2(0, 0)
 shader_parameter/emmission_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
-shader_parameter/flags = 44
+shader_parameter/flags = 4
 shader_parameter/tex = ExtResource("6_mnr01")
 shader_parameter/color_ramp = ExtResource("6_mnr01")
 shader_parameter/curve = ExtResource("7_3pokd")
@@ -66,8 +59,8 @@ shader_parameter/curve = ExtResource("7_3pokd")
 [sub_resource type="QuadMesh" id="QuadMesh_7q4ig"]
 material = SubResource("ShaderMaterial_e0aow")
 
-[node name="Ball" type="CharacterBody3D"]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -10, 30)
+[node name="Ball" type="CharacterBody3D" groups=["Ball"]]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_0k7od")
@@ -86,35 +79,17 @@ collision_mask = 4
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area"]
 shape = SubResource("SphereShape3D_xei7b")
 
-[node name="Shadow" type="Sprite3D" parent="."]
-texture = ExtResource("3_r2ahu")
+[node name="Shadow" type="Decal" parent="."]
+size = Vector3(15, 2, 15)
+texture_albedo = ExtResource("3_r2ahu")
 
-[node name="RayCast3D" type="RayCast3D" parent="."]
+[node name="ShadowRaycast" type="RayCast3D" parent="."]
 target_position = Vector3(0, -100, 0)
 collision_mask = 8
 hit_from_inside = true
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_xd51s")
-
-[node name="Debug_MaxHeight" type="CSGBox3D" parent="."]
-material_override = SubResource("StandardMaterial3D_yjqqn")
-size = Vector3(0.266602, 0.285156, 65.9668)
-
-[node name="Debug_Z" type="CSGSphere3D" parent="."]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_pswn4")
-material = SubResource("StandardMaterial3D_wq3n2")
-
-[node name="Debug_ZLand" type="CSGSphere3D" parent="."]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_yk2jc")
-material = SubResource("StandardMaterial3D_wq3n2")
-
-[node name="Debug_LaunchHeight" type="CSGSphere3D" parent="."]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_rjn21")
-material = SubResource("StandardMaterial3D_wq3n2")
 
 [node name="Trail" type="GPUParticles3D" parent="."]
 amount = 30
