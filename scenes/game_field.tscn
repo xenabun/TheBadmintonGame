@@ -1,21 +1,14 @@
-[gd_scene load_steps=62 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=42 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
 [ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://prefabs/trees.tscn" id="3_f8pxf"]
 [ext_resource type="Texture2D" uid="uid://c6rdby1kjqnc5" path="res://images/6f7a97101ad33899f1b0186481123e241.jpg" id="4_1apb5"]
+[ext_resource type="PackedScene" uid="uid://bx3mod8pqcrsd" path="res://prefabs/Ball.tscn" id="5_h3a3d"]
 [ext_resource type="Script" path="res://scripts/Network.gd" id="6_h2wnu"]
 [ext_resource type="Script" path="res://scripts/ServerBrowser.gd" id="7_4w53d"]
-[ext_resource type="Texture2D" uid="uid://bka37re8brfsp" path="res://images/round-gradient.png" id="7_gu05u"]
-[ext_resource type="Script" path="res://scripts/Ball.gd" id="8_d4rec"]
-[ext_resource type="Shader" path="res://addons/GPUTrail-main/shaders/trail.gdshader" id="8_svnxn"]
-[ext_resource type="Shader" path="res://shaders/outline.gdshader" id="9_jrner"]
-[ext_resource type="Shader" path="res://addons/GPUTrail-main/shaders/trail_draw_pass.gdshader" id="9_xc4xc"]
-[ext_resource type="Texture2D" uid="uid://crk6pkb7e5rwc" path="res://addons/GPUTrail-main/defaults/texture.tres" id="10_toyj1"]
-[ext_resource type="Texture2D" uid="uid://ct31fhxvcragr" path="res://addons/GPUTrail-main/defaults/curve.tres" id="11_4wxie"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
-[ext_resource type="Script" path="res://addons/GPUTrail-main/GPUTrail3D.gd" id="12_qwsn2"]
 [ext_resource type="Texture2D" uid="uid://bfy0ucogy3lda" path="res://images/controls.png" id="14_frpfu"]
 [ext_resource type="Shader" path="res://shaders/texture_outline.gdshader" id="15_274xj"]
 [ext_resource type="Shader" path="res://shaders/wavy_text.gdshader" id="17_p7lky"]
@@ -72,62 +65,6 @@ size = Vector3(30.1299, 23.4841, 30.0156)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rfrsq"]
 size = Vector3(30.1299, 23.4636, 30.0156)
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_scbn3"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_t3p6m"]
-render_priority = 0
-shader = ExtResource("9_jrner")
-shader_parameter/color = Color(1, 1, 1, 1)
-shader_parameter/size = 1.5
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oakse"]
-next_pass = SubResource("ShaderMaterial_t3p6m")
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_xei7b"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xd51s"]
-properties/0/path = NodePath(".:position")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath("Shadow:position")
-properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath("Shadow:rotation")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yjqqn"]
-albedo_color = Color(0.0886668, 0.76, 0, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pswn4"]
-albedo_color = Color(0, 0, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wq3n2"]
-no_depth_test = true
-shading_mode = 0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yk2jc"]
-albedo_color = Color(0.488667, 0.48, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rjn21"]
-albedo_color = Color(0.315, 0.75, 0.32225, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5xe6"]
-shader = ExtResource("8_svnxn")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_e0aow"]
-resource_local_to_scene = true
-render_priority = 0
-shader = ExtResource("9_xc4xc")
-shader_parameter/uv_offset = Vector2(0, 0)
-shader_parameter/emmission_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
-shader_parameter/flags = 4
-shader_parameter/color_ramp = ExtResource("10_toyj1")
-shader_parameter/curve = ExtResource("11_4wxie")
-
-[sub_resource type="QuadMesh" id="QuadMesh_7q4ig"]
-material = SubResource("ShaderMaterial_e0aow")
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_wierg"]
 properties/0/path = NodePath(".:Players")
@@ -339,77 +276,9 @@ collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.418967, -15.005)
 shape = SubResource("BoxShape3D_rfrsq")
 
-[node name="Ball" type="CharacterBody3D" parent="Level/World" node_paths=PackedStringArray("Level", "Network", "FieldArea", "FloorArea", "NetArea", "Player1Area", "Player2Area")]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, -10, 30)
-collision_layer = 0
-collision_mask = 0
-script = ExtResource("8_d4rec")
-Level = NodePath("../..")
-Network = NodePath("../../../Network")
-FieldArea = NodePath("../FieldArea")
-FloorArea = NodePath("../Floor/Area")
-NetArea = NodePath("../Net/Area")
-Player1Area = NodePath("../Player1Area")
-Player2Area = NodePath("../Player2Area")
+[node name="Balls" type="Node3D" parent="Level"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Ball"]
-shape = SubResource("SphereShape3D_scbn3")
-
-[node name="CSGSphere3D" type="CSGSphere3D" parent="Level/World/Ball"]
-cast_shadow = 0
-material = SubResource("StandardMaterial3D_oakse")
-
-[node name="Area" type="Area3D" parent="Level/World/Ball"]
-collision_layer = 4
-collision_mask = 4
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Ball/Area"]
-shape = SubResource("SphereShape3D_xei7b")
-
-[node name="Shadow" type="Sprite3D" parent="Level/World/Ball"]
-texture = ExtResource("7_gu05u")
-
-[node name="RayCast3D" type="RayCast3D" parent="Level/World/Ball"]
-target_position = Vector3(0, -100, 0)
-collision_mask = 8
-hit_from_inside = true
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="Level/World/Ball"]
-replication_config = SubResource("SceneReplicationConfig_xd51s")
-
-[node name="Debug_MaxHeight" type="CSGBox3D" parent="Level/World/Ball"]
-material_override = SubResource("StandardMaterial3D_yjqqn")
-size = Vector3(0.266602, 0.285156, 65.9668)
-
-[node name="Debug_Z" type="CSGSphere3D" parent="Level/World/Ball"]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_pswn4")
-material = SubResource("StandardMaterial3D_wq3n2")
-
-[node name="Debug_ZLand" type="CSGSphere3D" parent="Level/World/Ball"]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_yk2jc")
-material = SubResource("StandardMaterial3D_wq3n2")
-
-[node name="Debug_LaunchHeight" type="CSGSphere3D" parent="Level/World/Ball"]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_rjn21")
-material = SubResource("StandardMaterial3D_wq3n2")
-
-[node name="Trail" type="GPUParticles3D" parent="Level/World/Ball"]
-amount = 30
-lifetime = 30.0
-explosiveness = 1.0
-fixed_fps = 120
-process_material = SubResource("ShaderMaterial_v5xe6")
-draw_pass_1 = SubResource("QuadMesh_7q4ig")
-script = ExtResource("12_qwsn2")
-length = 30
-length_seconds = 0.25
-color_ramp = ExtResource("10_toyj1")
-curve = ExtResource("11_4wxie")
-billboard = true
-_defaults_have_been_set = true
+[node name="Ball" parent="Level/Balls" instance=ExtResource("5_h3a3d")]
 
 [node name="Players" type="Node3D" parent="Level"]
 

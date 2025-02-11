@@ -181,8 +181,8 @@ func check_match_sync():
 		if not player_data.has('match_sync'):
 			return false
 	return true
-@rpc('any_peer')
 
+@rpc('any_peer')
 func set_loading_screen(value):
 	UI.get_node('Loading').visible = value
 
@@ -207,6 +207,9 @@ func start_game():
 			player_data.state = Network.player_state_type.PLAYER
 			player_data.match_ready = true
 			next_player_num += 1
+
+			next_match_id += 1
+
 			if i != 1:
 				set_loading_screen.rpc_id(i, true)
 				match_sync.rpc_id(i)
@@ -244,7 +247,10 @@ func start_game():
 	elif current_game_type == game_type.SINGLEPLAYER:
 		for i in Network.Players:
 			var player_data = Network.Players[i]
+			
 			player_data.match_id = 0
+			# player_data.match_id = player_data.id - 1
+
 			player_data.num = player_data.id
 			player_data.state = Network.player_state_type.PLAYER
 			

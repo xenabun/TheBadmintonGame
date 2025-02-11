@@ -44,9 +44,15 @@ func _ready():
 	aim_arrow.hide()
 
 	set_physics_process(multiplayer.get_unique_id() == player_id)
+
+	var current_authority = multiplayer.get_unique_id()
+	var current_authority_player_data = Network.Players[current_authority]
+	var player_data = Network.Players[player_id]
+	if player_data and current_authority_player_data:
+		visible = player_data.match_id == current_authority_player_data.match_id
+
 	if multiplayer.get_unique_id() != player_id: return
 
-	var player_data = Network.Players[player_id]
 	if player_data:
 		player_num = player_data.num
 		match_id = player_data.match_id
