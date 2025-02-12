@@ -62,8 +62,8 @@ func get_opponent_id(id):
 func get_opponent_index(index):
 	return abs(index - 1)
 
-func peer_id_to_score_index(id):
-	return 0 if get_player_num(id) == 1 else 1
+# func peer_id_to_score_index(id):
+# 	return get_player_num(id) - 1
 
 func get_player_num(id):
 	if not Network.Players.has(id): return
@@ -170,6 +170,24 @@ func score_point_effect(p, player_num):
 	await get_tree().create_timer(0.5).timeout
 	score_effect.queue_free()
 
+@rpc('any_peer')
+func finish_match(winner_index, match_id):
+	var match_data = Network.Matches[match_id]
+	match_data.status = Network.match_status_type.PAUSED
+	Network.remove_ball(match_id)
+	var players_data = get_match_players_data(match_id)
+	
+	for i in players_data:
+		var player_id = players_data[i].id
+		var score_index = get_player_num(player_id) - 1
+		var result_text = WIN_TEXT if winner_index == score_index else LOSE_TEXT
+		var score_text = get_full_score_str(get_player_num(player_id), match_id)
+		if player_id == 1:
+			UI.show_match_result(result_text, score_text)
+		else:
+			if current_game_type != game_type.SINGLEPLAYER:
+				UI.show_match_result.rpc_id(player_id, result_text, score_text)
+
 @rpc('any_peer', 'call_local')
 func grant_point(p, match_id):
 	var match_data = Network.Matches[match_id]
@@ -185,19 +203,24 @@ func grant_point(p, match_id):
 		update_score_text(player_match_id, player_num)
 	
 	if check_win(p, match_id):
+		if player_id == 1:
+			finish_match(p, match_id)
+		else:
+			finish_match.rpc_id(1, p, match_id)
+
 		# game_in_progress = false
-		match_data.status = Network.match_status_type.PAUSED
-		if multiplayer.is_server():
-			# reset_score(match_id)
-			Network.remove_ball(match_id)
-		if match_id == player_match_id:
-			var game_result_ui = UI.get_node('GameResult')
-			var score_index = peer_id_to_score_index(player_id)
-			var result_text = WIN_TEXT if p == score_index else LOSE_TEXT
-			game_result_ui.get_node('Result').text = result_text
-			game_result_ui.get_node('Score').text = get_full_score_str(get_player_num(player_id), match_id)
-			game_result_ui.show()
-			UI.get_node('GameUI').hide()
+		# match_data.status = Network.match_status_type.PAUSED
+		# if multiplayer.is_server():
+		# 	# reset_score(match_id)
+		# 	Network.remove_ball(match_id)
+		# if match_id == player_match_id:
+		# 	var game_result_ui = UI.get_node('GameResult')
+		# 	var score_index = peer_id_to_score_index(player_id)
+		# 	var result_text = WIN_TEXT if p == score_index else LOSE_TEXT
+		# 	game_result_ui.get_node('Result').text = result_text
+		# 	game_result_ui.get_node('Score').text = get_full_score_str(get_player_num(player_id), match_id)
+		# 	game_result_ui.show()
+		# 	UI.get_node('GameUI').hide()
 
 		# ball.set_ball_ready()
 		# ball.reset_ball()
@@ -205,11 +228,20 @@ func grant_point(p, match_id):
 		# 	ServerBrowser.stop_broadcast()
 
 @rpc('any_peer')
-func reset_player_positions():
-	for player in get_tree().get_nodes_in_group('Player'):
-		player.reset_position.emit()
-	for bot in get_tree().get_nodes_in_group('Bot'):
-		bot._reset_position()
+func reset_player_positions(match_id):
+	if current_game_type == game_type.SINGLEPLAYER:
+		for i in Network.Players:
+			var player_data = Network.Players[i]
+			if not player_data.has('match_id') or player_data.match_id != match_id: continue
+			if not Level.get_node('Players').has_node(str(player_data.id)): continue
+			if player_data.is_bot:
+				Level.get_node('Players/' + str(player_data.id))._reset_position()
+			else:
+				Level.get_node('Players/' + str(player_data.id)).reset_position.emit()
+	# for player in get_tree().get_nodes_in_group('Player'):
+	# 	player.reset_position.emit()
+	# for bot in get_tree().get_nodes_in_group('Bot'):
+	# 	bot._reset_position()
 
 # func reset_score(match_id):
 # 	score = [ 0, 0 ]

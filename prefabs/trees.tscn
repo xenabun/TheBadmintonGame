@@ -5,9 +5,16 @@
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_do7hu"]
 transparency = 2
-alpha_scissor_threshold = 0.855
+alpha_scissor_threshold = 0.624
 alpha_antialiasing_mode = 0
 albedo_texture = ExtResource("2_c4gt7")
+rim = 0.0
+rim_tint = 0.0
+clearcoat = 0.0
+clearcoat_roughness = 1.0
+heightmap_scale = -16.0
+refraction_texture_channel = 1
+uv1_triplanar_sharpness = 2.92818
 
 [node name="trees" instance=ExtResource("1_moirv")]
 

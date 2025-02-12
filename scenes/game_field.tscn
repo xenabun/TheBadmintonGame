@@ -1,9 +1,10 @@
-[gd_scene load_steps=41 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=42 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
 [ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://prefabs/trees.tscn" id="3_f8pxf"]
 [ext_resource type="Texture2D" uid="uid://c6rdby1kjqnc5" path="res://images/6f7a97101ad33899f1b0186481123e241.jpg" id="4_1apb5"]
+[ext_resource type="Texture2D" uid="uid://mys6700w7ww4" path="res://images/field.png" id="4_au1ay"]
 [ext_resource type="Script" path="res://scripts/Network.gd" id="6_h2wnu"]
 [ext_resource type="Script" path="res://scripts/ServerBrowser.gd" id="7_4w53d"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
@@ -205,7 +206,7 @@ environment = SubResource("Environment_hy0gk")
 transform = Transform3D(5.8, 0, 0, 0, 5.8, 0, 0, 0, 5.8, 0, 0, 0)
 
 [node name="trees" parent="Level/World/WorldEnvironment" instance=ExtResource("3_f8pxf")]
-transform = Transform3D(4.195, 0, 0, 0, 4.195, 0, 0, 0, 4.195, 0, -2.68639, 0)
+transform = Transform3D(4.195, 0, 0, 0, 4.195, 0, 0, 0, 4.195, 0, -2.46778, 10.9318)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Level/World/WorldEnvironment"]
 transform = Transform3D(0.705926, -0.595605, -0.383305, 0.531061, 0.0870029, 0.842855, -0.46866, -0.798552, 0.37772, 0, 7.39259, 0)
@@ -230,6 +231,13 @@ size = Vector3(147.88, 0.174, 210.24)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05373, 0)
 material_override = SubResource("StandardMaterial3D_xvpac")
 size = Vector3(30, 0.178, 60)
+
+[node name="Sprite3D" type="Sprite3D" parent="Level/World/Floor"]
+transform = Transform3D(-5.12298e-07, 11, 4.37114e-08, 0, -4.80825e-07, 1, 11.72, 4.80825e-07, 1.91069e-15, -3.67199e-08, 0.159946, -4.37114e-08)
+shaded = true
+double_sided = false
+texture_filter = 4
+texture = ExtResource("4_au1ay")
 
 [node name="Area" type="Area3D" parent="Level/World/Floor"]
 collision_layer = 4

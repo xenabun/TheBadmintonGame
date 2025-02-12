@@ -26,6 +26,7 @@ func _enter_tree():
 func clear_lobby_player_list():
 	for child in lobby_player_list.get_children():
 		child.queue_free()
+
 @rpc('any_peer')
 func update_lobby_player_list(players):
 	if not state.in_server_lobby.get_state(): return
@@ -47,6 +48,14 @@ func update_lobby_player_list(players):
 func close_lobby_player_list():
 	state.in_menu.set_state(false)
 	state.in_server_lobby.set_state(false)
+
+@rpc
+func show_match_result(result_text, score_text):
+	var game_result_ui = get_node('GameResult')
+	game_result_ui.get_node('Result').text = result_text
+	game_result_ui.get_node('Score').text = score_text
+	game_result_ui.show()
+	get_node('GameUI').hide()
 
 @rpc('any_peer')
 func set_loading_screen(value):

@@ -52,14 +52,14 @@ func get_land_x():
 
 var ball_ready = true:
 	set(value):
+		reset_ball()
 		ball_ready = value
-		# if value == true and Game.game_in_progress:
 		if value and Game.is_match_in_progress(match_id):
-			reset_ball()
+			# await get_tree().create_timer(0.5).timeout
 			if multiplayer.is_server():
-				Game.reset_player_positions()
+				Game.reset_player_positions(match_id)
 			else:
-				Game.reset_player_positions.rpc_id(1)
+				Game.reset_player_positions.rpc_id(1, match_id)
 
 @rpc('any_peer', 'call_local')
 func set_ball_ready(value = true):
@@ -67,6 +67,9 @@ func set_ball_ready(value = true):
 @rpc("any_peer", 'call_local')
 func throw_ball(peer_id : int, player_name : String, new_position : Vector3,
 		new_direction : float, new_velocity_x : float, aim_dir_y : float):
+	
+	## TODO: wait for both players to close controls ui, only let num=1 throw?
+
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
@@ -147,12 +150,7 @@ func _physics_process(_delta):
 			Game.grant_point.rpc(0, match_id)
 		else:
 			var pdata = Network.Players[str(last_interact).to_int()]
-			var num = pdata.num
-			Game.grant_point.rpc(Game.get_opponent_index(num - 1), match_id)
-			# if last_interact == '1':
-			# 	Game.grant_point.rpc(1, match_id)
-			# else:
-			# 	Game.grant_point.rpc(0, match_id)
+			Game.grant_point.rpc(Game.get_opponent_index(pdata.num - 1), match_id)
 		set_ball_ready.rpc()
 		return
 	

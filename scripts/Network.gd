@@ -145,6 +145,9 @@ func _on_host_pressed():
 
 func _on_start_game_pressed():
 	if not multiplayer.is_server(): return
+	if Players.size() <= 1:
+		OS.alert('Необходимо минимум 2 игрока для начала игры')
+		return
 
 	ServerBrowser.stop_broadcast()
 	Game.start_game()

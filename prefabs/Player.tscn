@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://blx58dx1jig7h"]
+[gd_scene load_steps=26 format=3 uid="uid://blx58dx1jig7h"]
 
 [ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
@@ -12,7 +12,7 @@ radius = 1.00449
 height = 4.82426
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
-size = Vector3(16.4297, 23.9078, 14.8733)
+size = Vector3(14.0291, 21.4085, 13)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
 animation = &"playeranims/Walk"
@@ -100,64 +100,39 @@ properties/1/replication_mode = 2
 properties/2/path = NodePath("Username:text")
 properties/2/spawn = true
 properties/2/replication_mode = 2
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kwohg"]
-properties/0/path = NodePath(".:player_id")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:position")
-properties/1/spawn = true
-properties/1/replication_mode = 0
-properties/2/path = NodePath(".:rotation")
-properties/2/spawn = true
-properties/2/replication_mode = 0
-properties/3/path = NodePath("playermodel:rotation")
+properties/3/path = NodePath(".:player_id")
 properties/3/spawn = true
-properties/3/replication_mode = 0
-properties/4/path = NodePath(".:player_num")
-properties/4/spawn = false
-properties/4/replication_mode = 0
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lmu2p"]
-properties/0/path = NodePath("PlayerInput:direction")
-properties/0/spawn = false
-properties/0/replication_mode = 2
-properties/1/path = NodePath(".:position")
-properties/1/spawn = false
-properties/1/replication_mode = 2
-properties/2/path = NodePath("playermodel:rotation")
-properties/2/spawn = false
-properties/2/replication_mode = 2
-properties/3/path = NodePath("AnimationPlayer:current_animation")
-properties/3/spawn = false
 properties/3/replication_mode = 2
-properties/4/path = NodePath("AnimationTree:anim_player")
-properties/4/spawn = false
-properties/4/replication_mode = 0
-properties/5/path = NodePath("AnimationTree:active")
-properties/5/spawn = false
+properties/4/path = NodePath(".:position")
+properties/4/spawn = true
+properties/4/replication_mode = 2
+properties/5/path = NodePath(".:rotation")
+properties/5/spawn = true
 properties/5/replication_mode = 2
-properties/6/path = NodePath("AnimationTree:parameters/TimeScale/scale")
-properties/6/spawn = false
+properties/6/path = NodePath(".:throw_power")
+properties/6/spawn = true
 properties/6/replication_mode = 2
-properties/7/path = NodePath("AnimationTree:parameters/WalkScale/scale")
-properties/7/spawn = false
+properties/7/path = NodePath("playermodel:rotation")
+properties/7/spawn = true
 properties/7/replication_mode = 2
-properties/8/path = NodePath("AnimationTree:parameters/WalkSpeed/blend_amount")
-properties/8/spawn = false
+properties/8/path = NodePath("AnimationPlayer:current_animation")
+properties/8/spawn = true
 properties/8/replication_mode = 2
-properties/9/path = NodePath(".:rotation")
-properties/9/spawn = false
+properties/9/path = NodePath("AnimationTree:anim_player")
+properties/9/spawn = true
 properties/9/replication_mode = 2
-properties/10/path = NodePath("Username:text")
-properties/10/spawn = false
+properties/10/path = NodePath("AnimationTree:active")
+properties/10/spawn = true
 properties/10/replication_mode = 2
-properties/11/path = NodePath(".:username")
-properties/11/spawn = false
+properties/11/path = NodePath("AnimationTree:parameters/TimeScale/scale")
+properties/11/spawn = true
 properties/11/replication_mode = 2
-properties/12/path = NodePath(".:throw_power")
-properties/12/spawn = false
+properties/12/path = NodePath("AnimationTree:parameters/WalkScale/scale")
+properties/12/spawn = true
 properties/12/replication_mode = 2
+properties/13/path = NodePath("AnimationTree:parameters/WalkSpeed/blend_amount")
+properties/13/spawn = true
+properties/13/replication_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g2tai"]
 transparency = 1
@@ -199,13 +174,13 @@ collision_mask = 4
 monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RacketArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.20022, -2.86776)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0494356, -1.93111)
 shape = SubResource("BoxShape3D_i5pof")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="RacketArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.20022, -2.86776)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0494356, -1.93111)
 visible = false
-size = Vector3(16.2578, 23.9078, 14.8733)
+size = Vector3(14.0291, 21.4085, 13)
 material = ExtResource("3_s24ti")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -254,14 +229,6 @@ one_shot = true
 [node name="ActionPressed" type="Timer" parent="PlayerInput"]
 wait_time = 0.3
 one_shot = true
-
-[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-process_mode = 4
-replication_config = SubResource("SceneReplicationConfig_kwohg")
-
-[node name="PlayerInput1" type="MultiplayerSynchronizer" parent="."]
-process_mode = 4
-replication_config = SubResource("SceneReplicationConfig_lmu2p")
 
 [node name="AimArrow" type="Node3D" parent="."]
 
