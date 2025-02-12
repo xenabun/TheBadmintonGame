@@ -130,7 +130,8 @@ func update_camera_transform(t):
 
 func _physics_process(delta):
 	# print('physics step player_id: ', player_id, ' by ', multiplayer.get_unique_id())
-	if not Game.game_in_progress:
+	# if not Game.game_in_progress:
+	if not Game.is_match_in_progress(match_id):
 		if animation_tree.active:
 			animation_tree.active = false
 		return

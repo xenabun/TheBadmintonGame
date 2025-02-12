@@ -166,6 +166,7 @@ albedo_texture = ExtResource("6_2et2c")
 texture_filter = 0
 
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
+collision_layer = 0
 script = ExtResource("1_pqout")
 
 [node name="Username" type="Label3D" parent="."]

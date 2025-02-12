@@ -12,6 +12,10 @@ enum player_state_type {
 	SPECTATOR,
 	PLAYER
 }
+enum match_status_type {
+	IN_PROGRESS,
+	PAUSED
+}
 
 @export var PORT : int = 5000
 @export var Level : Node
@@ -20,6 +24,7 @@ enum player_state_type {
 @export var ServerBrowserUI : Node
 
 @export var server_state : server_state_type = server_state_type.NONE
+@export var Matches : Dictionary = {}
 @export var Players : Dictionary = {}
 @export var Balls : Dictionary = {}
 
@@ -177,7 +182,8 @@ func quit_server():
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	Players = {}
 	Balls = {}
-	Game.game_in_progress = true
+	Matches = {}
+	# Game.game_in_progress = true
 	# Game.ball.set_ball_ready()
 	# Game.ball.reset_ball()
 	UI.state.in_menu.set_state(true)
@@ -261,6 +267,7 @@ func add_bot(bot_username):
 	character.name = '2'
 	character.player = Level.get_node('Players/1')
 	character.Level = Level
+	# character.Network = self
 	character.get_node('Username').text = bot_username
 	var spawn_point = Level.get_node('World/Player2Spawn')
 	character.position = spawn_point.position
@@ -278,8 +285,7 @@ func add_ball(match_id):
 	ball.match_id = match_id
 	Level.get_node('Balls').add_child(ball, true)
 	Balls[match_id] = {
-		'match_id': match_id,
-		'object': ball
+		'match_id': match_id
 	}
 
 func remove_ball(match_id):

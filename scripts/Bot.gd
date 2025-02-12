@@ -51,7 +51,8 @@ func _ready():
 	$RacketArea/CSGBox3D.hide()
 
 func _physics_process(delta):
-	if not Game.game_in_progress:
+	# if not Game.game_in_progress:
+	if not Game.is_match_in_progress(match_id):
 		if animation_tree.active:
 			animation_tree.active = false
 		return

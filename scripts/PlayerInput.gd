@@ -102,10 +102,12 @@ func _input(event):
 			# if Game.current_game_type == Game.game_type.SINGLEPLAYER:
 			# 	Game.game_in_progress = not menu.visible
 	
-	if not Game.game_in_progress or is_game_paused(): return
+	# if not Game.game_in_progress or is_game_paused(): return
+	if not Game.is_match_in_progress(player.match_id) or is_game_paused(): return
 	
 	if event.is_action_pressed('action'):
-		if player.ball != null and player.ball.ball_ready and Game.game_in_progress:
+		# if player.ball != null and player.ball.ball_ready and Game.game_in_progress:
+		if player.ball != null and player.ball.ball_ready and Game.is_match_in_progress(player.match_id):
 			var pos = player.get_node('Ball').global_position
 			var new_direction = VectorMath.look_vector(player.get_node('RacketArea')).z
 			var aim_x = sin((aim_direction.x * 2 * PI) / 2)

@@ -53,7 +53,8 @@ func get_land_x():
 var ball_ready = true:
 	set(value):
 		ball_ready = value
-		if value == true and Game.game_in_progress:
+		# if value == true and Game.game_in_progress:
+		if value and Game.is_match_in_progress(match_id):
 			reset_ball()
 			if multiplayer.is_server():
 				Game.reset_player_positions()
@@ -130,7 +131,8 @@ func _physics_process(_delta):
 	# 			node.position = Vector3.ZERO
 	
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
-	if not Game.game_in_progress or ball_ready: return
+	# if not Game.game_in_progress or ball_ready: return
+	if not Game.is_match_in_progress(match_id) or ball_ready: return
 	
 	# reset when leaves field area
 	if not ball_hitbox.overlaps_area(FieldArea):

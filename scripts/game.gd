@@ -22,8 +22,13 @@ const LOSE_TEXT = 'Поражение'
 var debug = false
 
 var window_focus = true
-var score = [ 0, 0 ]
-var game_in_progress = true
+# var score = [ 0, 0 ]
+# var game_in_progress = true
+
+func is_match_in_progress(match_id):
+	if not Network.Matches.has(match_id): return
+	var match_data = Network.Matches[match_id]
+	return match_data.status == Network.match_status_type.IN_PROGRESS
 
 func get_ball_by_match_id(match_id):
 	for i in Network.Balls:
@@ -61,16 +66,28 @@ func peer_id_to_score_index(id):
 	return 0 if get_player_num(id) == 1 else 1
 
 func get_player_num(id):
-	if Network.Players.has(id):
-		var player_data = Network.Players[id]
-		if player_data.has('num'):
-			return player_data.num
+	if not Network.Players.has(id): return
+	var player_data = Network.Players[id]
+	if player_data.has('num'):
+		return player_data.num
 
-func get_full_score_str():
-	if get_player_num(multiplayer.get_unique_id()) == 1:
-		return str(score[0], ' : ', score[1])
+func get_player_match_id(id):
+	if not Network.Players.has(id): return
+	var player_data = Network.Players[id]
+	if player_data.has('match_id'):
+		return player_data.match_id
+
+func get_full_score_str(player_num, match_id):
+	var match_data = Network.Matches[match_id]
+	var match_score = match_data.score
+	if player_num == 1:
+		return str(match_score[0], ' : ', match_score[1])
 	else:
-		return str(score[1], ' : ', score[0])
+		return str(match_score[1], ' : ', match_score[0])
+	# if get_player_num(multiplayer.get_unique_id()) == 1:
+	# 	return str(score[0], ' : ', score[1])
+	# else:
+	# 	return str(score[1], ' : ', score[0])
 
 func get_match_players_data(match_id):
 	var ids = {0: null, 1: null}
@@ -88,20 +105,28 @@ func get_match_players_data(match_id):
 	return ids
 
 @rpc('any_peer')
-func update_score_text():
-	var pdata = Network.Players[multiplayer.get_unique_id()]
-	var match_id = pdata.match_id
+func update_score_text(match_id = null, player_num = null):
+	# var pdata = Network.Players[multiplayer.get_unique_id()]
+	# if match_id == null:
+		# match_id = pdata.match_id
+	if match_id == null or player_num == null:
+		var player_id = multiplayer.get_unique_id()
+		match_id = get_player_match_id(player_id)
+		player_num = get_player_num(player_id)
+	
+	var match_data = Network.Matches[match_id]
+	var match_score = match_data.score
 	var players_data = get_match_players_data(match_id)
 	var score_control = UI.get_node('GameUI/ScoreControl')
 	
-	if pdata.has('num') and pdata.num == 2:
-		score_control.get_node('Player1Score').text = str(score[players_data[1].num - 1])
-		score_control.get_node('Player2Score').text = str(score[players_data[0].num - 1])
+	if player_num == 2:
+		score_control.get_node('Player1Score').text = str(match_score[players_data[1].num - 1])
+		score_control.get_node('Player2Score').text = str(match_score[players_data[0].num - 1])
 		score_control.get_node('Player1').text = players_data[1].username
 		score_control.get_node('Player2').text = players_data[0].username
 	else:
-		score_control.get_node('Player1Score').text = str(score[players_data[0].num - 1])
-		score_control.get_node('Player2Score').text = str(score[players_data[1].num - 1])
+		score_control.get_node('Player1Score').text = str(match_score[players_data[0].num - 1])
+		score_control.get_node('Player2Score').text = str(match_score[players_data[1].num - 1])
 		score_control.get_node('Player1').text = players_data[0].username
 		score_control.get_node('Player2').text = players_data[1].username
 
@@ -112,16 +137,22 @@ func update_score_text_for_all():
 		else:
 			update_score_text.rpc_id(i)
 
-func check_win(p):
-	return score[p] >= 2
-	# if score[p] >= 20 and score[get_opponent_index(p)] >= 20:
-	# 	if score[p] >= 29 and score[get_opponent_index(p)] >= 29:
-	# 		return score[p] >= 30
-	# 	else: return score[p] - score[get_opponent_index(p)] >= 2
-	# else: return score[p] >= 21
+func check_win(p, match_id):
+	var match_data = Network.Matches[match_id]
+	var match_score = match_data.score
+	return match_score[p] >= 2
+	# if match_score[p] >= 20 and match_score[get_opponent_index(p)] >= 20:
+	# 	if match_score[p] >= 29 and match_score[get_opponent_index(p)] >= 29:
+	# 		return match_score[p] >= 30
+	# 	else: return match_score[p] - match_score[get_opponent_index(p)] >= 2
+	# else: return match_score[p] >= 21
 
-func score_point_effect(p):
-	var player_num = get_player_num(multiplayer.get_unique_id())
+func score_point_effect(p, player_num):
+	# var player_id = multiplayer.get_unique_id()
+	# var player_match_id = get_player_match_id(player_id)
+	# if match_id != player_match_id: return
+
+	# var player_num = get_player_num(player_id)
 	if player_num == 2:
 		p = get_opponent_index(p)
 	var score_control = UI.get_node('GameUI/ScoreControl')
@@ -141,21 +172,33 @@ func score_point_effect(p):
 
 @rpc('any_peer', 'call_local')
 func grant_point(p, match_id):
-	score[p] += 1
-	score_point_effect(p)
-	update_score_text()
-	if check_win(p):
-		game_in_progress = false
-		var game_result_ui = UI.get_node('GameResult')
-		var score_index = peer_id_to_score_index(multiplayer.get_unique_id())
-		var result_text = WIN_TEXT if p == score_index else LOSE_TEXT
-		game_result_ui.get_node('Result').text = result_text
-		game_result_ui.get_node('Score').text = get_full_score_str()
-		game_result_ui.show()
-		UI.get_node('GameUI').hide()
-		reset_score()
+	var match_data = Network.Matches[match_id]
+	var match_score = match_data.score
+	var player_id = multiplayer.get_unique_id()
+	var player_match_id = get_player_match_id(player_id)
+
+	match_score[p] += 1
+
+	if match_id == player_match_id:
+		var player_num = get_player_num(player_id)
+		score_point_effect(p, player_num)
+		update_score_text(player_match_id, player_num)
+	
+	if check_win(p, match_id):
+		# game_in_progress = false
+		match_data.status = Network.match_status_type.PAUSED
 		if multiplayer.is_server():
+			# reset_score(match_id)
 			Network.remove_ball(match_id)
+		if match_id == player_match_id:
+			var game_result_ui = UI.get_node('GameResult')
+			var score_index = peer_id_to_score_index(player_id)
+			var result_text = WIN_TEXT if p == score_index else LOSE_TEXT
+			game_result_ui.get_node('Result').text = result_text
+			game_result_ui.get_node('Score').text = get_full_score_str(get_player_num(player_id), match_id)
+			game_result_ui.show()
+			UI.get_node('GameUI').hide()
+
 		# ball.set_ball_ready()
 		# ball.reset_ball()
 		# if multiplayer.is_server():
@@ -168,8 +211,8 @@ func reset_player_positions():
 	for bot in get_tree().get_nodes_in_group('Bot'):
 		bot._reset_position()
 
-func reset_score():
-	score = [ 0, 0 ]
+# func reset_score(match_id):
+# 	score = [ 0, 0 ]
 
 @rpc('any_peer')
 func set_match_sync(player_id):
@@ -205,16 +248,21 @@ func check_match_sync():
 # 	UI.get_node('Loading').visible = value
 
 func start_game():
-	game_in_progress = true
+	# game_in_progress = true
 	Network.server_state = Network.server_state_type.MATCH
+	var match_amount = ceil(Network.Players.size() / 2)
+	for match_id in match_amount:
+		Network.Matches[match_id] = {
+			'score' = [ 0, 0 ],
+			'status' = Network.match_status_type.IN_PROGRESS,
+		}
 
 	if current_game_type == game_type.MULTIPLAYER:
 		var next_match_id = 0
 		var next_player_num = 1
 		var next_match = []
 
-		var balls_amount = ceil(Network.Players.size() / 2)
-		for match_id in balls_amount:
+		for match_id in match_amount:
 			Network.add_ball(match_id)
 
 		for i in Network.Players:
@@ -229,11 +277,10 @@ func start_game():
 			player_data.state = Network.player_state_type.PLAYER
 			player_data.match_ready = true
 			next_player_num += 1
-			# next_match_id += 1
 
 			if i != 1:
 				UI.set_loading_screen.rpc_id(i, true)
-				match_sync.rpc_id(i, balls_amount)
+				match_sync.rpc_id(i, match_amount)
 			else:
 				UI.set_loading_screen(true)
 		
@@ -294,7 +341,8 @@ func start_game():
 
 		update_score_text()
 
-	reset_score()
+	# for match_id in match_amount:
+	# 	reset_score(match_id)
 
 func _ready():
 	debug = get_tree().get_root().get_node('Scene/DebugUI').visible

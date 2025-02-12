@@ -15,7 +15,7 @@ var title_rot_deg = 1
 var title_rot_time = 4
 
 func _ready():
-	state = UI_State.new(self)
+	state = UI_State.new(self, Network)
 
 func _enter_tree():
 	title_label.rotation = deg_to_rad(-title_rot_deg)
