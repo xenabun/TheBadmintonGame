@@ -64,7 +64,7 @@ func _init(_ui, Network):
 	in_server_browser.state_changed.connect(func(_old_state, new_state, _args):
 		ui.get_node('ServerBrowser').visible = new_state
 		if new_state:
-			ui.get_node('ServerBrowser/PortText').text = 'Порт: ' + str(ui.Network.PORT)
+			ui.get_node('ServerBrowser/PortPanel/PortText').text = 'Порт: ' + str(ui.Network.PORT)
 			ui.ServerBrowser.listenPort = ui.Network.PORT + 1
 			ui.ServerBrowser.listen_to_broadcast()
 		else:
@@ -78,9 +78,12 @@ func _init(_ui, Network):
 		)
 
 	entering_port.state_changed.connect(func(_old_state, new_state, _args):
+		in_main_menu.set_state(new_state)
+		if new_state:
+			ui.get_node('CurrentUsername').visible = false
 		ui.get_node('MainMenu/Port').visible = new_state
-		ui.get_node('CurrentUsername').visible = not new_state
 		ui.get_node('MainMenu/Menu').visible = not new_state
+		in_server_browser.set_state(not new_state)
 		)
 	
 	showing_message.state_changed.connect(func(_old_state, new_state, _args):

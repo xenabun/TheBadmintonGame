@@ -92,6 +92,11 @@ func _on_singleplayer_pressed():
 	Network.start_singleplayer()
 
 func _on_multiplayer_pressed():
+	# state.entering_port.set_state(true)
+	state.in_main_menu.set_state(false)
+	state.in_server_browser.set_state(true)
+
+func _on_port_change_pressed():
 	state.entering_port.set_state(true)
 
 func _on_port_menu_close_pressed():
@@ -103,8 +108,10 @@ func _on_port_confirm():
 	if port_num and port_num >= 1024 and port_num <= 49151:
 		Network.PORT = port_num
 		state.entering_port.set_state(false)
-		state.in_main_menu.set_state(false)
-		state.in_server_browser.set_state(true)
+		# state.in_main_menu.set_state(false)
+		# state.in_server_browser.set_state(true)
+	else:
+		OS.alert('Введено неверное значение')
 
 func _on_lobby_exit_pressed():
 	Network.quit_server()

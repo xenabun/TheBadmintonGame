@@ -1,12 +1,5 @@
 extends CharacterBody3D
 
-signal reset_position
-func _reset_position():
-	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn')
-	position = spawn_point.position
-	rotation = spawn_point.rotation
-	update_camera_transform(1)
-
 @export var player_id : int = 0
 @export var player_num : int = 1
 @export var match_id : int = 0
@@ -14,6 +7,9 @@ func _reset_position():
 @export var stamina_bar : Node
 @export var throw_power : float = PlayerVariables.MAX_POWER
 @export var aim_x : float = 0
+## TODO: wait for guide to be hidden and then let players play
+@export var can_play : bool = true
+@export var can_throw : bool = false
 
 @onready var Level = get_tree().get_root().get_node('Scene/Level')
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
@@ -33,14 +29,30 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var prev_direction = Vector3.ZERO
 var camera
-var ball
+# var ball
+
+# @rpc('any_peer')
+# func reset_ball():
+# 	ball = null
 
 @rpc('any_peer')
-func reset_ball():
-	ball = null
+func set_can_throw(value):
+	can_throw = value
 
 func get_player_side():
 	return 1 if player_num == 1 else -1
+
+@rpc('any_peer')
+func reset_position():
+	var player_index = player_num - 1
+	if not can_throw:
+		player_index = Game.get_opponent_index(player_index)
+	var player_round_score = Game.get_player_round_score(match_id, player_index)
+	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
+	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn' + side)
+	position = spawn_point.position
+	rotation = spawn_point.rotation
+	update_camera_transform(1)
 
 func _ready():
 	player_id = get_multiplayer_authority()
@@ -62,15 +74,17 @@ func _ready():
 
 	if player_data:
 		player_num = player_data.num
+		can_throw = player_num == 1
 		match_id = player_data.match_id
 		username = player_data.username
 		username_billboard.text = player_data.username
+		# ball = Game.get_ball_by_match_id(match_id)
 		Game.print_debug_msg('getting player data: username: ' + str(player_data.username))
 	else:
 		Game.print_debug_msg('getting player data: not found')
+		return
 
-	ball = Game.get_ball_by_match_id(match_id)
-	reset_position.connect(_reset_position)
+	# reset_position.connect(_reset_position)
 	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
 	var GameUI = UI.get_node('GameUI')
@@ -222,6 +236,7 @@ func _physics_process(delta):
 	
 	# position
 	move_and_slide()
+	## TODO: limit player movement when is about to throw
 	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
 	var side = get_player_side()
 	var z_clamp = [2 * side, PlayerVariables.Z_LIMIT * side]
@@ -229,7 +244,8 @@ func _physics_process(delta):
 	
 	# aim arrow
 	## TODO: only draw arrow if its your turn
-	if (ball != null and ball.ball_ready) or input.action_hold:
+	# if (ball != null and ball.ball_ready) or input.action_hold:
+	if can_throw or input.action_hold:
 		aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 		if not aim_arrow.visible:
 			aim_arrow_sprite.scale.x = 0

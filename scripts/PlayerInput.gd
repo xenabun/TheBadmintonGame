@@ -105,27 +105,33 @@ func _input(event):
 	# if not Game.game_in_progress or is_game_paused(): return
 	if not Game.is_match_in_progress(player.match_id) or is_game_paused(): return
 	
-	if event.is_action_pressed('action'):
-		# if player.ball != null and player.ball.ball_ready and Game.game_in_progress:
-		if player.ball != null and player.ball.ball_ready and Game.is_match_in_progress(player.match_id):
-			var pos = player.get_node('Ball').global_position
-			var new_direction = VectorMath.look_vector(player.get_node('RacketArea')).z
-			var aim_x = sin((aim_direction.x * 2 * PI) / 2)
-			var aim_y = aim_direction.y
-			var new_velocity_x = aim_x * 30 * -new_direction
-			player.ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
-					player.name, pos, new_direction, new_velocity_x, aim_y)
-			player.get_node('AimArrow').hide()
-			throw_ready.rpc()
-		else:
-			if action_ready and not action_active:
-				action_hold = true
-				racket_hold_timer.start()
-				action_active = true
-				racket_hold.rpc()
-	if event.is_action_released('action') and action_hold:
-		racket_hold_timer.stop()
-		action_hold = false
+	if player.can_play:
+		if event.is_action_pressed('action'):
+			# if player.ball != null and player.ball.ball_ready and Game.game_in_progress:
+			var ball = Game.get_ball_by_match_id(player.match_id)
+			# print(player.ball != null, ' ', player.ball.ball_ready, ' ', Game.is_match_in_progress(player.match_id))
+			# print(ball != null, ' ', ball.ball_ready, ' ', Game.is_match_in_progress(player.match_id))
+			if player.can_throw and ball != null and ball.ball_ready and Game.is_match_in_progress(player.match_id):
+				var pos = player.get_node('Ball').global_position
+				var new_direction = VectorMath.look_vector(player.get_node('RacketArea')).z
+				var aim_x = sin((aim_direction.x * 2 * PI) / 2)
+				var aim_y = aim_direction.y
+				var new_velocity_x = aim_x * 30 * -new_direction
+				player.can_throw = false
+				ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
+						player.name, pos, new_direction, new_velocity_x, aim_y)
+				player.get_node('AimArrow').hide()
+				throw_ready.rpc()
+			else:
+				if action_ready and not action_active:
+					action_hold = true
+					racket_hold_timer.start()
+					action_active = true
+					racket_hold.rpc()
+		if event.is_action_released('action') and action_hold:
+			racket_hold_timer.stop()
+			action_hold = false
+	
 	if event.is_action_pressed('sprint'):
 		shift_hold = true
 		sprinting = true

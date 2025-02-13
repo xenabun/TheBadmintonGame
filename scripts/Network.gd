@@ -17,7 +17,7 @@ enum match_status_type {
 	PAUSED
 }
 
-@export var PORT : int = 5000
+@export var PORT : int = 3333
 @export var Level : Node
 @export var UI : Node
 @export var ServerBrowser : Node
@@ -223,7 +223,7 @@ func setup_player(character_name, data):
 	character.position = data.position
 	character.rotation = data.rotation
 
-func add_player(id : int = 1, num : int = 1):
+func add_player(id : int = 1, num : int = 1): # , can_throw : bool = false):
 	if Level.get_node('Players').has_node(str(id)): return
 	Game.print_debug_msg('adding player ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 
@@ -233,7 +233,7 @@ func add_player(id : int = 1, num : int = 1):
 	# character.player_num = num
 	character.name = str(id)
 	# var num = 1 if id == 1 else 2
-	var spawn_point = Level.get_node('World/Player' + str(num) + 'Spawn')
+	var spawn_point = Level.get_node('World/Player' + str(num) + 'SpawnEven')
 	# print('applying spawn position ', 'World/Player' + str(num) + 'Spawn')
 	# character.position = spawn_point.position
 	# character.rotation = spawn_point.rotation
@@ -245,13 +245,15 @@ func add_player(id : int = 1, num : int = 1):
 	# })
 	if id == 1:
 		# character.player_num = num
+		# character.can_throw = can_throw
 		character.position = spawn_point.position
 		character.rotation = spawn_point.rotation
 	else:
 		setup_player.rpc_id(id, str(id), {
 			# 'num': num,
-			'position': spawn_point.position,
-			'rotation': spawn_point.rotation,
+			# can_throw = can_throw,
+			position = spawn_point.position,
+			rotation = spawn_point.rotation,
 		})
 	# Game.update_score_text_for_all() # .rpc()
 
@@ -293,6 +295,19 @@ func add_ball(match_id):
 
 func remove_ball(match_id):
 	if not Balls.has(match_id): return
+	if Game.current_game_type == Game.game_type.SINGLEPLAYER:
+		Level.get_node('Players/2').ball = null
+	# for i in Players:
+	# 	var pdata = Players[i]
+	# 	if (Level.get_node('Players').has_node(str(pdata.id))
+	# 			and pdata.has('match_id') and pdata.match_id == match_id):
+	# 		if pdata.is_bot:
+	# 			Level.get_node('Players/' + str(pdata.id)).ball = null
+			# var player = Level.get_node('Players/' + str(pdata.id))
+			# if pdata.is_bot or i == 1:
+			# 	player.reset_ball()
+			# else:
+			# 	player.reset_ball.rpc_id(pdata.id)
 	if Level.get_node('Balls').has_node(str(match_id)):
 		var ball = Level.get_node('Balls/' + str(match_id))
 
@@ -301,15 +316,6 @@ func remove_ball(match_id):
 			ball.reset_authority.rpc_id(multiplayer_authority)
 
 		ball.queue_free()
-	for i in Players:
-		var pdata = Players[i]
-		if (Level.get_node('Players').has_node(str(pdata.id))
-				and pdata.has('match_id') and pdata.match_id == match_id):
-			var player = Level.get_node('Players/' + str(pdata.id))
-			if pdata.is_bot or i == 1:
-				player.reset_ball()
-			else:
-				player.reset_ball.rpc_id(pdata.id)
 	Balls.erase(match_id)
 
 func _process(_delta):

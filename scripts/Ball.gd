@@ -124,6 +124,7 @@ func _ready():
 	if Network.Players.has(current_authority):
 		var current_authority_player_data = Network.Players[current_authority]
 		if current_authority_player_data and current_authority_player_data.has('match_id'):
+			print('ball visiblity set for ', current_authority, ': ', match_id == current_authority_player_data.match_id)
 			visible = match_id == current_authority_player_data.match_id
 
 func _physics_process(_delta):
@@ -144,13 +145,22 @@ func _physics_process(_delta):
 	
 	# floor interact
 	if ball_hitbox.overlaps_area(FloorArea):
+		var p = 0
 		if ball_hitbox.overlaps_area(Player1Area):
-			Game.grant_point.rpc(1, match_id)
+			p = 1
+			# Game.grant_point.rpc(1, match_id)
 		elif ball_hitbox.overlaps_area(Player2Area):
-			Game.grant_point.rpc(0, match_id)
+			p = 0
+			# Game.grant_point.rpc(0, match_id)
 		else:
 			var pdata = Network.Players[str(last_interact).to_int()]
-			Game.grant_point.rpc(Game.get_opponent_index(pdata.num - 1), match_id)
+			p = Game.get_opponent_index(pdata.num - 1)
+			# Game.grant_point.rpc(Game.get_opponent_index(pdata.num - 1), match_id)
+		if multiplayer.get_unique_id() == 1:
+			Game.set_players_can_throw(match_id, p + 1)
+		else:
+			Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
+		Game.grant_point.rpc(p, match_id)
 		set_ball_ready.rpc()
 		return
 	

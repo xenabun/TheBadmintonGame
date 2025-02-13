@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://bubjsct8lo2e5" path="res://images/arrow.png" id="6_2et2c"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ll8ur"]
-radius = 1.00449
+radius = 0.656523
 height = 4.82426
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
@@ -133,6 +133,15 @@ properties/12/replication_mode = 2
 properties/13/path = NodePath("AnimationTree:parameters/WalkSpeed/blend_amount")
 properties/13/spawn = true
 properties/13/replication_mode = 2
+properties/14/path = NodePath(".:match_id")
+properties/14/spawn = true
+properties/14/replication_mode = 2
+properties/15/path = NodePath(".:can_play")
+properties/15/spawn = true
+properties/15/replication_mode = 2
+properties/16/path = NodePath(".:can_throw")
+properties/16/spawn = true
+properties/16/replication_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g2tai"]
 transparency = 1
@@ -143,6 +152,14 @@ texture_filter = 0
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
 collision_layer = 0
 script = ExtResource("1_pqout")
+player_id = null
+player_num = null
+match_id = null
+username = null
+throw_power = null
+aim_x = null
+can_play = null
+can_throw = null
 
 [node name="Username" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.50246, 0)

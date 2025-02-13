@@ -21,6 +21,9 @@ var stamina = PlayerVariables.MAX_STAMINA
 var target_position
 var exhausted = false
 var sprinting = false
+var can_play = true
+var can_throw = false
+
 func _on_sprint_timeout():
 	sprinting = false
 var racket_cooldown = false:
@@ -34,11 +37,17 @@ var racket_cooldown = false:
 func _on_racket_cooldown_timeout():
 	racket_cooldown = false
 
-func reset_ball():
-	ball = null
+# func reset_ball():
+# 	ball = null
 
-func _reset_position():
-	var spawn_point = Level.get_node('World/Player2Spawn')
+func reset_position():
+	## TODO: add bot can_throw logic and make bot be able to throw ball
+	var player_index = 2 # player_num - 1
+	if true: # not can_throw:
+		player_index = Game.get_opponent_index(player_index)
+	var player_round_score = Game.get_player_round_score(match_id, player_index)
+	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
+	var spawn_point = Level.get_node('World/Player2Spawn' + side)
 	position = spawn_point.position
 	rotation = spawn_point.rotation
 
