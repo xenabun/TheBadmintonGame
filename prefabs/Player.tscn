@@ -12,7 +12,7 @@ radius = 0.656523
 height = 4.82426
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_i5pof"]
-size = Vector3(14.0291, 21.4085, 13)
+size = Vector3(16.43, 23.908, 14.873)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mlw0r"]
 animation = &"playeranims/Walk"
@@ -191,13 +191,13 @@ collision_mask = 4
 monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RacketArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0494356, -1.93111)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -2.868)
 shape = SubResource("BoxShape3D_i5pof")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="RacketArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0494356, -1.93111)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -2.868)
 visible = false
-size = Vector3(14.0291, 21.4085, 13)
+size = Vector3(16.43, 23.908, 14.873)
 material = ExtResource("3_s24ti")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
