@@ -151,12 +151,12 @@ func update_score_text_for_all():
 func check_round_win(p, match_id):
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
-	return round_score[p] >= 20
-	# if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
-	# 	if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
-	# 		return round_score[p] >= 30
-	# 	else: return round_score[p] - round_score[get_opponent_index(p)] >= 2
-	# else: return round_score[p] >= 21
+	# return round_score[p] >= 20
+	if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
+		if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
+			return round_score[p] >= 30
+		else: return round_score[p] - round_score[get_opponent_index(p)] >= 2
+	else: return round_score[p] >= 21
 
 func score_point_effect(p, player_num):
 	if player_num == 2:
