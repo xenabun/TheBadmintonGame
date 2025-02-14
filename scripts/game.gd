@@ -46,7 +46,7 @@ func set_players_can_throw(match_id, player_num):
 				and player_data.match_id == match_id and player_data.num == player_num
 				and Level.get_node('Players').has_node(str(player_data.id))):
 			var player = Level.get_node('Players/' + str(player_data.id))
-			if player_data.id == 1:
+			if player_data.is_bot or player_data.id == 1:
 				player.set_can_throw(true)
 			else:
 				player.set_can_throw.rpc_id(player_data.id, true)

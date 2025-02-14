@@ -156,10 +156,13 @@ func _physics_process(_delta):
 			var pdata = Network.Players[str(last_interact).to_int()]
 			p = Game.get_opponent_index(pdata.num - 1)
 			# Game.grant_point.rpc(Game.get_opponent_index(pdata.num - 1), match_id)
-		if multiplayer.get_unique_id() == 1:
-			Game.set_players_can_throw(match_id, p + 1)
+		if Game.current_game_type == Game.game_type.MULTIPLAYER:
+			if multiplayer.get_unique_id() == 1:
+				Game.set_players_can_throw(match_id, p + 1)
+			else:
+				Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
 		else:
-			Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
+			Game.set_players_can_throw(match_id, 1)
 		Game.grant_point.rpc(p, match_id)
 		set_ball_ready.rpc()
 		return
@@ -167,12 +170,18 @@ func _physics_process(_delta):
 	# net interact
 	if ball_hitbox.overlaps_area(NetArea) and NetArea != ignored_area:
 		# Game.print_debug_msg('ball hit net')
-		var player_name = Network.Players[Game.get_opponent_id(get_multiplayer_authority())].username
+		# var player_name = Network.Players[Game.get_opponent_id(get_multiplayer_authority())].username
+		# var last_interact_id = str(last_interact).to_int()
+		# var opponent_id = Game.get_opponent_id(last_interact_id)
+		# var player_name = Network.Players[opponent_id].username
+		# var player_name = str(opponent_id)
+		# print(last_interact_id, opponent_id, player_name)
 		var new_power = power * 0.75
 		var new_direction = -direction
 		var new_velocity_x = -velocity.x
 		bounce_ball.rpc(get_multiplayer_authority(),
-				player_name, new_velocity_x, new_direction, new_power,
+				# player_name, new_velocity_x, new_direction, new_power,
+				last_interact, new_velocity_x, new_direction, new_power,
 				position, NetArea)
 
 	# racket interact

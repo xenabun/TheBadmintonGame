@@ -40,6 +40,9 @@ func _on_racket_cooldown_timeout():
 # func reset_ball():
 # 	ball = null
 
+func set_can_throw(value):
+	can_throw = value
+
 func reset_position():
 	## TODO: add bot can_throw logic and make bot be able to throw ball
 	var player_index = 2 # player_num - 1
