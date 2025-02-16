@@ -13,6 +13,7 @@ extends CharacterBody3D
 @onready var sprint_timer = get_node('Sprint')
 
 var ball
+var noise
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var throw_power = PlayerVariables.MAX_POWER
@@ -56,6 +57,9 @@ func reset_position():
 
 func _ready():
 	ball = Game.get_ball_by_match_id(match_id)
+	noise = FastNoiseLite.new()
+	noise.seed = randi()
+	noise.frequency = 0.0001
 	$Debug_Dest.visible = Game.debug
 	$AimArrow.visible = Game.debug
 	$SprintingLabel.visible = Game.debug
@@ -217,6 +221,8 @@ func _physics_process(delta):
 	
 	# aim arrow
 	var x_frac = (position.x - player.position.x) / PlayerVariables.X_LIMIT
-	aim_x = x_frac / 3
+	var noise_offset = noise.get_noise_1d(float(Time.get_ticks_msec()))
+	var aim_help = player.position.x / PlayerVariables.X_LIMIT
+	aim_x = (x_frac / 3) + (noise_offset / 2 + aim_help / 4)
 	if Game.debug:
 		$AimArrow.rotation.y = -sin((aim_x * PI) / 2)

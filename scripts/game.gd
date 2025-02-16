@@ -94,7 +94,7 @@ func get_player_match_id(id):
 
 func get_full_score_str(player_num, match_id):
 	var match_data = Network.Matches[match_id]
-	var match_score = match_data.round_score # match_data.match_score
+	var match_score = match_data.match_score
 	if player_num == 1:
 		return str(match_score[0], ' : ', match_score[1])
 	else:
@@ -127,15 +127,20 @@ func update_score_text(match_id = null, player_num = null):
 	
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
+	var match_score = match_data.match_score
 	var players_data = get_match_players_data(match_id)
 	var score_control = UI.get_node('GameUI/ScoreControl')
 	
 	if player_num == 2:
+		score_control.get_node('Player1Score2').text = str(match_score[players_data[1].num - 1])
+		score_control.get_node('Player2Score2').text = str(match_score[players_data[0].num - 1])
 		score_control.get_node('Player1Score').text = str(round_score[players_data[1].num - 1])
 		score_control.get_node('Player2Score').text = str(round_score[players_data[0].num - 1])
 		score_control.get_node('Player1').text = players_data[1].username
 		score_control.get_node('Player2').text = players_data[0].username
 	else:
+		score_control.get_node('Player1Score2').text = str(match_score[players_data[0].num - 1])
+		score_control.get_node('Player2Score2').text = str(match_score[players_data[1].num - 1])
 		score_control.get_node('Player1Score').text = str(round_score[players_data[0].num - 1])
 		score_control.get_node('Player2Score').text = str(round_score[players_data[1].num - 1])
 		score_control.get_node('Player1').text = players_data[0].username
@@ -151,12 +156,17 @@ func update_score_text_for_all():
 func check_round_win(p, match_id):
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
-	# return round_score[p] >= 20
-	if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
-		if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
-			return round_score[p] >= 30
-		else: return round_score[p] - round_score[get_opponent_index(p)] >= 2
-	else: return round_score[p] >= 21
+	return round_score[p] >= 2
+	# if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
+	# 	if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
+	# 		return round_score[p] >= 30
+	# 	else: return round_score[p] - round_score[get_opponent_index(p)] >= 2
+	# else: return round_score[p] >= 21
+
+func check_match_win(p, match_id):
+	var match_data = Network.Matches[match_id]
+	var match_score = match_data.match_score
+	return match_score[p] >= 2
 
 func score_point_effect(p, player_num):
 	if player_num == 2:
@@ -202,17 +212,21 @@ func grant_point(p, match_id):
 	var player_match_id = get_player_match_id(player_id)
 
 	round_score[p] += 1
-
+	
+	if check_round_win(p, match_id):
+		var match_score = match_data.match_score
+		match_score[p] += 1
+		match_data.round_score = [ 0, 0 ]
+		if check_match_win(p, match_id):
+			if player_id == 1:
+				finish_match(p, match_id)
+			else:
+				finish_match.rpc_id(1, p, match_id)
+	
 	if match_id == player_match_id:
 		var player_num = get_player_num(player_id)
 		score_point_effect(p, player_num)
-		update_score_text(player_match_id, player_num)
-	
-	if check_round_win(p, match_id):
-		if player_id == 1:
-			finish_match(p, match_id)
-		else:
-			finish_match.rpc_id(1, p, match_id)
+		update_score_text(match_id, player_num)
 
 @rpc('any_peer')
 func reset_player_positions(match_id):

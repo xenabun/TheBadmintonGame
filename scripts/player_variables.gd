@@ -19,4 +19,6 @@ const JUMP_VELOCITY = 18.0
 const ACTION_HOLD_TIME = 0.4
 
 const X_LIMIT = 15.0
+const X_THROW_LIMIT = 12.0
 const Z_LIMIT = 30.0
+const Z_THROW_LIMIT = 8.4

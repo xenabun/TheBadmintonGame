@@ -42,14 +42,17 @@ func set_can_throw(value):
 func get_player_side():
 	return 1 if player_num == 1 else -1
 
-@rpc('any_peer')
-func reset_position():
+func get_throw_side():
 	var player_index = player_num - 1
 	if not can_throw:
 		player_index = Game.get_opponent_index(player_index)
 	var player_round_score = Game.get_player_round_score(match_id, player_index)
 	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
-	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn' + side)
+	return side
+
+@rpc('any_peer')
+func reset_position():
+	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn' + get_throw_side())
 	position = spawn_point.position
 	rotation = spawn_point.rotation
 	update_camera_transform(1)
@@ -236,15 +239,20 @@ func _physics_process(delta):
 	
 	# position
 	move_and_slide()
-	## TODO: limit player movement when is about to throw
-	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
 	var side = get_player_side()
-	var z_clamp = [2 * side, PlayerVariables.Z_LIMIT * side]
-	position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
+	if Game.get_ball_by_match_id(match_id).ball_ready:
+		var throw_side = get_throw_side()
+		var throw_size_x = 1 if throw_side == 'Even' else -1
+		var z_clamp = [PlayerVariables.Z_THROW_LIMIT * side, PlayerVariables.Z_LIMIT * side]
+		var x_clamp = [0, PlayerVariables.X_THROW_LIMIT * side * throw_size_x]
+		position.x = clamp(position.x, min(x_clamp[0], x_clamp[1]), max(x_clamp[0], x_clamp[1]))
+		position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
+	else:
+		var z_clamp = [2 * side, PlayerVariables.Z_LIMIT * side]
+		position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
+		position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# aim arrow
-	## TODO: only draw arrow if its your turn
-	# if (ball != null and ball.ball_ready) or input.action_hold:
 	if can_throw or input.action_hold:
 		aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 		if not aim_arrow.visible:
@@ -253,10 +261,7 @@ func _physics_process(delta):
 			aim_arrow.position.z = 0
 			aim_arrow.show()
 	
-	if (
-		Game.window_focus
-		and not input.is_game_paused()
-	):
+	if Game.window_focus and not input.is_game_paused():
 		# camera
 		update_camera_transform(0.2)
 		

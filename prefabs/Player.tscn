@@ -152,14 +152,6 @@ texture_filter = 0
 [node name="Player" type="CharacterBody3D" groups=["Player"]]
 collision_layer = 0
 script = ExtResource("1_pqout")
-player_id = null
-player_num = null
-match_id = null
-username = null
-throw_power = null
-aim_x = null
-can_play = null
-can_throw = null
 
 [node name="Username" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.50246, 0)

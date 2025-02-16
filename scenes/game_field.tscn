@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=39 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -127,6 +127,11 @@ anti_aliasing = false
 [sub_resource type="LabelSettings" id="LabelSettings_20vvk"]
 font_size = 80
 outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_i4lr5"]
+font_size = 50
+outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_tnxmh"]
@@ -501,6 +506,7 @@ theme_override_font_sizes/font_size = 12
 text = "X"
 
 [node name="ServerBrowser" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 0
 
@@ -679,7 +685,6 @@ offset_bottom = 148.0
 text = "Вернуться назад"
 
 [node name="GameUI" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -743,6 +748,24 @@ label_settings = SubResource("LabelSettings_20vvk")
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="ScoreSemicolon2" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -133.0
+offset_top = -120.5
+offset_right = 133.0
+offset_bottom = -10.5
+grow_horizontal = 2
+grow_vertical = 2
+text = ":"
+label_settings = SubResource("LabelSettings_i4lr5")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Player1Score" type="Label" parent="UI/GameUI/ScoreControl"]
 layout_mode = 1
 anchors_preset = 8
@@ -776,6 +799,41 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "0"
 label_settings = SubResource("LabelSettings_20vvk")
+vertical_alignment = 1
+
+[node name="Player1Score2" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -276.0
+offset_top = -118.17
+offset_right = -10.0
+offset_bottom = -8.17
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_i4lr5")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Player2Score2" type="Label" parent="UI/GameUI/ScoreControl"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 10.0
+offset_top = -118.17
+offset_right = 276.0
+offset_bottom = -8.17
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_i4lr5")
 vertical_alignment = 1
 
 [node name="Player1" type="Label" parent="UI/GameUI/ScoreControl"]
@@ -1098,7 +1156,6 @@ grow_vertical = 0
 text = "Закрыть"
 
 [node name="DebugUI" type="Control" parent="."]
-visible = false
 clip_contents = true
 layout_mode = 3
 anchors_preset = 2
