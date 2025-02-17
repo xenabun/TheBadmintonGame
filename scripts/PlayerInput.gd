@@ -132,6 +132,11 @@ func _input(event):
 			racket_hold_timer.stop()
 			action_hold = false
 	
+	if event.is_action_pressed('leaderboard'):
+		UI.state.showing_leaderboard.set_state(true)
+	if event.is_action_released('leaderboard'):
+		UI.state.showing_leaderboard.set_state(false)
+
 	if event.is_action_pressed('sprint'):
 		shift_hold = true
 		sprinting = true

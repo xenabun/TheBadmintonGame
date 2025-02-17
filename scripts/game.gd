@@ -51,7 +51,6 @@ func set_players_can_throw(match_id, player_num):
 			else:
 				player.set_can_throw.rpc_id(player_data.id, true)
 
-
 func get_opponent_id(id):
 	if not Network.Players.has(id): return
 
@@ -130,21 +129,26 @@ func update_score_text(match_id = null, player_num = null):
 	var match_score = match_data.match_score
 	var players_data = get_match_players_data(match_id)
 	var score_control = UI.get_node('GameUI/ScoreControl')
+	var score_leaderboard = UI.get_node('Leaderboard/Panel/Score')
 	
-	if player_num == 2:
-		score_control.get_node('Player1Score2').text = str(match_score[players_data[1].num - 1])
-		score_control.get_node('Player2Score2').text = str(match_score[players_data[0].num - 1])
-		score_control.get_node('Player1Score').text = str(round_score[players_data[1].num - 1])
-		score_control.get_node('Player2Score').text = str(round_score[players_data[0].num - 1])
-		score_control.get_node('Player1').text = players_data[1].username
-		score_control.get_node('Player2').text = players_data[0].username
-	else:
+	if player_num == 1:
 		score_control.get_node('Player1Score2').text = str(match_score[players_data[0].num - 1])
 		score_control.get_node('Player2Score2').text = str(match_score[players_data[1].num - 1])
 		score_control.get_node('Player1Score').text = str(round_score[players_data[0].num - 1])
 		score_control.get_node('Player2Score').text = str(round_score[players_data[1].num - 1])
 		score_control.get_node('Player1').text = players_data[0].username
 		score_control.get_node('Player2').text = players_data[1].username
+		score_leaderboard.get_node('MatchScore').text = str(match_score[players_data[0].num - 1], ' : ', match_score[players_data[1].num - 1])
+		score_leaderboard.get_node('RoundScore').text = str(round_score[players_data[0].num - 1], ' : ', round_score[players_data[1].num - 1])
+	else:
+		score_control.get_node('Player1Score2').text = str(match_score[players_data[1].num - 1])
+		score_control.get_node('Player2Score2').text = str(match_score[players_data[0].num - 1])
+		score_control.get_node('Player1Score').text = str(round_score[players_data[1].num - 1])
+		score_control.get_node('Player2Score').text = str(round_score[players_data[0].num - 1])
+		score_control.get_node('Player1').text = players_data[1].username
+		score_control.get_node('Player2').text = players_data[0].username
+		score_leaderboard.get_node('MatchScore').text = str(match_score[players_data[1].num - 1], ' : ', match_score[players_data[0].num - 1])
+		score_leaderboard.get_node('RoundScore').text = str(round_score[players_data[1].num - 1], ' : ', round_score[players_data[0].num - 1])
 
 func update_score_text_for_all():
 	for i in Network.Players:
@@ -204,6 +208,10 @@ func finish_match(winner_index, match_id):
 			if current_game_type != game_type.SINGLEPLAYER:
 				UI.show_match_result.rpc_id(player_id, result_text, score_text)
 
+# @rpc('any_peer')
+# func push_round_score():
+# 	Network.Leaderboard[][].push_back()
+
 @rpc('any_peer', 'call_local')
 func grant_point(p, match_id):
 	var match_data = Network.Matches[match_id]
@@ -216,6 +224,15 @@ func grant_point(p, match_id):
 	if check_round_win(p, match_id):
 		var match_score = match_data.match_score
 		match_score[p] += 1
+		# match_data.round_history.push_back(match_data.round_score)
+		# push_round_score()
+		var id1 = Network.find_player_by_match_id_with_num(match_id, 1).id
+		var id2 = get_opponent_id(id1)
+		var reverse_round_score = match_data.round_score.duplicate()
+		reverse_round_score.reverse()
+		Network.Leaderboard[id1][id2].push_back(match_data.round_score)
+		Network.Leaderboard[id2][id1].push_back(reverse_round_score)
+		UI.update_leaderboard_match_data()
 		match_data.round_score = [ 0, 0 ]
 		if check_match_win(p, match_id):
 			if player_id == 1:
@@ -288,7 +305,6 @@ func start_game():
 		Network.Matches[match_id] = {
 			match_score = [ 0, 0 ],
 			round_score = [ 0, 0 ],
-			round = 1,
 			status = Network.match_status_type.IN_PROGRESS,
 		}
 
@@ -312,6 +328,11 @@ func start_game():
 			player_data.state = Network.player_state_type.PLAYER
 			player_data.match_ready = true
 			next_player_num += 1
+
+			Network.Leaderboard[i] = {}
+			for i2 in Network.Players:
+				if i2 == i: continue
+				Network.Leaderboard[i][i2] = []
 
 			if i != 1:
 				UI.set_loading_screen.rpc_id(i, true)
@@ -361,6 +382,11 @@ func start_game():
 			player_data.num = player_data.id
 			player_data.state = Network.player_state_type.PLAYER
 			
+			Network.Leaderboard[i] = {}
+			for i2 in Network.Players:
+				if i2 == i: continue
+				Network.Leaderboard[i][i2] = []
+
 			# if not player_data.is_bot:
 			# 	Network.add_spectator(player_data.id)
 			

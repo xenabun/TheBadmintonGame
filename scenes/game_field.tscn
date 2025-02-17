@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=42 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -80,6 +80,9 @@ properties/2/replication_mode = 2
 properties/3/path = NodePath(".:Matches")
 properties/3/spawn = true
 properties/3/replication_mode = 2
+properties/4/path = NodePath(".:Leaderboard")
+properties/4/spawn = true
+properties/4/replication_mode = 2
 
 [sub_resource type="FontVariation" id="FontVariation_rqevk"]
 variation_embolden = 0.2
@@ -139,11 +142,6 @@ font_size = 46
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
-[sub_resource type="LabelSettings" id="LabelSettings_0cqv7"]
-font_size = 56
-outline_size = 10
-outline_color = Color(0, 0, 0, 1)
-
 [sub_resource type="LabelSettings" id="LabelSettings_urfof"]
 font_size = 80
 outline_size = 8
@@ -152,6 +150,25 @@ outline_color = Color(0, 0, 0, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_r3h5r"]
 font_size = 100
 outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_73a6d"]
+font_size = 36
+outline_size = 3
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_1spbm"]
+color = Color(0.791999, 0.791999, 0.791999, 0.47451)
+grow_begin = -1.0
+grow_end = -1.0
+thickness = 2
+
+[sub_resource type="LabelSettings" id="LabelSettings_h7gsf"]
+font_size = 21
+
+[sub_resource type="LabelSettings" id="LabelSettings_0cqv7"]
+font_size = 56
+outline_size = 10
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wlmk5"]
@@ -312,15 +329,10 @@ spawn_path = NodePath("../Balls")
 
 [node name="Network" type="Node" parent="." node_paths=PackedStringArray("Level", "UI", "ServerBrowser", "ServerBrowserUI")]
 script = ExtResource("6_h2wnu")
-PORT = null
 Level = NodePath("../Level")
 UI = NodePath("../UI")
 ServerBrowser = NodePath("../ServerBrowser")
 ServerBrowserUI = NodePath("../UI/ServerBrowser")
-server_state = null
-Matches = null
-Players = null
-Balls = null
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="Network"]
 replication_config = SubResource("SceneReplicationConfig_wierg")
@@ -685,6 +697,7 @@ offset_bottom = 148.0
 text = "Вернуться назад"
 
 [node name="GameUI" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -869,6 +882,248 @@ text = "Player2"
 label_settings = SubResource("LabelSettings_tnxmh")
 horizontal_alignment = 2
 
+[node name="GameResult" type="Control" parent="UI"]
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI/GameResult"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -719.0
+offset_top = -500.0
+offset_right = 719.0
+offset_bottom = 500.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.329412)
+
+[node name="Result" type="Label" parent="UI/GameResult"]
+z_index = 1
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -289.0
+offset_right = 160.0
+offset_bottom = -179.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Победа!"
+label_settings = SubResource("LabelSettings_urfof")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Score" type="Label" parent="UI/GameResult"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -358.0
+offset_top = -68.5
+offset_right = 358.0
+offset_bottom = 68.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "3 : 1
+"
+label_settings = SubResource("LabelSettings_r3h5r")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Exit" type="Button" parent="UI/GameResult"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = 300.0
+offset_right = 63.0
+offset_bottom = 331.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Главное меню"
+
+[node name="Leaderboard" type="Control" parent="UI"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="UI/Leaderboard"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -489.0
+offset_top = -281.5
+offset_right = 489.0
+offset_bottom = 281.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Score" type="Control" parent="UI/Leaderboard/Panel"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 62.98
+offset_right = 62.98
+offset_bottom = 100.0
+grow_horizontal = 2
+
+[node name="MatchScoreText" type="Label" parent="UI/Leaderboard/Panel/Score"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -41.0
+offset_right = -20.0
+offset_bottom = 4.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "Счет игры"
+label_settings = SubResource("LabelSettings_73a6d")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MatchScore" type="Label" parent="UI/Leaderboard/Panel/Score"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -43.0
+offset_right = 170.0
+offset_bottom = 7.0
+grow_vertical = 2
+text = "0 : 0"
+label_settings = SubResource("LabelSettings_73a6d")
+
+[node name="RoundScoreText" type="Label" parent="UI/Leaderboard/Panel/Score"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -4.0
+offset_right = -20.0
+offset_bottom = 41.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "Счет партии"
+label_settings = SubResource("LabelSettings_73a6d")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="RoundScore" type="Label" parent="UI/Leaderboard/Panel/Score"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -6.0
+offset_right = 170.0
+offset_bottom = 44.0
+grow_vertical = 2
+text = "0 : 0"
+label_settings = SubResource("LabelSettings_73a6d")
+
+[node name="HSeparator" type="HSeparator" parent="UI/Leaderboard/Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 100.0
+offset_bottom = 104.0
+grow_horizontal = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_1spbm")
+
+[node name="Table" type="MarginContainer" parent="UI/Leaderboard/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 104.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Container" type="GridContainer" parent="UI/Leaderboard/Panel/Table"]
+layout_mode = 2
+columns = 2
+
+[node name="Left" type="ScrollContainer" parent="UI/Leaderboard/Panel/Table/Container"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Container" type="VBoxContainer" parent="UI/Leaderboard/Panel/Table/Container/Left"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Top" type="GridContainer" parent="UI/Leaderboard/Panel/Table/Container/Left/Container"]
+layout_mode = 2
+columns = 3
+
+[node name="Number" type="Panel" parent="UI/Leaderboard/Panel/Table/Container/Left/Container/Top"]
+custom_minimum_size = Vector2(50, 30)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Leaderboard/Panel/Table/Container/Left/Container/Top/Number"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "№"
+label_settings = SubResource("LabelSettings_h7gsf")
+horizontal_alignment = 1
+
+[node name="Username" type="Panel" parent="UI/Leaderboard/Panel/Table/Container/Left/Container/Top"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="UI/Leaderboard/Panel/Table/Container/Left/Container/Top/Username"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Имя"
+label_settings = SubResource("LabelSettings_h7gsf")
+horizontal_alignment = 1
+
+[node name="Content" type="VBoxContainer" parent="UI/Leaderboard/Panel/Table/Container/Left/Container"]
+layout_mode = 2
+
+[node name="Right" type="ScrollContainer" parent="UI/Leaderboard/Panel/Table/Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Container" type="GridContainer" parent="UI/Leaderboard/Panel/Table/Container/Right"]
+layout_mode = 2
+columns = 1024
+
 [node name="Menu" type="Control" parent="UI"]
 visible = false
 layout_mode = 2
@@ -926,77 +1181,6 @@ text = "Возобновить игру"
 [node name="Exit" type="Button" parent="UI/Menu/VBoxContainer"]
 layout_mode = 2
 text = "Выйти в главное меню"
-
-[node name="GameResult" type="Control" parent="UI"]
-visible = false
-layout_mode = 2
-
-[node name="ColorRect" type="ColorRect" parent="UI/GameResult"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -719.0
-offset_top = -500.0
-offset_right = 719.0
-offset_bottom = 500.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.329412)
-
-[node name="Result" type="Label" parent="UI/GameResult"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -155.0
-offset_right = 160.0
-offset_bottom = -45.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Победа!"
-label_settings = SubResource("LabelSettings_urfof")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Score" type="Label" parent="UI/GameResult"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -358.0
-offset_top = -68.5
-offset_right = 358.0
-offset_bottom = 68.5
-grow_horizontal = 2
-grow_vertical = 2
-text = "3 : 1
-"
-label_settings = SubResource("LabelSettings_r3h5r")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Exit" type="Button" parent="UI/GameResult"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -62.0
-offset_top = 77.0
-offset_right = 63.0
-offset_bottom = 108.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Главное меню"
 
 [node name="Connecting" type="Control" parent="UI"]
 visible = false
@@ -1156,6 +1340,7 @@ grow_vertical = 0
 text = "Закрыть"
 
 [node name="DebugUI" type="Control" parent="."]
+visible = false
 clip_contents = true
 layout_mode = 3
 anchors_preset = 2
@@ -1224,8 +1409,8 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/ServerBrowser/PortChange" to="UI" method="_on_port_change_pressed"]
 [connection signal="pressed" from="UI/Lobby/StartGame" to="Network" method="_on_start_game_pressed"]
 [connection signal="pressed" from="UI/Lobby/Back" to="UI" method="_on_lobby_exit_pressed"]
+[connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_pause_menu_close"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Exit" to="UI" method="_on_game_exit_pressed"]
-[connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/GameControls/Panel/Close" to="UI" method="_on_controls_close"]
 [connection signal="pressed" from="UI/Message/Panel/Button" to="UI" method="_on_message_close_pressed"]

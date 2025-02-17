@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://8k6sl4fytt41"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_h7gsf"]
+font_size = 21
+
+[node name="ScoreColumn" type="VBoxContainer"]
+
+[node name="Top" type="Panel" parent="."]
+custom_minimum_size = Vector2(200, 30)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Top"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+label_settings = SubResource("LabelSettings_h7gsf")
+horizontal_alignment = 1
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2

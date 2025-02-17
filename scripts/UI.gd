@@ -23,6 +23,52 @@ func _enter_tree():
 	title_tween.tween_property(title_label, 'rotation', deg_to_rad(title_rot_deg), title_rot_time)
 	title_tween.chain().tween_property(title_label, 'rotation', deg_to_rad(-title_rot_deg), title_rot_time)
 
+func leaderboard_init():
+	var leaderboard = get_node('Leaderboard')
+	var user_label_container = leaderboard.get_node('Panel/Table/Container/Left/Container/Content')
+	var score_column_container = leaderboard.get_node('Panel/Table/Container/Right/Container')
+	var user_label_prefab = preload("res://prefabs/leaderboard/user_label.tscn")
+	var score_column_prefab = preload("res://prefabs/leaderboard/score_column.tscn")
+	var score_label_prefab = preload("res://prefabs/leaderboard/score_label.tscn")
+
+	leaderboard.get_node('Panel/Score').show()
+	
+	for child in user_label_container.get_children():
+		child.queue_free()
+	for child in score_column_container.get_children():
+		child.queue_free()
+
+	var i = 0
+	for player_id in Network.Players:
+		i += 1
+		var player_data = Network.Players[player_id]
+		var user_label = user_label_prefab.instantiate()
+		user_label.name = str(player_id)
+		user_label.get_node('Number/Label').text = str(i)
+		user_label.get_node('Username/Label').text = player_data.username
+		user_label_container.add_child(user_label, true)
+		var score_column = score_column_prefab.instantiate()
+		score_column.name = str(player_id)
+		score_column.get_node('Top/Label').text = str(i)
+		score_column_container.add_child(score_column, true)
+		for player_id2 in Network.Players:
+			var score_label = score_label_prefab.instantiate()
+			score_label.name = str(player_id2)
+			score_label.get_node('Label').text = '-' if player_id2 == player_id else ''
+			score_column.get_node('Content').add_child(score_label, true)
+
+func update_leaderboard_match_data():
+	var score_column_container = get_node('Leaderboard/Panel/Table/Container/Right/Container')
+	for id1 in Network.Leaderboard:
+		for id2 in Network.Leaderboard[id1]:
+			var score_label = score_column_container.get_node(str(id2) + '/Content/' + str(id1) + '/Label')
+			var scores_unformatted = Network.Leaderboard[id1][id2]
+			var scores : PackedStringArray = []
+			for score in scores_unformatted:
+				scores.push_back(str(score[0], '-', score[1]))
+			var score_str = ' '.join(scores)
+			score_label.text = score_str
+
 func clear_lobby_player_list():
 	for child in lobby_player_list.get_children():
 		child.queue_free()
@@ -50,11 +96,13 @@ func close_lobby_player_list():
 	state.in_server_lobby.set_state(false)
 
 @rpc
-func show_match_result(result_text, score_text):
+func show_match_result(result_text, _score_text):
 	var game_result_ui = get_node('GameResult')
 	game_result_ui.get_node('Result').text = result_text
-	game_result_ui.get_node('Score').text = score_text
+	# game_result_ui.get_node('Score').text = score_text
 	game_result_ui.show()
+	get_node('Leaderboard/Panel/Score').hide()
+	state.showing_leaderboard.set_state(true)
 	get_node('GameUI').hide()
 
 @rpc('any_peer')

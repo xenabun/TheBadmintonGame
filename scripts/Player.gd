@@ -98,6 +98,7 @@ func _ready():
 	update_camera_transform(0.2)
 	GameUI.show()
 	GameControls.show()
+	UI.leaderboard_init()
 	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina

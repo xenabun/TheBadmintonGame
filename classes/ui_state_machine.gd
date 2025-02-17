@@ -10,6 +10,7 @@ var in_server_lobby : State = State.new(false)
 var entering_port : State = State.new(false)
 var showing_message : State = State.new(false)
 var in_game_menu : State = State.new(false)
+var showing_leaderboard : State = State.new(false)
 
 func _init(_ui, Network):
 	print('Initializing ', _ui, ' state machine')
@@ -30,6 +31,7 @@ func _init(_ui, Network):
 	ui.get_node('Connecting').hide()
 	ui.get_node('Lobby').hide()
 	ui.get_node('Message').hide()
+	ui.get_node('Leaderboard').hide()
 
 	in_menu.state_changed.connect(func(_old_state, new_state, _args):
 		ui.set_physics_process(new_state)
@@ -94,16 +96,14 @@ func _init(_ui, Network):
 	in_game_menu.state_changed.connect(func(_old_state, new_state, _args):
 		ui.get_node('Menu').visible = new_state
 		if Game.current_game_type == Game.game_type.SINGLEPLAYER:
-			# Game.game_in_progress = not new_state
-			# var player_id = multiplayer.get_unique_id()
-			# if not Network.Players.has(player_id): return
-			# var player_data = Network.Players[player_id]
-			# if not player_data.has('match_id'): return
-			# var match_id = player_data.match_id
-			# if not Network.Matches.has(match_id): return
-			var match_data = Network.Matches[0] # match_id]
+			var match_data = Network.Matches[0]
 			if new_state:
 				match_data.status = Network.match_status_type.PAUSED
 			else:
 				match_data.status = Network.match_status_type.IN_PROGRESS
+		)
+	
+	showing_leaderboard.state_changed.connect(func(_old_state, new_state, _args):
+		ui.get_node('Leaderboard').visible = new_state
+		ui.get_node('GameUI').visible = not new_state
 		)

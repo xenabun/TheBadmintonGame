@@ -25,6 +25,7 @@ enum match_status_type {
 
 @export var server_state : server_state_type = server_state_type.NONE
 @export var Matches : Dictionary = {}
+@export var Leaderboard : Dictionary = {}
 @export var Players : Dictionary = {}
 @export var Balls : Dictionary = {}
 
@@ -45,6 +46,12 @@ func find_first_player_by_match_id(match_id):
 	for i in Players:
 		var pdata = Players[i]
 		if pdata.has('match_id') and pdata.has('num') and pdata.match_id == match_id:
+			return pdata
+
+func find_player_by_match_id_with_num(match_id, num):
+	for i in Players:
+		var pdata = Players[i]
+		if pdata.has('match_id') and pdata.has('num') and pdata.match_id == match_id and pdata.num == num:
 			return pdata
 
 func update_lobby_player_list_for_all():
@@ -186,9 +193,11 @@ func quit_server():
 	Players = {}
 	Balls = {}
 	Matches = {}
+	Leaderboard = {}
 	# Game.game_in_progress = true
 	# Game.ball.set_ball_ready()
 	# Game.ball.reset_ball()
+	UI.state.showing_leaderboard.set_state(false)
 	UI.state.in_menu.set_state(true)
 	UI.state.in_main_menu.set_state(true)
 	UI.state.in_server_lobby.set_state(false)
