@@ -10,7 +10,7 @@ func _init(initial_state = false):
 func get_state():
     return state
 
-func set_state(new_state, args = {}):
+func set_state(new_state, args = null):
     var old_state = state
     state = new_state
     state_changed.emit(old_state, state, args)

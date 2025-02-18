@@ -153,7 +153,7 @@ func update_score_text_for_all():
 func check_round_win(p, match_id):
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
-	return round_score[p] >= 3
+	return round_score[p] >= 2
 	# if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
 	# 	if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
 	# 		return round_score[p] >= 30
@@ -190,7 +190,11 @@ func finish_match(winner_index, match_id):
 	Network.remove_ball(match_id)
 	var players_data = get_match_players_data(match_id)
 	
+	var can_continue = true # any players left that didnt play with everyone?
+
 	for i in players_data:
+		if can_continue:
+			Network.Players[i].finished = true
 		var player_id = players_data[i].id
 		var score_index = get_player_num(player_id) - 1
 		var result_text = WIN_TEXT if winner_index == score_index else LOSE_TEXT
@@ -200,6 +204,25 @@ func finish_match(winner_index, match_id):
 		else:
 			if current_game_type != game_type.SINGLEPLAYER:
 				UI.show_match_result.rpc_id(player_id, result_text, score_text)
+	
+	if can_continue:
+		# wait for everyone to be finished
+		pass
+
+# Leaderboard = {
+# 	[1] = {
+# 		[2] = '21-11 11-21 21-11',
+# 		[3] = '',
+# 	},
+# 	[2] = {
+# 		[1] = '11-21 21-11 11-21',
+# 		[3] = '',
+# 	},
+# 	[3] = {
+# 		[1] = '',
+# 		[2] = '',
+# 	},
+# }
 
 @rpc('any_peer', 'call_local')
 func grant_point(p, match_id):

@@ -90,16 +90,17 @@ func _ready():
 	# reset_position.connect(_reset_position)
 	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
-	var GameUI = UI.get_node('GameUI')
+	# var GameUI = UI.get_node('GameUI')
 	var GameControls = UI.get_node('GameControls')
 	camera.make_current()
 	camera.global_position = menu_camera.global_position
 	camera.global_rotation = menu_camera.global_rotation
 	update_camera_transform(0.2)
-	GameUI.show()
+	# GameUI.show()
+	UI.state.showing_game_ui.set_state(true)
 	GameControls.show()
 	UI.leaderboard_init()
-	stamina_bar = GameUI.get_node('StaminaBarControl/StaminaBar')
+	stamina_bar = UI.get_node('GameUI/StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = input.stamina
 	stamina_bar.show()

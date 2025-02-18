@@ -133,9 +133,9 @@ func _input(event):
 			action_hold = false
 	
 	if event.is_action_pressed('leaderboard'):
-		UI.state.showing_leaderboard.set_state(true)
+		UI.state.showing_leaderboard.set_state(true, false)
 	if event.is_action_released('leaderboard'):
-		UI.state.showing_leaderboard.set_state(false)
+		UI.state.showing_leaderboard.set_state(false, false)
 
 	if event.is_action_pressed('sprint'):
 		shift_hold = true

@@ -27,9 +27,10 @@ func _ready():
 	set_physics_process(multiplayer.get_unique_id() == player_id)
 	if multiplayer.get_unique_id() != player_id: return
 	camera.make_current()
-	var GameUI = UI.get_node('GameUI')
-	GameUI.get_node('StaminaBarControl/StaminaBar').hide()
-	GameUI.show()
+	# var GameUI = UI.get_node('')
+	UI.get_node('GameUI/StaminaBarControl/StaminaBar').hide()
+	# GameUI.show()
+	UI.state.showing_game_ui.set_state(true)
 	if Game.window_focus:
 		Input.set_mouse_mode(Input.MouseMode.MOUSE_MODE_CAPTURED)
 	Game.window_focus_changed.connect(_on_window_focus_changed)

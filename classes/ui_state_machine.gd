@@ -11,6 +11,7 @@ var entering_port : State = State.new(false)
 var showing_message : State = State.new(false)
 var in_game_menu : State = State.new(false)
 var showing_leaderboard : State = State.new(false)
+var showing_game_ui : State = State.new(false)
 
 func _init(_ui, Network):
 	print('Initializing ', _ui, ' state machine')
@@ -38,7 +39,8 @@ func _init(_ui, Network):
 		ui.menu_camera_pivot.get_node('MenuCamera').set_current(new_state)
 		ui.get_node('CurrentUsername').visible = new_state
 		if new_state:
-			ui.get_node('GameUI').hide()
+			# ui.get_node('GameUI').hide()
+			showing_game_ui.set_state(false)
 			ui.get_node('Menu').hide()
 			ui.get_node('GameResult').hide()
 			ui.get_node('GameControls').hide()
@@ -103,7 +105,14 @@ func _init(_ui, Network):
 				match_data.status = Network.match_status_type.IN_PROGRESS
 		)
 	
-	showing_leaderboard.state_changed.connect(func(_old_state, new_state, _args):
+	showing_leaderboard.state_changed.connect(func(_old_state, new_state, show_result):
 		ui.get_node('Leaderboard').visible = new_state
-		ui.get_node('GameUI').visible = not new_state
+		# ui.get_node('GameUI').visible = not new_state
+		showing_game_ui.set_state(not new_state)
+		get_node('Leaderboard/Panel/Results').visible = show_result
+		get_node('Leaderboard/Panel/Score').visible = not show_result
+		)
+	
+	showing_game_ui.state_changed.connect(func(_old_state, new_state, _args):
+		ui.get_node('GameUI').visible = new_state
 		)

@@ -197,7 +197,7 @@ func quit_server():
 	# Game.game_in_progress = true
 	# Game.ball.set_ball_ready()
 	# Game.ball.reset_ball()
-	UI.state.showing_leaderboard.set_state(false)
+	UI.state.showing_leaderboard.set_state(false, false)
 	UI.state.in_menu.set_state(true)
 	UI.state.in_main_menu.set_state(true)
 	UI.state.in_server_lobby.set_state(false)

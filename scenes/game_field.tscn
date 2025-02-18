@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=43 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -142,11 +142,6 @@ font_size = 46
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
-[sub_resource type="LabelSettings" id="LabelSettings_urfof"]
-font_size = 80
-outline_size = 8
-outline_color = Color(0, 0, 0, 1)
-
 [sub_resource type="LabelSettings" id="LabelSettings_r3h5r"]
 font_size = 100
 outline_size = 8
@@ -155,6 +150,16 @@ outline_color = Color(0, 0, 0, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_73a6d"]
 font_size = 36
 outline_size = 3
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_om11m"]
+font_size = 40
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_gs8nd"]
+font_size = 41
+outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_1spbm"]
@@ -900,25 +905,6 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.329412)
 
-[node name="Result" type="Label" parent="UI/GameResult"]
-z_index = 1
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -289.0
-offset_right = 160.0
-offset_bottom = -179.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Победа!"
-label_settings = SubResource("LabelSettings_urfof")
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="Score" type="Label" parent="UI/GameResult"]
 visible = false
 layout_mode = 1
@@ -964,15 +950,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -489.0
-offset_top = -281.5
-offset_right = 489.0
-offset_bottom = 281.5
+offset_left = -457.0
+offset_top = -270.0
+offset_right = 457.0
+offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Score" type="Control" parent="UI/Leaderboard/Panel"]
-visible = false
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -1043,6 +1028,46 @@ offset_bottom = 44.0
 grow_vertical = 2
 text = "0 : 0"
 label_settings = SubResource("LabelSettings_73a6d")
+
+[node name="Results" type="Control" parent="UI/Leaderboard/Panel"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_bottom = 100.0
+grow_horizontal = 2
+
+[node name="MatchResult" type="Label" parent="UI/Leaderboard/Panel/Results"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_right = 160.0
+offset_bottom = 55.0
+grow_horizontal = 2
+text = "Победа!"
+label_settings = SubResource("LabelSettings_om11m")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WaitText" type="Label" parent="UI/Leaderboard/Panel/Results"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -55.0
+offset_right = 160.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Ожидайте окончания других матчей"
+label_settings = SubResource("LabelSettings_gs8nd")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="UI/Leaderboard/Panel"]
 layout_mode = 1
@@ -1338,6 +1363,20 @@ offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 0
 text = "Закрыть"
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="UI"]
+title = "Подтвердите"
+initial_position = 2
+size = Vector2i(359, 132)
+unresizable = true
+always_on_top = true
+ok_button_text = "Да"
+dialog_text = "
+Вы действительно хотите покинуть матч?
+
+"
+dialog_autowrap = true
+cancel_button_text = "Нет"
 
 [node name="DebugUI" type="Control" parent="."]
 visible = false

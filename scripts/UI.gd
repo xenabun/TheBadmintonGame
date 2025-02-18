@@ -16,6 +16,16 @@ var title_rot_time = 4
 
 func _ready():
 	state = UI_State.new(self, Network)
+	
+	var prompt = get_node('ConfirmationDialog')
+	prompt.canceled.connect(clear_prompt_connections)
+
+func clear_prompt_connections():
+	print('clearing prompt connections')
+	var prompt = get_node('ConfirmationDialog')
+	var confirm_cons = prompt.confirmed.get_connections()
+	for con in confirm_cons:
+		prompt.confirmed.disconnect(con.callable)
 
 func _enter_tree():
 	title_label.rotation = deg_to_rad(-title_rot_deg)
@@ -98,19 +108,26 @@ func close_lobby_player_list():
 @rpc
 func show_match_result(result_text, _score_text):
 	var game_result_ui = get_node('GameResult')
-	game_result_ui.get_node('Result').text = result_text
+	# game_result_ui.get_node('Result').text = result_text
+	get_node('Leaderboard/Panel/Results/MatchResult').text = result_text
 	# game_result_ui.get_node('Score').text = score_text
 	game_result_ui.show()
-	get_node('Leaderboard/Panel/Score').hide()
-	state.showing_leaderboard.set_state(true)
-	get_node('GameUI').hide()
+	state.showing_leaderboard.set_state(true, true)
+	# get_node('Leaderboard/Panel/Score').hide()
+	# get_node('Leaderboard/Panel/Results').show()
+	# get_node('GameUI').hide()
+	state.showing_game_ui.set_state(false)
 
 @rpc('any_peer')
 func set_loading_screen(value):
 	get_node('Loading').visible = value
 
 func _on_game_exit_pressed():
-	Network.quit_server()
+	var prompt = get_node('ConfirmationDialog')
+	prompt.dialog_text = "Вы действительно хотите покинуть матч?"
+	prompt.confirmed.connect(Network.quit_server)
+	prompt.confirmed.connect(clear_prompt_connections)
+	prompt.popup_centered()
 
 func _on_server_browser_back_pressed():
 	state.in_main_menu.set_state(true)
