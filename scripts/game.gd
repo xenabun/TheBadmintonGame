@@ -17,7 +17,6 @@ const LOSE_TEXT = 'Поражение'
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
 @onready var Network = get_tree().get_root().get_node('Scene/Network')
 @onready var ServerBrowser = get_tree().get_root().get_node('Scene/ServerBrowser')
-# @onready var ball = Level.get_node('World/Ball')
 
 var debug = false
 var window_focus = true
@@ -76,9 +75,6 @@ func get_opponent_id(id):
 func get_opponent_index(index):
 	return abs(index - 1)
 
-# func peer_id_to_score_index(id):
-# 	return get_player_num(id) - 1
-
 func get_player_num(id):
 	if not Network.Players.has(id): return
 	var player_data = Network.Players[id]
@@ -116,9 +112,6 @@ func get_match_players_data(match_id):
 
 @rpc('any_peer')
 func update_score_text(match_id = null, player_num = null):
-	# var pdata = Network.Players[multiplayer.get_unique_id()]
-	# if match_id == null:
-		# match_id = pdata.match_id
 	if match_id == null or player_num == null:
 		var player_id = multiplayer.get_unique_id()
 		match_id = get_player_match_id(player_id)
@@ -160,7 +153,7 @@ func update_score_text_for_all():
 func check_round_win(p, match_id):
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
-	return round_score[p] >= 2
+	return round_score[p] >= 3
 	# if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
 	# 	if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
 	# 		return round_score[p] >= 30
@@ -208,10 +201,6 @@ func finish_match(winner_index, match_id):
 			if current_game_type != game_type.SINGLEPLAYER:
 				UI.show_match_result.rpc_id(player_id, result_text, score_text)
 
-# @rpc('any_peer')
-# func push_round_score():
-# 	Network.Leaderboard[][].push_back()
-
 @rpc('any_peer', 'call_local')
 func grant_point(p, match_id):
 	var match_data = Network.Matches[match_id]
@@ -224,8 +213,6 @@ func grant_point(p, match_id):
 	if check_round_win(p, match_id):
 		var match_score = match_data.match_score
 		match_score[p] += 1
-		# match_data.round_history.push_back(match_data.round_score)
-		# push_round_score()
 		var id1 = Network.find_player_by_match_id_with_num(match_id, 1).id
 		var id2 = get_opponent_id(id1)
 		var reverse_round_score = match_data.round_score.duplicate()
@@ -253,42 +240,33 @@ func reset_player_positions(match_id):
 		for bot in get_tree().get_nodes_in_group('Bot'):
 			bot.reset_position()
 	elif current_game_type == game_type.MULTIPLAYER:
-		# print('RESETING PLAYER POSITIONS:')
 		for id in Network.Players:
 			var player_data = Network.Players[id]
-			# print('reseting step 1 for id ', id)
 			if not player_data.has('match_id') or player_data.match_id != match_id: continue
-			# print('reseting step 2 for id ', id)
 			if not Level.get_node('Players').has_node(str(id)): continue
-			# print('reseting step 3 for id ', id)
 			if player_data.is_bot or id == 1:
 				Level.get_node('Players/' + str(id)).reset_position()
 			else:
 				Level.get_node('Players/' + str(id)).reset_position.rpc_id(id)
-
-# func reset_score(match_id):
-# 	score = [ 0, 0 ]
 
 @rpc('any_peer')
 func set_match_sync(player_id):
 	Network.Players[player_id].match_sync = true
 
 @rpc('any_peer')
-func match_sync(): # balls_amount):
+func match_sync():
 	print(multiplayer.get_unique_id(), ' sync start')
-	while not check_match_ready(): # balls_amount):
+	while not check_match_ready():
 		await get_tree().create_timer(0.1).timeout
 	print(multiplayer.get_unique_id(), ' sync end')
 	var id = multiplayer.get_unique_id()
 	set_match_sync.rpc_id(1, id)
 
-func check_match_ready(): # balls_amount):
+func check_match_ready():
 	for i in Network.Players:
 		var player_data = Network.Players[i]
 		if not player_data.has('match_ready'):
 			return false
-	# if Network.Balls.size() != balls_amount:
-	# 	return false
 	return true
 
 func check_match_sync():
@@ -313,9 +291,6 @@ func start_game():
 		var next_player_num = 1
 		var next_match = []
 
-		# for match_id in match_amount:
-		# 	Network.add_ball(match_id)
-
 		for i in Network.Players:
 			if next_match.size() >= 2:
 				next_match_id += 1
@@ -336,7 +311,7 @@ func start_game():
 
 			if i != 1:
 				UI.set_loading_screen.rpc_id(i, true)
-				match_sync.rpc_id(i) # , match_amount)
+				match_sync.rpc_id(i)
 			else:
 				UI.set_loading_screen(true)
 		
@@ -377,7 +352,6 @@ func start_game():
 			var player_data = Network.Players[i]
 			
 			player_data.match_id = 0
-			# player_data.match_id = player_data.id - 1
 
 			player_data.num = player_data.id
 			player_data.state = Network.player_state_type.PLAYER
@@ -386,9 +360,6 @@ func start_game():
 			for i2 in Network.Players:
 				if i2 == i: continue
 				Network.Leaderboard[i][i2] = []
-
-			# if not player_data.is_bot:
-			# 	Network.add_spectator(player_data.id)
 			
 			if player_data.is_bot:
 				Network.add_bot(player_data.username)
@@ -397,16 +368,12 @@ func start_game():
 
 		update_score_text()
 
-	# for match_id in match_amount:
-	# 	reset_score(match_id)
-
 func _ready():
 	debug = get_tree().get_root().get_node('Scene/DebugUI').visible
 	for argument in OS.get_cmdline_args():
 		if argument.contains('-debug'):
 			get_tree().get_root().get_node('Scene/DebugUI').visible = true
 			debug = true
-	# start_game()
 	get_viewport().focus_entered.connect(_on_window_focus_in)
 	get_viewport().focus_exited.connect(_on_window_focus_out)
 

@@ -241,6 +241,7 @@ func _physics_process(delta):
 	# position
 	move_and_slide()
 	var side = get_player_side()
+	# ERROR ball is null
 	if Game.get_ball_by_match_id(match_id).ball_ready:
 		var throw_side = get_throw_side()
 		var throw_size_x = 1 if throw_side == 'Even' else -1

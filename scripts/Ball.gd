@@ -67,9 +67,6 @@ func set_ball_ready(value = true):
 @rpc("any_peer", 'call_local')
 func throw_ball(peer_id : int, player_name : String, new_position : Vector3,
 		new_direction : float, new_velocity_x : float, aim_dir_y : float):
-	
-	## TODO: wait for both players to close controls ui, only let num=1 throw?
-
 	if not peer_id or peer_id < 1 or Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		peer_id = 1
 	ball_ready = false
