@@ -5,16 +5,17 @@ const ADDRESS : String = '127.0.0.1'
 enum server_state_type {
 	NONE,
 	LOBBY,
-	MATCH
+	MATCH,
 }
 enum player_state_type {
 	NONE,
 	SPECTATOR,
-	PLAYER
+	PLAYER,
 }
 enum match_status_type {
 	IN_PROGRESS,
-	PAUSED
+	PAUSED,
+	FINISHED,
 }
 
 @export var PORT : int = 3333
@@ -84,29 +85,6 @@ func del_player_data(player_id):
 	if not Players.has(player_id): return
 	Players.erase(player_id)
 	update_lobby_player_list_for_all()
-
-func remove_player(id):
-	if not multiplayer.is_server(): return
-	var match_id
-	var pdata = Players[id]
-	if pdata.has('match_id'):
-		match_id = pdata.match_id
-	del_player_data(id)
-	if match_id:
-		var player = find_first_player_by_match_id(match_id)
-		var ball = Game.get_ball_by_match_id(match_id)
-		ball.set_multiplayer_authority(player.id)
-	Game.update_score_text_for_all()
-	if Level.get_node('Players').has_node(str(id)):
-		Level.get_node('Players/' + str(id)).queue_free()
-	if Level.get_node('Spectators').has_node(str(id)):
-		Level.get_node('Spectators/' + str(id)).queue_free()
-	# for player in get_tree().get_nodes_in_group('Player'):
-	# 	if str(player.name) == str(id):
-	# 		player.queue_free()
-	# for spectator in get_tree().get_nodes_in_group('Spectator'):
-	# 	if str(spectator.name) == str(id):
-	# 		spectator.queue_free()
 
 func kick_peer(id):
 	kicked.rpc_id(id)
@@ -184,6 +162,18 @@ func join_by_ip(ip):
 	UI.state.in_server_browser.set_state(false)
 	UI.get_node('Connecting').show()
 
+func start_singleplayer():
+	Game.current_game_type = Game.game_type.SINGLEPLAYER
+	UI.state.in_menu.set_state(false)
+	UI.state.in_main_menu.set_state(false)
+	var bot_username = 'Компьютер'
+	add_player_data(1, UI.username_box.text, false)
+	add_player_data(2, bot_username, true)
+	Game.start_game()
+	# add_spectator()
+	# var plr_char = add_player()
+	# add_bot(plr_char, bot_username)
+
 @rpc('any_peer')
 func kicked():
 	quit_server()
@@ -203,6 +193,7 @@ func quit_server():
 	# Game.game_in_progress = true
 	# Game.ball.set_ball_ready()
 	# Game.ball.reset_ball()
+	UI.leaderboard_clear()
 	UI.state.showing_leaderboard.set_state(false, false)
 	UI.state.in_menu.set_state(true)
 	UI.state.in_main_menu.set_state(true)
@@ -218,18 +209,6 @@ func quit_server():
 			spectator.queue_free()
 		for bot in get_tree().get_nodes_in_group('Bot'):
 			bot.queue_free()
-
-func start_singleplayer():
-	Game.current_game_type = Game.game_type.SINGLEPLAYER
-	UI.state.in_menu.set_state(false)
-	UI.state.in_main_menu.set_state(false)
-	var bot_username = 'Компьютер'
-	add_player_data(1, UI.username_box.text, false)
-	add_player_data(2, bot_username, true)
-	Game.start_game()
-	# add_spectator()
-	# var plr_char = add_player()
-	# add_bot(plr_char, bot_username)
 
 @rpc('any_peer')
 func setup_player(character_name, data):
@@ -273,6 +252,29 @@ func add_player(id : int = 1, num : int = 1): # , can_throw : bool = false):
 	# Game.update_score_text_for_all() # .rpc()
 
 	return character
+
+func remove_player(id):
+	if not multiplayer.is_server(): return
+	var match_id
+	var pdata = Players[id]
+	if pdata.has('match_id'):
+		match_id = pdata.match_id
+	del_player_data(id)
+	if match_id:
+		var player = find_first_player_by_match_id(match_id)
+		var ball = Game.get_ball_by_match_id(match_id)
+		ball.set_multiplayer_authority(player.id)
+	Game.update_score_text_for_all()
+	if Level.get_node('Players').has_node(str(id)):
+		Level.get_node('Players/' + str(id)).queue_free()
+	if Level.get_node('Spectators').has_node(str(id)):
+		Level.get_node('Spectators/' + str(id)).queue_free()
+	# for player in get_tree().get_nodes_in_group('Player'):
+	# 	if str(player.name) == str(id):
+	# 		player.queue_free()
+	# for spectator in get_tree().get_nodes_in_group('Spectator'):
+	# 	if str(spectator.name) == str(id):
+	# 		spectator.queue_free()
 
 func add_spectator(id: int = 1):
 	if Level.get_node('Spectators').has_node(str(id)): return

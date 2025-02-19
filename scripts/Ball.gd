@@ -99,6 +99,7 @@ func reset_ball():
 	ignored_area = null
 	velocity = Vector3.ZERO
 	position = Vector3(0, -10, 30)
+
 @rpc('any_peer')
 func reset_authority():
 	set_multiplayer_authority(1)

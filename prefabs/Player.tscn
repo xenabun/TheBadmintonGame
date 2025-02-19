@@ -1,10 +1,9 @@
-[gd_scene load_steps=26 format=3 uid="uid://blx58dx1jig7h"]
+[gd_scene load_steps=25 format=3 uid="uid://blx58dx1jig7h"]
 
 [ext_resource type="PackedScene" uid="uid://bwg6vxx141sog" path="res://prefabs/player_model.tscn" id="1_4y33c"]
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_pqout"]
 [ext_resource type="AnimationLibrary" uid="uid://c33w2uu14i1fb" path="res://meshes/playeranims.glb" id="2_80x2u"]
 [ext_resource type="Material" uid="uid://5ikr8dl3gf0d" path="res://materials/test.material" id="3_s24ti"]
-[ext_resource type="Script" path="res://scripts/PlayerInput.gd" id="4_ipxnc"]
 [ext_resource type="Texture2D" uid="uid://bubjsct8lo2e5" path="res://images/arrow.png" id="6_2et2c"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ll8ur"]
@@ -142,6 +141,9 @@ properties/15/replication_mode = 2
 properties/16/path = NodePath(".:can_throw")
 properties/16/spawn = true
 properties/16/replication_mode = 2
+properties/17/path = NodePath(".:aim_x")
+properties/17/spawn = true
+properties/17/replication_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g2tai"]
 transparency = 1
@@ -220,24 +222,23 @@ parameters/TimeScale/scale = 1.5
 parameters/WalkScale/scale = 1.0
 parameters/WalkSpeed/blend_amount = 1.0
 
-[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_v8t2k")
-script = ExtResource("4_ipxnc")
-
-[node name="RacketActive" type="Timer" parent="PlayerInput"]
+[node name="RacketActive" type="Timer" parent="."]
 wait_time = 0.4
 one_shot = true
 
-[node name="RacketCooldown" type="Timer" parent="PlayerInput"]
+[node name="RacketCooldown" type="Timer" parent="."]
 wait_time = 0.35
 one_shot = true
 
-[node name="RacketHold" type="Timer" parent="PlayerInput"]
+[node name="RacketHold" type="Timer" parent="."]
 one_shot = true
 
-[node name="ActionPressed" type="Timer" parent="PlayerInput"]
+[node name="ActionPressed" type="Timer" parent="."]
 wait_time = 0.3
 one_shot = true
+
+[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_v8t2k")
 
 [node name="AimArrow" type="Node3D" parent="."]
 
@@ -246,7 +247,7 @@ transform = Transform3D(-2.18557e-07, -1.32, -4.37114e-08, 0, -5.7699e-08, 1, -5
 material_override = SubResource("StandardMaterial3D_g2tai")
 texture = ExtResource("6_2et2c")
 
-[connection signal="timeout" from="PlayerInput/RacketActive" to="PlayerInput" method="_on_racket_active_timeout"]
-[connection signal="timeout" from="PlayerInput/RacketCooldown" to="PlayerInput" method="_on_racket_cooldown_timeout"]
-[connection signal="timeout" from="PlayerInput/RacketHold" to="PlayerInput" method="_on_racket_hold_timeout"]
-[connection signal="timeout" from="PlayerInput/ActionPressed" to="PlayerInput" method="_on_action_pressed_timeout"]
+[connection signal="timeout" from="RacketActive" to="." method="_on_racket_active_timeout"]
+[connection signal="timeout" from="RacketCooldown" to="." method="_on_racket_cooldown_timeout"]
+[connection signal="timeout" from="RacketHold" to="." method="_on_racket_hold_timeout"]
+[connection signal="timeout" from="ActionPressed" to="." method="_on_action_pressed_timeout"]

@@ -5,8 +5,10 @@ const CAMERA_VERTICAL_SPEED = 0.1
 const ZOOM_STEP = 10
 
 @export var player_id : int
+@export var match_id : int = 0
 
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
+@onready var Network = get_tree().get_root().get_node('Scene/Network')
 @onready var camera = get_node('HorizontalAxis/VerticalAxis/Camera')
 @onready var h_axis = get_node('HorizontalAxis')
 @onready var v_axis = get_node('HorizontalAxis/VerticalAxis')
@@ -14,7 +16,7 @@ const ZOOM_STEP = 10
 var mouse_hold : bool = false
 var mouse_pos : Vector2 = Vector2.ZERO
 var mouse_velocity : Vector2 = Vector2.ZERO
-var zoom_delta = 0
+var zoom_delta : int = 0
 var zoom_tween
 
 func _on_window_focus_changed(new_focus):
@@ -27,7 +29,13 @@ func _on_in_game_menu_state_changed(_old_state, new_state, _args):
 func _ready():
 	player_id = get_multiplayer_authority()
 	set_physics_process(multiplayer.get_unique_id() == player_id)
+	
 	if multiplayer.get_unique_id() != player_id: return
+	
+	var player_data = Network.Players[player_id]
+	if player_data:
+		match_id = player_data.match_id
+
 	camera.make_current()
 	# var GameUI = UI.get_node('')
 	UI.get_node('GameUI/StaminaBarControl/StaminaBar').hide()
@@ -39,6 +47,10 @@ func _ready():
 	# Game.window_focus_changed.connect(_on_window_focus_changed)
 	# UI.state.in_game_menu.state_changed.connect(_on_in_game_menu_state_changed)
 
+@rpc('any_peer')
+func reset_authority():
+	set_multiplayer_authority(1)
+
 func _enter_tree():
 	set_multiplayer_authority(str(name).to_int())
 func _exit_tree():
@@ -46,6 +58,9 @@ func _exit_tree():
 		Game.window_focus_changed.disconnect(_on_window_focus_changed)
 	if UI.state.in_game_menu.state_changed.is_connected(_on_in_game_menu_state_changed):
 		UI.state.in_game_menu.state_changed.disconnect(_on_in_game_menu_state_changed)
+
+func is_game_paused():
+	return UI.get_node('Menu').visible or UI.get_node('GameControls').visible
 
 func _input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
@@ -55,6 +70,8 @@ func _input(event):
 		var new_state = not current_state
 		UI.state.in_game_menu.set_state(new_state)
 	
+	if not Game.is_match_in_progress(match_id) or is_game_paused(): return
+
 	if event.is_action_pressed('leaderboard'):
 		UI.state.showing_leaderboard.set_state(true, false)
 	if event.is_action_released('leaderboard'):

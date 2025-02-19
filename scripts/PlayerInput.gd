@@ -1,6 +1,6 @@
 extends MultiplayerSynchronizer
 
-@export var direction := Vector3()
+@export var direction : Vector3 = Vector3.ZERO
 @export var player : Node
 @export var animation_tree : Node
 @export var sprinting : bool = false

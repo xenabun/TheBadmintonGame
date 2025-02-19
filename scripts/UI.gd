@@ -42,11 +42,6 @@ func leaderboard_init():
 	var score_label_prefab = preload("res://prefabs/leaderboard/score_label.tscn")
 
 	leaderboard.get_node('Panel/Score').show()
-	
-	for child in user_label_container.get_children():
-		child.queue_free()
-	for child in score_column_container.get_children():
-		child.queue_free()
 
 	var i = 0
 	for player_id in Network.Players:
@@ -66,6 +61,15 @@ func leaderboard_init():
 			score_label.name = str(player_id2)
 			score_label.get_node('Label').text = '-' if player_id2 == player_id else ''
 			score_column.get_node('Content').add_child(score_label, true)
+
+func leaderboard_clear():
+	var leaderboard = get_node('Leaderboard')
+	var user_label_container = leaderboard.get_node('Panel/Table/Container/Left/Container/Content')
+	var score_column_container = leaderboard.get_node('Panel/Table/Container/Right/Container')
+	for child in user_label_container.get_children():
+		child.queue_free()
+	for child in score_column_container.get_children():
+		child.queue_free()
 
 func update_leaderboard_match_data():
 	var score_column_container = get_node('Leaderboard/Panel/Table/Container/Right/Container')
@@ -107,6 +111,7 @@ func close_lobby_player_list():
 
 @rpc
 func show_match_result(result_text, _score_text):
+	get_node('GameControls').hide()
 	var game_result_ui = get_node('GameResult')
 	# game_result_ui.get_node('Result').text = result_text
 	get_node('Leaderboard/Panel/Results/MatchResult').text = result_text
