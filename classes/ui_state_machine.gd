@@ -109,8 +109,8 @@ func _init(_ui, Network):
 		ui.get_node('Leaderboard').visible = new_state
 		# ui.get_node('GameUI').visible = not new_state
 		showing_game_ui.set_state(not new_state)
-		get_node('Leaderboard/Panel/Results').visible = show_result
-		get_node('Leaderboard/Panel/Score').visible = not show_result
+		ui.get_node('Leaderboard/Panel/Results').visible = show_result
+		ui.get_node('Leaderboard/Panel/Score').visible = not show_result
 		)
 	
 	showing_game_ui.state_changed.connect(func(_old_state, new_state, _args):

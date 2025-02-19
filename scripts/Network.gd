@@ -42,6 +42,12 @@ func _ready():
 	multiplayer.connection_failed.connect(connection_failed)
 	ServerBrowser.join_server.connect(join_by_ip)
 
+# func get_last_match_id():
+# 	var last_match_id = 0
+# 	for id in Matches:
+# 		last_match_id = max(last_match_id, id)
+# 	return last_match_id
+
 func find_first_player_by_match_id(match_id):
 	for i in Players:
 		var pdata = Players[i]
