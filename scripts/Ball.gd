@@ -56,10 +56,7 @@ var ball_ready = true:
 		ball_ready = value
 		if value and Game.is_match_in_progress(match_id):
 			# await get_tree().create_timer(0.5).timeout
-			if multiplayer.is_server():
-				Game.reset_player_positions(match_id)
-			else:
-				Game.reset_player_positions.rpc_id(1, match_id)
+			Game.reset_player_positions.rpc_id(1, match_id)
 
 @rpc('any_peer', 'call_local')
 func set_ball_ready(value = true):
@@ -155,10 +152,7 @@ func _physics_process(_delta):
 			p = Game.get_opponent_index(pdata.num - 1)
 			# Game.grant_point.rpc(Game.get_opponent_index(pdata.num - 1), match_id)
 		if Game.current_game_type == Game.game_type.MULTIPLAYER:
-			if multiplayer.get_unique_id() == 1:
-				Game.set_players_can_throw(match_id, p + 1)
-			else:
-				Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
+			Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
 		else:
 			Game.set_players_can_throw(match_id, 1)
 		Game.grant_point.rpc(p, match_id)

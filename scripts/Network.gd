@@ -63,11 +63,7 @@ func find_player_by_match_id_with_num(match_id, num):
 
 func update_lobby_player_list_for_all():
 	if Game.current_game_type == Game.game_type.SINGLEPLAYER: return
-	for i in Players:
-		if multiplayer.get_unique_id() == i:
-			UI.update_lobby_player_list(Players)
-		else:
-			UI.update_lobby_player_list.rpc_id(i, Players)
+	UI.update_lobby_player_list.rpc(Players)
 
 @rpc('any_peer')
 func add_player_data(player_id, username, is_bot):
@@ -142,11 +138,7 @@ func _on_start_game_pressed():
 
 	ServerBrowser.stop_broadcast()
 	Game.start_game()
-	for i in Players:
-		if i == 1:
-			UI.close_lobby_player_list()
-		else:
-			UI.close_lobby_player_list.rpc_id(i)
+	UI.close_lobby_player_list.rpc()
 
 func join_by_ip(ip):
 	Game.print_debug_msg('trying to join by ip: ' + ip)
@@ -180,12 +172,33 @@ func kicked():
 	UI.show_message("Вы были исключены")
 
 func quit_server():
+	# var id = multiplayer.get_unique_id()
+	# var match_id
+	# var pdata = Players[id]
+	# if pdata.has('match_id'):
+	# 	match_id = pdata.match_id
+	# if match_id:
+	# 	var ball = Game.get_ball_by_match_id(match_id)
+	# 	if ball:
+	# 		ball.set_multiplayer_authority(1)
+	# if Level.get_node('Players').has_node(str(id)):
+	# 	var player = Level.get_node('Players/' + str(id))
+	# 	player.reset_authority()
+	# 	Level.get_node('Players').remove_child(player)
+	# 	player.queue_free()
+	# if Level.get_node('Spectators').has_node(str(id)):
+	# 	var spectator = Level.get_node('Spectators/' + str(id))
+	# 	spectator.reset_authority()
+	# 	Level.get_node('Spectators').remove_child(spectator)
+	# 	spectator.queue_free()
+
+	if peer: peer.close()
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	
 	if multiplayer.server_disconnected.is_connected(quit_server):
 		multiplayer.server_disconnected.disconnect(quit_server)
 	Game.current_game_type = Game.game_type.NONE
 	server_state = server_state_type.NONE
-	if peer: peer.close()
-	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	Players = {}
 	Balls = {}
 	Matches = {}
@@ -210,7 +223,7 @@ func quit_server():
 		for bot in get_tree().get_nodes_in_group('Bot'):
 			bot.queue_free()
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func setup_player(character_name, data):
 	var character = Level.get_node('Players/' + character_name)
 	# character.player_num = data.num
@@ -237,18 +250,22 @@ func add_player(id : int = 1, num : int = 1): # , can_throw : bool = false):
 	# 	'position': spawn_point.position,
 	# 	'rotation': spawn_point.rotation,
 	# })
-	if id == 1:
-		# character.player_num = num
-		# character.can_throw = can_throw
-		character.position = spawn_point.position
-		character.rotation = spawn_point.rotation
-	else:
-		setup_player.rpc_id(id, str(id), {
-			# 'num': num,
-			# can_throw = can_throw,
-			position = spawn_point.position,
-			rotation = spawn_point.rotation,
-		})
+	setup_player.rpc_id(id, str(id), {
+		position = spawn_point.position,
+		rotation = spawn_point.rotation,
+	})
+	# if id == 1:
+	# 	# character.player_num = num
+	# 	# character.can_throw = can_throw
+	# 	character.position = spawn_point.position
+	# 	character.rotation = spawn_point.rotation
+	# else:
+	# 	setup_player.rpc_id(id, str(id), {
+	# 		# 'num': num,
+	# 		# can_throw = can_throw,
+	# 		position = spawn_point.position,
+	# 		rotation = spawn_point.rotation,
+	# 	})
 	# Game.update_score_text_for_all() # .rpc()
 
 	return character
@@ -267,9 +284,17 @@ func remove_player(id):
 			ball.set_multiplayer_authority(1) # player.id)
 	Game.update_score_text_for_all()
 	if Level.get_node('Players').has_node(str(id)):
-		Level.get_node('Players/' + str(id)).queue_free()
+		var player = Level.get_node('Players/' + str(id))
+		# var multiplayer_authority = player.get_multiplayer_authority()
+		# if multiplayer_authority != multiplayer.get_unique_id() and multiplayer_authority in get_tree().get_network_connected_peers():
+		# 	player.reset_authority.rpc_id(multiplayer_authority)
+		player.queue_free()
 	if Level.get_node('Spectators').has_node(str(id)):
-		Level.get_node('Spectators/' + str(id)).queue_free()
+		var spectator = Level.get_node('Spectators/' + str(id))
+		# var multiplayer_authority = spectator.get_multiplayer_authority()
+		# if multiplayer_authority != multiplayer.get_unique_id() and multiplayer_authority in get_tree().get_network_connected_peers():
+		# 	spectator.reset_authority.rpc_id(multiplayer_authority)
+		spectator.queue_free()
 	# for player in get_tree().get_nodes_in_group('Player'):
 	# 	if str(player.name) == str(id):
 	# 		player.queue_free()

@@ -33,8 +33,9 @@ func clear_prompt_connections():
 	for con in confirm_cons:
 		prompt.confirmed.disconnect(con.callable)
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func leaderboard_init():
+	print('running leaderboard init ', multiplayer.get_unique_id())
 	var leaderboard = get_node('Leaderboard')
 	var user_label_container = leaderboard.get_node('Panel/Table/Container/Left/Container/Content')
 	var score_column_container = leaderboard.get_node('Panel/Table/Container/Right/Container')
@@ -88,7 +89,7 @@ func clear_lobby_player_list():
 	for child in lobby_player_list.get_children():
 		child.queue_free()
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func update_lobby_player_list(players):
 	if not state.in_server_lobby.get_state(): return
 
@@ -105,17 +106,26 @@ func update_lobby_player_list(players):
 			kick_button.pressed.connect(func():
 				Network.kick_peer(player_data.id)) # player_label.player_id))
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func close_lobby_player_list():
 	state.in_menu.set_state(false)
 	state.in_server_lobby.set_state(false)
 
-@rpc
+@rpc('call_local')
+func show_ready_check():
+	var ready_check = get_node('Leaderboard/Panel/ReadyCheck')
+	ready_check.get_node('Ready').disabled = false
+	ready_check.get_node('Ready').text = 'Готов'
+	ready_check.get_node('Panel/Check').hide()
+	ready_check.get_node('Panel/Cross').show()
+	ready_check.show()
+
+@rpc('call_local')
 func close_match_result():
 	state.showing_leaderboard.set_state(false, false)
 	get_node('GameResult').hide()
 
-@rpc
+@rpc('call_local')
 func show_match_result(result_text, _score_text):
 	get_node('GameControls').hide()
 	var game_result_ui = get_node('GameResult')
@@ -129,7 +139,7 @@ func show_match_result(result_text, _score_text):
 	# get_node('GameUI').hide()
 	state.showing_game_ui.set_state(false)
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func set_loading_screen(value):
 	get_node('Loading').visible = value
 
@@ -188,6 +198,13 @@ func _on_port_confirm():
 		# state.in_server_browser.set_state(true)
 	else:
 		OS.alert('Введено неверное значение')
+
+func _on_next_match_ready_pressed():
+	var ready_check = get_node('Leaderboard/Panel/ReadyCheck')
+	ready_check.get_node('Ready').disabled = true
+	ready_check.get_node('Panel/Check').show()
+	ready_check.get_node('Panel/Cross').hide()
+	Game.set_player_ready.rpc_id(1, multiplayer.get_unique_id())
 
 func _on_lobby_exit_pressed():
 	Network.quit_server()

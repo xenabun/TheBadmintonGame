@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://dao4a65ncuf15"]
+[gd_scene load_steps=45 format=3 uid="uid://dao4a65ncuf15"]
 
 [ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
@@ -7,7 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://mys6700w7ww4" path="res://images/field.png" id="4_au1ay"]
 [ext_resource type="Script" path="res://scripts/Network.gd" id="6_h2wnu"]
 [ext_resource type="Script" path="res://scripts/ServerBrowser.gd" id="7_4w53d"]
+[ext_resource type="Texture2D" uid="uid://dunsfkxuac18q" path="res://images/54841.png" id="10_txq36"]
 [ext_resource type="PackedScene" uid="uid://biiikapfvb4vb" path="res://prefabs/server_button.tscn" id="11_dli3y"]
+[ext_resource type="Texture2D" uid="uid://bj1tl5or62wlh" path="res://images/54842.png" id="11_kh1dc"]
 [ext_resource type="Script" path="res://scripts/UI.gd" id="12_2yf3a"]
 [ext_resource type="Texture2D" uid="uid://bfy0ucogy3lda" path="res://images/controls.png" id="14_frpfu"]
 [ext_resource type="Shader" path="res://shaders/texture_outline.gdshader" id="15_274xj"]
@@ -1084,6 +1086,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 104.0
+offset_bottom = -48.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 5
@@ -1148,6 +1151,77 @@ size_flags_vertical = 3
 [node name="Container" type="GridContainer" parent="UI/Leaderboard/Panel/Table/Container/Right"]
 layout_mode = 2
 columns = 1024
+
+[node name="ReadyCheck" type="Control" parent="UI/Leaderboard/Panel"]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -50.0
+offset_right = 10.0
+offset_bottom = -10.0
+grow_vertical = 0
+
+[node name="Ready" type="Button" parent="UI/Leaderboard/Panel/ReadyCheck"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 48.0
+offset_top = -15.0
+offset_right = 171.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Готов"
+
+[node name="Panel" type="Panel" parent="UI/Leaderboard/Panel/ReadyCheck"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+
+[node name="Check" type="TextureRect" parent="UI/Leaderboard/Panel/ReadyCheck/Panel"]
+visible = false
+modulate = Color(1, 1, 1, 0.764706)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -15.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_txq36")
+expand_mode = 1
+
+[node name="Cross" type="TextureRect" parent="UI/Leaderboard/Panel/ReadyCheck/Panel"]
+modulate = Color(1, 1, 1, 0.764706)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -15.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_kh1dc")
+expand_mode = 1
 
 [node name="Menu" type="Control" parent="UI"]
 visible = false
@@ -1449,6 +1523,7 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/Lobby/StartGame" to="Network" method="_on_start_game_pressed"]
 [connection signal="pressed" from="UI/Lobby/Back" to="UI" method="_on_lobby_exit_pressed"]
 [connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
+[connection signal="pressed" from="UI/Leaderboard/Panel/ReadyCheck/Ready" to="UI" method="_on_next_match_ready_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_pause_menu_close"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/GameControls/Panel/Close" to="UI" method="_on_controls_close"]

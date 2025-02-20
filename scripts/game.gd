@@ -21,6 +21,7 @@ const LOSE_TEXT = 'Поражение'
 var debug : bool = false
 var window_focus : bool = true
 var players_finished : Dictionary = {}
+var players_ready : Dictionary = {}
 var is_match_finish_loop_running : bool = false
 
 func is_match_in_progress(match_id):
@@ -39,7 +40,7 @@ func get_ball_by_match_id(match_id):
 			return Level.get_node('Balls/' + str(match_id))
 	return null
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func set_players_can_throw(match_id, player_num):
 	for i in Network.Players:
 		var player_data = Network.Players[i]
@@ -47,7 +48,7 @@ func set_players_can_throw(match_id, player_num):
 				and player_data.match_id == match_id and player_data.num == player_num
 				and Level.get_node('Players').has_node(str(player_data.id))):
 			var player = Level.get_node('Players/' + str(player_data.id))
-			if player_data.is_bot or player_data.id == 1:
+			if player_data.is_bot:
 				player.set_can_throw(true)
 			else:
 				player.set_can_throw.rpc_id(player_data.id, true)
@@ -123,7 +124,7 @@ func get_match_spectators_data(match_id):
 
 	return ids
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func update_score_text(match_id = null, player_num = null):
 	if match_id == null or player_num == null:
 		var player_id = multiplayer.get_unique_id()
@@ -158,11 +159,7 @@ func update_score_text(match_id = null, player_num = null):
 		score_leaderboard.get_node('RoundScore').text = str(round_score[players_data[1].num - 1], ' : ', round_score[players_data[0].num - 1])
 
 func update_score_text_for_all():
-	for i in Network.Players:
-		if multiplayer.get_unique_id() == i:
-			update_score_text()
-		else:
-			update_score_text.rpc_id(i)
+	update_score_text.rpc()
 
 func check_round_win(p, match_id):
 	var match_data = Network.Matches[match_id]
@@ -198,14 +195,12 @@ func score_point_effect(p, player_num):
 	score_effect.queue_free()
 
 func is_everyone_finished():
-	var finished = true
 	for id in Network.Leaderboard:
 		var player_data = Network.Players[id]
 		if not players_finished.has(id) and player_data.state != Network.player_state_type.SPECTATOR:
 			print('player ', str(id), ' has not finished playing yet!')
-			finished = false
-			break
-	return finished
+			return false
+	return true
 
 func can_continue():
 	for id1 in Network.Leaderboard:
@@ -215,6 +210,16 @@ func can_continue():
 			if score1.is_empty() and score2.is_empty():
 				return true
 	return false
+
+func is_everyone_ready():
+	for i in Network.Players:
+		if not players_ready.has(i):
+			return false
+	return true
+
+@rpc('any_peer', 'call_local')
+func set_player_ready(i):
+	players_ready[i] = true
 
 # Leaderboard = {
 # 	[1] = {
@@ -231,7 +236,7 @@ func can_continue():
 # 	},
 # }
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func finish_match(winner_index, match_id):
 	if not multiplayer.is_server(): return
 	var match_data = Network.Matches[match_id]
@@ -249,34 +254,25 @@ func finish_match(winner_index, match_id):
 		var score_index = get_player_num(player_id) - 1
 		var result_text = WIN_TEXT if winner_index == score_index else LOSE_TEXT
 		var score_text = get_full_score_str(get_player_num(player_id), match_id)
-		if player_id == 1:
-			UI.show_match_result(result_text, score_text)
-		else:
-			if current_game_type != game_type.SINGLEPLAYER:
-				UI.show_match_result.rpc_id(player_id, result_text, score_text)
+		if not players_data[i].is_bot:
+			UI.show_match_result.rpc_id(player_id, result_text, score_text)
 	
 	# show results to spectators
 	for i in spectators_data:
 		if get_player_match_id(i) != match_id: continue
 		var score_text = get_full_score_str(get_player_num(players_data[0].id), match_id)
-		if i == 1:
-			UI.show_match_result('', score_text)
-		else:
-			UI.show_match_result.rpc_id(i, '', score_text)
+		UI.show_match_result.rpc_id(i, '', score_text)			
 
 	print('is everyone finished? ', is_everyone_finished(), '; can continue? ', can_continue())
 	if not is_match_finish_loop_running:
 		while not is_everyone_finished():
 			await get_tree().create_timer(1.0).timeout
 		if can_continue():
-			print('STARTING NEW GAME IN 3... 2... 1...')
+			print('CAN CONTINUE GAME, PREPARING...')
 			for i in Network.Players:
 				var pdata = Network.Players[i]
 				pdata.erase('match_id')
-				if i == 1:
-					UI.set_loading_screen(true)
-				else:
-					UI.set_loading_screen.rpc_id(i, true)
+			# UI.set_loading_screen.rpc(true)
 			for i in Network.Balls:
 				Network.remove_ball(i)
 			Network.Balls = {}
@@ -290,13 +286,16 @@ func finish_match(winner_index, match_id):
 				if multiplayer_authority != multiplayer.get_unique_id():
 					spectator.reset_authority.rpc_id(multiplayer_authority)
 				spectator.queue_free()
-			
+			players_ready = {}
+			UI.show_ready_check.rpc()
+			print('IS EVERYONE READY???')
+			while not is_everyone_ready():
+				await get_tree().create_timer(1.0).timeout
+			print('EVERYONE IS READY!!!')
+			print('STARTING NEW GAME IN 3... 2... 1...')
+			UI.set_loading_screen.rpc(true)
 			await get_tree().create_timer(3.0).timeout
-			for i in Network.Players:
-				if i == 1:
-					UI.close_match_result()
-				else:
-					UI.close_match_result.rpc_id(i)
+			UI.close_match_result.rpc()
 			start_game()
 
 @rpc('any_peer', 'call_local')
@@ -321,17 +320,14 @@ func grant_point(p, match_id):
 		UI.update_leaderboard_match_data()
 		match_data.round_score = [ 0, 0 ]
 		if check_match_win(p, match_id):
-			if player_id == 1:
-				finish_match(p, match_id)
-			else:
-				finish_match.rpc_id(1, p, match_id)
+			finish_match.rpc_id(1, p, match_id)
 	
 	if match_id == player_match_id:
 		var player_num = get_player_num(player_id)
 		score_point_effect(p, player_num)
 		update_score_text(match_id, player_num)
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func reset_player_positions(match_id):
 	if current_game_type == game_type.SINGLEPLAYER:
 		for player in get_tree().get_nodes_in_group('Player'):
@@ -343,7 +339,7 @@ func reset_player_positions(match_id):
 			var player_data = Network.Players[id]
 			if not player_data.has('match_id') or player_data.match_id != match_id: continue
 			if not Level.get_node('Players').has_node(str(id)): continue
-			if player_data.is_bot or id == 1:
+			if player_data.is_bot:
 				Level.get_node('Players/' + str(id)).reset_position()
 			else:
 				Level.get_node('Players/' + str(id)).reset_position.rpc_id(id)
@@ -352,8 +348,9 @@ func reset_player_positions(match_id):
 func set_match_sync(player_id):
 	Network.Players[player_id].match_sync = true
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func match_sync():
+	if multiplayer.is_server(): return
 	print(multiplayer.get_unique_id(), ' sync start')
 	while not check_match_ready():
 		await get_tree().create_timer(0.1).timeout
@@ -397,11 +394,6 @@ func start_game():
 	players_finished = {}
 	is_match_finish_loop_running = false
 	Network.server_state = Network.server_state_type.MATCH
-	
-	var next_match_id = Network.Matches.size()
-	# if next_match_id > 0:
-	# 	next_match_id += 1
-	var first_match_id = next_match_id
 
 	if Network.Leaderboard.is_empty():
 		for i in Network.Players:
@@ -409,11 +401,8 @@ func start_game():
 			for i2 in Network.Players:
 				if i2 == i: continue
 				Network.Leaderboard[i][i2] = []
-		for i in Network.Players:
-			if i == 1:
-				UI.leaderboard_init()
-			else:
-				UI.leaderboard_init.rpc_id(i)
+		print('LEADERBOARD INIT CALL')
+		UI.leaderboard_init.rpc()
 
 	var busy_players : Dictionary = {}
 	for id1 in Network.Leaderboard:
@@ -424,9 +413,13 @@ func start_game():
 				busy_players[id1] = id2
 				busy_players[id2] = id1
 
-	# var match_amount = ceil(Network.Players.size() / 2)
 	var match_amount = int(ceil(busy_players.size() / 2.0))
+	var next_match_id = Network.Matches.size()
+	var first_match_id = next_match_id
 	var last_match_id = first_match_id + match_amount
+	print('first match id: ', first_match_id, '; last match id: ', last_match_id, '; ', match_amount)
+	# TODO: creates two matches but needs to create one
+
 	for match_id in range(first_match_id, last_match_id + 1):
 		Network.Matches[match_id] = {
 			match_score = [ 0, 0 ],
@@ -467,11 +460,8 @@ func start_game():
 				# player_data.match_ready = true
 				player_data.state = Network.player_state_type.SPECTATOR
 			player_data.match_ready = true
-			if i == 1:
-				UI.set_loading_screen(true)
-			else:
-				UI.set_loading_screen.rpc_id(i, true)
-				match_sync.rpc_id(i)
+		match_sync.rpc()
+		UI.set_loading_screen.rpc(true)
 
 		# for i in Network.Players:
 		# 	if next_match.size() >= 2:
@@ -507,11 +497,8 @@ func start_game():
 		for match_id in range(first_match_id, last_match_id + 1):
 			Network.add_ball(match_id)
 
+		UI.set_loading_screen.rpc(false)
 		for i in Network.Players:
-			if i != 1:
-				UI.set_loading_screen.rpc_id(i, false)
-			else:
-				UI.set_loading_screen(false)
 			var player_data = Network.Players[i]
 			player_data.erase('match_ready')
 			player_data.erase('match_sync')
@@ -519,7 +506,7 @@ func start_game():
 				Network.add_player(player_data.id, player_data.num)
 			elif player_data.state == Network.player_state_type.SPECTATOR:
 				Network.add_spectator(player_data.id)
-		
+
 		update_score_text_for_all()
 
 	elif current_game_type == game_type.SINGLEPLAYER:

@@ -73,7 +73,7 @@ var camera
 # func reset_ball():
 # 	ball = null
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func set_can_throw(value):
 	can_throw = value
 
@@ -88,7 +88,7 @@ func get_throw_side():
 	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
 	return side
 
-@rpc('any_peer')
+@rpc('any_peer', 'call_local')
 func reset_position():
 	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn' + get_throw_side())
 	position = spawn_point.position

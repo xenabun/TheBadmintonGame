@@ -111,6 +111,8 @@ func _init(_ui, Network):
 		showing_game_ui.set_state(not new_state)
 		ui.get_node('Leaderboard/Panel/Results').visible = show_result
 		ui.get_node('Leaderboard/Panel/Score').visible = not show_result
+		if new_state:
+			ui.get_node('Leaderboard/Panel/ReadyCheck').hide()
 		)
 	
 	showing_game_ui.state_changed.connect(func(_old_state, new_state, _args):
