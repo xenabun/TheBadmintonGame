@@ -138,7 +138,7 @@ func _ready():
 	# GameUI.show()
 	UI.state.showing_game_ui.set_state(true)
 	UI.get_node('GameControls').show()
-	UI.leaderboard_init()
+	# UI.leaderboard_init()
 	stamina_bar = UI.get_node('GameUI/StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	# stamina_bar.value = input.stamina

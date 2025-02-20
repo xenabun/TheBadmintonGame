@@ -271,6 +271,8 @@ func finish_match(winner_index, match_id):
 		if can_continue():
 			print('STARTING NEW GAME IN 3... 2... 1...')
 			for i in Network.Players:
+				var pdata = Network.Players[i]
+				pdata.erase('match_id')
 				if i == 1:
 					UI.set_loading_screen(true)
 				else:
@@ -290,6 +292,11 @@ func finish_match(winner_index, match_id):
 				spectator.queue_free()
 			
 			await get_tree().create_timer(3.0).timeout
+			for i in Network.Players:
+				if i == 1:
+					UI.close_match_result()
+				else:
+					UI.close_match_result.rpc_id(i)
 			start_game()
 
 @rpc('any_peer', 'call_local')
@@ -306,6 +313,7 @@ func grant_point(p, match_id):
 		match_score[p] += 1
 		var id1 = Network.find_player_by_match_id_with_num(match_id, 1).id
 		var id2 = get_opponent_id(id1)
+		print('applying leaderboard score for ids: ', str(id1), '; ', str(id2))
 		var reverse_round_score = match_data.round_score.duplicate()
 		reverse_round_score.reverse()
 		Network.Leaderboard[id1][id2].push_back(match_data.round_score)
@@ -391,8 +399,8 @@ func start_game():
 	Network.server_state = Network.server_state_type.MATCH
 	
 	var next_match_id = Network.Matches.size()
-	if next_match_id > 0:
-		next_match_id += 1
+	# if next_match_id > 0:
+	# 	next_match_id += 1
 	var first_match_id = next_match_id
 
 	if Network.Leaderboard.is_empty():
@@ -401,6 +409,11 @@ func start_game():
 			for i2 in Network.Players:
 				if i2 == i: continue
 				Network.Leaderboard[i][i2] = []
+		for i in Network.Players:
+			if i == 1:
+				UI.leaderboard_init()
+			else:
+				UI.leaderboard_init.rpc_id(i)
 
 	var busy_players : Dictionary = {}
 	for id1 in Network.Leaderboard:
@@ -413,7 +426,8 @@ func start_game():
 
 	# var match_amount = ceil(Network.Players.size() / 2)
 	var match_amount = int(ceil(busy_players.size() / 2.0))
-	for match_id in match_amount:
+	var last_match_id = first_match_id + match_amount
+	for match_id in range(first_match_id, last_match_id + 1):
 		Network.Matches[match_id] = {
 			match_score = [ 0, 0 ],
 			round_score = [ 0, 0 ],
@@ -490,7 +504,7 @@ func start_game():
 			await get_tree().create_timer(0.1).timeout
 		print('server sync end')
 		
-		for match_id in match_amount:
+		for match_id in range(first_match_id, last_match_id + 1):
 			Network.add_ball(match_id)
 
 		for i in Network.Players:

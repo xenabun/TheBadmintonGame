@@ -261,9 +261,10 @@ func remove_player(id):
 		match_id = pdata.match_id
 	del_player_data(id)
 	if match_id:
-		var player = find_first_player_by_match_id(match_id)
+		# var player = find_first_player_by_match_id(match_id)
 		var ball = Game.get_ball_by_match_id(match_id)
-		ball.set_multiplayer_authority(player.id)
+		if ball:
+			ball.set_multiplayer_authority(1) # player.id)
 	Game.update_score_text_for_all()
 	if Level.get_node('Players').has_node(str(id)):
 		Level.get_node('Players/' + str(id)).queue_free()

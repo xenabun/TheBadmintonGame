@@ -20,6 +20,12 @@ func _ready():
 	var prompt = get_node('ConfirmationDialog')
 	prompt.canceled.connect(clear_prompt_connections)
 
+func _enter_tree():
+	title_label.rotation = deg_to_rad(-title_rot_deg)
+	title_tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	title_tween.tween_property(title_label, 'rotation', deg_to_rad(title_rot_deg), title_rot_time)
+	title_tween.chain().tween_property(title_label, 'rotation', deg_to_rad(-title_rot_deg), title_rot_time)
+
 func clear_prompt_connections():
 	print('clearing prompt connections')
 	var prompt = get_node('ConfirmationDialog')
@@ -27,12 +33,7 @@ func clear_prompt_connections():
 	for con in confirm_cons:
 		prompt.confirmed.disconnect(con.callable)
 
-func _enter_tree():
-	title_label.rotation = deg_to_rad(-title_rot_deg)
-	title_tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	title_tween.tween_property(title_label, 'rotation', deg_to_rad(title_rot_deg), title_rot_time)
-	title_tween.chain().tween_property(title_label, 'rotation', deg_to_rad(-title_rot_deg), title_rot_time)
-
+@rpc('any_peer')
 func leaderboard_init():
 	var leaderboard = get_node('Leaderboard')
 	var user_label_container = leaderboard.get_node('Panel/Table/Container/Left/Container/Content')
@@ -108,6 +109,11 @@ func update_lobby_player_list(players):
 func close_lobby_player_list():
 	state.in_menu.set_state(false)
 	state.in_server_lobby.set_state(false)
+
+@rpc
+func close_match_result():
+	state.showing_leaderboard.set_state(false, false)
+	get_node('GameResult').hide()
 
 @rpc
 func show_match_result(result_text, _score_text):

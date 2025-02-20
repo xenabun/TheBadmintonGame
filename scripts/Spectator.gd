@@ -4,7 +4,7 @@ const CAMERA_HORIZONTAL_SPEED = 0.15
 const CAMERA_VERTICAL_SPEED = 0.1
 const ZOOM_STEP = 10
 
-@export var player_id : int
+@export var player_id : int = 0
 @export var match_id : int = 0
 
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
@@ -41,7 +41,7 @@ func _ready():
 	UI.get_node('GameUI/StaminaBarControl/StaminaBar').hide()
 	# GameUI.show()
 	UI.state.showing_game_ui.set_state(true)
-	UI.leaderboard_init()
+	# UI.leaderboard_init()
 	# if Game.window_focus:
 	# 	Input.set_mouse_mode(Input.MouseMode.MOUSE_MODE_CAPTURED)
 	# Game.window_focus_changed.connect(_on_window_focus_changed)
