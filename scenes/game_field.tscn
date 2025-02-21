@@ -1586,6 +1586,8 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/ServerBrowser/PortChange" to="UI" method="_on_port_change_pressed"]
 [connection signal="pressed" from="UI/Lobby/StartGame" to="Network" method="_on_start_game_pressed"]
 [connection signal="pressed" from="UI/Lobby/Back" to="UI" method="_on_lobby_exit_pressed"]
+[connection signal="pressed" from="UI/GameUI/MatchSwitch/Panel/Previous" to="UI" method="_on_previous_match_switch_pressed"]
+[connection signal="pressed" from="UI/GameUI/MatchSwitch/Panel/Next" to="UI" method="_on_next_match_switch_pressed"]
 [connection signal="pressed" from="UI/GameResult/Exit" to="UI" method="_on_game_exit_pressed"]
 [connection signal="pressed" from="UI/Leaderboard/Panel/ReadyCheck/Ready" to="UI" method="_on_next_match_ready_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_pause_menu_close"]
