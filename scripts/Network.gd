@@ -166,7 +166,7 @@ func kicked():
 	UI.show_message("Вы были исключены")
 
 func quit_server():
-	multiplayer.multiplayer_peer.disconnect_peer(1)
+	# multiplayer.multiplayer_peer.disconnect_peer(1)
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	if peer: peer.close()
 	

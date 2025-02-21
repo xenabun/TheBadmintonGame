@@ -38,6 +38,7 @@ func clear_prompt_connections():
 func leaderboard_init():
 	print('running leaderboard init ', multiplayer.get_unique_id())
 	var leaderboard = get_node('Leaderboard')
+	leaderboard.get_node('Panel/Results/WaitText').show()
 	var user_label_container = leaderboard.get_node('Panel/Table/Container/Left/Container/Content')
 	var score_column_container = leaderboard.get_node('Panel/Table/Container/Right/Container')
 	var user_label_prefab = preload("res://prefabs/leaderboard/user_label.tscn")
@@ -50,15 +51,18 @@ func leaderboard_init():
 	for player_id in Network.Players:
 		i += 1
 		var player_data = Network.Players[player_id]
+		
 		var user_label = user_label_prefab.instantiate()
 		user_label.name = str(player_id)
 		user_label.get_node('Number/Label').text = str(i)
 		user_label.get_node('Username/Label').text = player_data.username
 		user_label_container.add_child(user_label, true)
+		
 		var score_column = score_column_prefab.instantiate()
 		score_column.name = str(player_id)
 		score_column.get_node('Top/Label').text = str(i)
 		score_column_container.add_child(score_column, true)
+		
 		for player_id2 in Network.Players:
 			var score_label = score_label_prefab.instantiate()
 			score_label.name = str(player_id2)
@@ -126,13 +130,100 @@ func close_match_result():
 	get_node('GameResult').hide()
 
 @rpc('call_local')
-func show_match_result(result_text, _score_text):
+func show_match_result(result_text, final = false):
 	get_node('GameControls').hide()
 	var game_result_ui = get_node('GameResult')
 	get_node('Leaderboard/Panel/Results/MatchResult').text = result_text
 	game_result_ui.show()
 	state.showing_leaderboard.set_state(true, true)
 	state.showing_game_ui.set_state(false)
+	
+	if final:
+		var leaderboard = get_node('Leaderboard')
+		leaderboard.get_node('Panel/Results/WaitText').hide()
+		leaderboard.get_node('Panel/Score').hide()
+
+		leaderboard_clear()
+		
+		var user_label_container = leaderboard.get_node('Panel/Table/Container/Left/Container/Content')
+		var score_column_container = leaderboard.get_node('Panel/Table/Container/Right/Container')
+		var user_label_prefab = preload("res://prefabs/leaderboard/user_label.tscn")
+		var score_column_prefab = preload("res://prefabs/leaderboard/score_column.tscn")
+		var score_label_prefab = preload("res://prefabs/leaderboard/score_label.tscn")
+		
+		var points_column = score_column_prefab.instantiate()
+		points_column.get_node('Top/Label').text = 'Очки'
+		points_column.get_node('Top').custom_minimum_size.x = 100
+		score_column_container.add_child(points_column)
+		
+		var match_amount_column = score_column_prefab.instantiate()
+		match_amount_column.get_node('Top/Label').text = 'Матчи'
+		match_amount_column.get_node('Top').custom_minimum_size.x = 125
+		score_column_container.add_child(match_amount_column)
+		
+		var match_score_column = score_column_prefab.instantiate()
+		match_score_column.get_node('Top/Label').text = 'Разница геймов'
+		score_column_container.add_child(match_score_column)
+		
+		var round_score_column = score_column_prefab.instantiate()
+		round_score_column.get_node('Top/Label').text = 'Разница очков'
+		score_column_container.add_child(round_score_column)
+		
+		var player_stats = {}
+		var player_points = []
+		for player_id in Network.Players:
+			var player_data = Network.Players[player_id]
+			var leaderboard_data = Network.Leaderboard[player_id]
+			var points = 0
+			var match_amount = leaderboard_data.size()
+			var match_score = [ 0, 0 ]
+			var round_score = [ 0, 0 ]
+			for i in leaderboard_data:
+				var round_data = leaderboard_data[i]
+				for score in round_data:
+					if score[0] > score[1]:
+						points += 1
+						match_score[0] += 1
+					else:
+						match_score[1] += 1
+					round_score[0] += score[0]
+					round_score[1] += score[1]
+			player_points.push_back({ id = player_id, points = points })
+			player_stats[player_id] = {
+				username = player_data.username,
+				points = points,
+				match_amount = match_amount,
+				match_score = match_score,
+				round_score = round_score,
+			}
+		player_points.sort_custom(func(a, b): return a.points > b.points)
+
+		for i in range(0, player_points.size()):
+			var player_id = player_points[i].id
+			var player_data = player_stats[player_id]
+
+			var user_label = user_label_prefab.instantiate()
+			user_label.get_node('Number/Label').text = str(i + 1)
+			user_label.get_node('Username/Label').text = player_data.username
+			user_label_container.add_child(user_label)
+			
+			var points_row = score_label_prefab.instantiate()
+			points_row.get_node('Label').text = str(player_data.points)
+			points_row.custom_minimum_size.x = 100
+			points_column.get_node('Content').add_child(points_row)
+
+			var match_amount_row = score_label_prefab.instantiate()
+			match_amount_row.get_node('Label').text = str(player_data.match_amount)
+			match_amount_row.custom_minimum_size.x = 125
+			match_amount_column.get_node('Content').add_child(match_amount_row)
+			
+			var match_score_row = score_label_prefab.instantiate()
+			match_score_row.get_node('Label').text = str(player_data.match_score[0], '-', player_data.match_score[1])
+			match_score_column.get_node('Content').add_child(match_score_row)
+			
+			var round_score_row = score_label_prefab.instantiate()
+			round_score_row.get_node('Label').text = str(player_data.round_score[0], '-', player_data.round_score[1])
+			round_score_column.get_node('Content').add_child(round_score_row)
 
 @rpc('any_peer', 'call_local')
 func set_loading_screen(value):

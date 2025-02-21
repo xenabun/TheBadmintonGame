@@ -705,6 +705,7 @@ offset_bottom = 148.0
 text = "Вернуться назад"
 
 [node name="GameUI" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -1007,7 +1008,6 @@ grow_vertical = 2
 text = "Главное меню"
 
 [node name="Leaderboard" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="UI/Leaderboard"]
@@ -1017,9 +1017,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -457.0
+offset_left = -533.0
 offset_top = -270.0
-offset_right = 457.0
+offset_right = 533.0
 offset_bottom = 270.0
 grow_horizontal = 2
 grow_vertical = 2
