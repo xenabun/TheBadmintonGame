@@ -162,30 +162,9 @@ func kicked():
 	UI.show_message("Вы были исключены")
 
 func quit_server():
-	# var id = multiplayer.get_unique_id()
-	# var match_id
-	# var pdata = Players[id]
-	# if pdata.has('match_id'):
-	# 	match_id = pdata.match_id
-	# if match_id:
-	# 	var ball = Game.get_ball_by_match_id(match_id)
-	# 	if ball:
-	# 		ball.set_multiplayer_authority(1)
-	# if Level.get_node('Players').has_node(str(id)):
-	# 	var player = Level.get_node('Players/' + str(id))
-	# 	player.reset_authority()
-	# 	Level.get_node('Players').remove_child(player)
-	# 	player.queue_free()
-	# if Level.get_node('Spectators').has_node(str(id)):
-	# 	var spectator = Level.get_node('Spectators/' + str(id))
-	# 	spectator.reset_authority()
-	# 	Level.get_node('Spectators').remove_child(spectator)
-	# 	spectator.queue_free()
-
-	# TODO: check if has authority then delete
-
-	if peer: peer.close()
+	multiplayer.multiplayer_peer.disconnect_peer(1)
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
+	if peer: peer.close()
 	
 	if multiplayer.server_disconnected.is_connected(quit_server):
 		multiplayer.server_disconnected.disconnect(quit_server)
@@ -201,16 +180,16 @@ func quit_server():
 	UI.state.in_main_menu.set_state(true)
 	UI.state.in_server_lobby.set_state(false)
 	UI.state.in_server_browser.set_state(false)
-	if multiplayer.is_server():
-		ServerBrowser.stop_broadcast()
-		for ball in get_tree().get_nodes_in_group('Ball'):
-			ball.queue_free()
-		for player in get_tree().get_nodes_in_group('Player'):
-			player.queue_free()
-		for spectator in get_tree().get_nodes_in_group('Spectator'):
-			spectator.queue_free()
-		for bot in get_tree().get_nodes_in_group('Bot'):
-			bot.queue_free()
+	# if multiplayer.is_server():
+	ServerBrowser.stop_broadcast()
+	for ball in get_tree().get_nodes_in_group('Ball'):
+		ball.queue_free()
+	for player in get_tree().get_nodes_in_group('Player'):
+		player.queue_free()
+	for spectator in get_tree().get_nodes_in_group('Spectator'):
+		spectator.queue_free()
+	for bot in get_tree().get_nodes_in_group('Bot'):
+		bot.queue_free()
 
 @rpc('any_peer', 'call_local')
 func setup_player(character_name, data):
@@ -234,6 +213,7 @@ func add_player(id : int = 1, num : int = 1):
 	return character
 
 func remove_player(id):
+	_remove_player.rpc(id)
 	if not multiplayer.is_server(): return
 	var match_id
 	var pdata = Players[id]
@@ -245,6 +225,9 @@ func remove_player(id):
 		if ball:
 			ball.set_multiplayer_authority(1)
 	Game.update_score_text_for_all()
+
+@rpc('any_peer', 'call_local')
+func _remove_player(id):
 	if Level.get_node('Players').has_node(str(id)):
 		var player = Level.get_node('Players/' + str(id))
 		player.queue_free()

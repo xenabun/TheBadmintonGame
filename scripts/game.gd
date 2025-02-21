@@ -65,6 +65,7 @@ func get_opponent_id(id):
 	for player_id in Network.Players:
 		if player_id == id: continue
 		var player_data = Network.Players[player_id]
+		if player_data.state != Network.player_state_type.PLAYER: continue
 		if not player_data.has('match_id'): continue
 		if player_data.match_id != match_id: continue
 		opponent_id = player_id
@@ -72,7 +73,7 @@ func get_opponent_id(id):
 	
 	if not opponent_id:
 		opponent_id = id
-
+	print('getting opponent in match:', match_id, '; opponent: ', opponent_id, '; of player: ', id)
 	return opponent_id
 
 func get_opponent_index(index):
@@ -279,6 +280,9 @@ func finish_match(winner_index, match_id):
 			await get_tree().create_timer(3.0).timeout
 			UI.close_match_result.rpc()
 			start_game()
+		else:
+			# TODO: show final leaderboard with results
+			pass
 
 @rpc('any_peer', 'call_local')
 func grant_point(p, match_id):
