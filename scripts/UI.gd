@@ -193,6 +193,12 @@ func _on_next_match_ready_pressed():
 	ready_check.get_node('Panel/Check').show()
 	ready_check.get_node('Panel/Cross').hide()
 	Game.set_player_ready.rpc_id(1, multiplayer.get_unique_id())
+# TODO: add match switch logic
+func _on_previous_match_switch_pressed():
+	pass
+
+func _on_next_match_switch_pressed():
+	pass
 
 func _on_lobby_exit_pressed():
 	Network.quit_server()

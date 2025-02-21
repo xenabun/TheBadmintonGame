@@ -113,6 +113,10 @@ func _init(_ui, Network):
 			ui.get_node('Leaderboard/Panel/ReadyCheck').hide()
 		)
 	
-	showing_game_ui.state_changed.connect(func(_old_state, new_state, _args):
+	showing_game_ui.state_changed.connect(func(_old_state, new_state, args):
+		if args and args.has('stamina'):
+			ui.get_node('GameUI/StaminaBarControl').visible = args.stamina
+		if args and args.has('match_switch'):
+			ui.get_node('GameUI/MatchSwitch').visible = args.match_switch
 		ui.get_node('GameUI').visible = new_state
 		)

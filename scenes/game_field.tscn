@@ -704,7 +704,6 @@ offset_bottom = 148.0
 text = "Вернуться назад"
 
 [node name="GameUI" type="Control" parent="UI"]
-visible = false
 layout_mode = 2
 
 [node name="StaminaBarControl" type="Control" parent="UI/GameUI"]
@@ -889,7 +888,71 @@ text = "Player2"
 label_settings = SubResource("LabelSettings_tnxmh")
 horizontal_alignment = 2
 
+[node name="MatchSwitch" type="Control" parent="UI/GameUI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = 274.0
+offset_right = 20.0
+offset_bottom = 314.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="UI/GameUI/MatchSwitch"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_top = -26.0
+offset_right = 175.0
+offset_bottom = 26.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Players" type="Label" parent="UI/GameUI/MatchSwitch/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "ИгрокИгрокИгрок1 против ИгрокИгрокИгрок2"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true
+uppercase = true
+
+[node name="Previous" type="Button" parent="UI/GameUI/MatchSwitch/Panel"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = -50.0
+offset_right = -15.0
+grow_vertical = 2
+text = "<"
+
+[node name="Next" type="Button" parent="UI/GameUI/MatchSwitch/Panel"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_right = 50.0
+grow_horizontal = 0
+grow_vertical = 2
+text = ">"
+
 [node name="GameResult" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="ColorRect" type="ColorRect" parent="UI/GameResult"]
@@ -943,6 +1006,7 @@ grow_vertical = 2
 text = "Главное меню"
 
 [node name="Leaderboard" type="Control" parent="UI"]
+visible = false
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="UI/Leaderboard"]

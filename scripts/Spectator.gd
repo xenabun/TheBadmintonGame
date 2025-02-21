@@ -39,8 +39,8 @@ func _ready():
 		match_id = player_data.match_id
 
 	camera.make_current()
-	UI.get_node('GameUI/StaminaBarControl/StaminaBar').hide()
-	UI.state.showing_game_ui.set_state(true)
+	# UI.get_node('GameUI/StaminaBarControl/StaminaBar').hide()
+	UI.state.showing_game_ui.set_state(true, {stamina = false, match_switch = true})
 
 @rpc('any_peer')
 func reset_authority():

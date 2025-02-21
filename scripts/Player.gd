@@ -123,7 +123,7 @@ func _ready():
 	camera.global_position = menu_camera.global_position
 	camera.global_rotation = menu_camera.global_rotation
 	update_camera_transform(1)
-	UI.state.showing_game_ui.set_state(true)
+	UI.state.showing_game_ui.set_state(true, {stamina = true, match_switch = false})
 	UI.get_node('GameControls').show()
 	stamina_bar = UI.get_node('GameUI/StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
