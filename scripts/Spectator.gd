@@ -26,6 +26,8 @@ func _on_in_game_menu_state_changed(_old_state, new_state, _args):
 	var mouse_mode = Input.MouseMode.MOUSE_MODE_VISIBLE if new_state else Input.MouseMode.MOUSE_MODE_CAPTURED
 	Input.set_mouse_mode(mouse_mode)
 
+# TODO: add match switch
+
 func _ready():
 	player_id = get_multiplayer_authority()
 	set_physics_process(multiplayer.get_unique_id() == player_id)
