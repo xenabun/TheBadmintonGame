@@ -59,6 +59,10 @@ func update_lobby_player_list_for_all():
 	if Game.current_game_type == Game.game_type.SINGLEPLAYER: return
 	UI.update_lobby_player_list.rpc(Players)
 
+@rpc('any_peer', 'call_local')
+func set_match_id(player_id, match_id):
+	Players[player_id].match_id = match_id
+
 @rpc('any_peer')
 func add_player_data(player_id, username, is_bot):
 	if Players.has(player_id):return

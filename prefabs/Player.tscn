@@ -237,7 +237,7 @@ one_shot = true
 wait_time = 0.3
 one_shot = true
 
-[node name="PlayerInput" type="MultiplayerSynchronizer" parent="."]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_v8t2k")
 
 [node name="AimArrow" type="Node3D" parent="."]

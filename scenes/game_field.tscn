@@ -355,7 +355,7 @@ Network = NodePath("../Network")
 [node name="BroadcastTimer" type="Timer" parent="ServerBrowser"]
 wait_time = 0.1
 
-[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "lobby_player_list", "Network", "ServerBrowser")]
+[node name="UI" type="CenterContainer" parent="." node_paths=PackedStringArray("menu_camera_pivot", "player_camera", "title_label", "username_box", "lobby_player_list", "Level", "Network", "ServerBrowser")]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -371,6 +371,7 @@ player_camera = NodePath("../Level/World/PlayerCamera")
 title_label = NodePath("MainMenu/Title")
 username_box = NodePath("CurrentUsername/VBoxContainer/Username")
 lobby_player_list = NodePath("Lobby/Panel/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer")
+Level = NodePath("../Level")
 Network = NodePath("../Network")
 ServerBrowser = NodePath("../ServerBrowser")
 
@@ -1592,5 +1593,6 @@ text = "Connection status: -"
 [connection signal="pressed" from="UI/Leaderboard/Panel/ReadyCheck/Ready" to="UI" method="_on_next_match_ready_pressed"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Close" to="UI" method="_on_pause_menu_close"]
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Exit" to="UI" method="_on_game_exit_pressed"]
+[connection signal="hidden" from="UI/GameControls" to="UI" method="_on_game_controls_hidden"]
 [connection signal="pressed" from="UI/GameControls/Panel/Close" to="UI" method="_on_controls_close"]
 [connection signal="pressed" from="UI/Message/Panel/Button" to="UI" method="_on_message_close_pressed"]

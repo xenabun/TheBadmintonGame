@@ -127,37 +127,38 @@ func get_match_spectators_data(match_id):
 
 @rpc('any_peer', 'call_local')
 func update_score_text(match_id = null, player_num = null):
-	if match_id == null or player_num == null:
-		var player_id = multiplayer.get_unique_id()
-		match_id = get_player_match_id(player_id)
-		player_num = get_player_num(player_id)
-	if not Network.Matches.has(match_id): return
+	var player_id = multiplayer.get_unique_id()
+	var player_data = Network.Players[player_id]
+	if match_id == null and player_data.has('match_id'):
+		match_id = player_data.match_id
+	if player_num == null and player_data.has('num'):
+		player_num = player_data.num
+	# print('update_score_text(): match id: ', match_id, '; has match: ', Network.Matches.has(match_id), '; player data: ', player_data)
+	if match_id == null or not Network.Matches.has(match_id): return
 
+	var player_state = player_data.state
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
 	var match_score = match_data.match_score
 	var players_data = get_match_players_data(match_id)
-	var score_control = UI.get_node('GameUI/ScoreControl')
+	var game_ui = UI.get_node('GameUI')
+	var score_control = game_ui.get_node('ScoreControl')
+	var match_switch = game_ui.get_node('MatchSwitch')
 	var score_leaderboard = UI.get_node('Leaderboard/Panel/Score')
 	
-	if player_num == 1:
-		score_control.get_node('Player1Score2').text = str(match_score[players_data[0].num - 1])
-		score_control.get_node('Player2Score2').text = str(match_score[players_data[1].num - 1])
-		score_control.get_node('Player1Score').text = str(round_score[players_data[0].num - 1])
-		score_control.get_node('Player2Score').text = str(round_score[players_data[1].num - 1])
-		score_control.get_node('Player1').text = players_data[0].username
-		score_control.get_node('Player2').text = players_data[1].username
-		score_leaderboard.get_node('MatchScore').text = str(match_score[players_data[0].num - 1], ' : ', match_score[players_data[1].num - 1])
-		score_leaderboard.get_node('RoundScore').text = str(round_score[players_data[0].num - 1], ' : ', round_score[players_data[1].num - 1])
-	else:
-		score_control.get_node('Player1Score2').text = str(match_score[players_data[1].num - 1])
-		score_control.get_node('Player2Score2').text = str(match_score[players_data[0].num - 1])
-		score_control.get_node('Player1Score').text = str(round_score[players_data[1].num - 1])
-		score_control.get_node('Player2Score').text = str(round_score[players_data[0].num - 1])
-		score_control.get_node('Player1').text = players_data[1].username
-		score_control.get_node('Player2').text = players_data[0].username
-		score_leaderboard.get_node('MatchScore').text = str(match_score[players_data[1].num - 1], ' : ', match_score[players_data[0].num - 1])
-		score_leaderboard.get_node('RoundScore').text = str(round_score[players_data[1].num - 1], ' : ', round_score[players_data[0].num - 1])
+	var set_score_texts = func(i1, i2):
+		score_control.get_node('Player1Score2').text = str(match_score[players_data[i1].num - 1])
+		score_control.get_node('Player2Score2').text = str(match_score[players_data[i2].num - 1])
+		score_control.get_node('Player1Score').text = str(round_score[players_data[i1].num - 1])
+		score_control.get_node('Player2Score').text = str(round_score[players_data[i2].num - 1])
+		score_control.get_node('Player1').text = players_data[i1].username
+		score_control.get_node('Player2').text = players_data[i2].username
+		score_leaderboard.get_node('MatchScore').text = str(match_score[players_data[i1].num - 1], ' : ', match_score[players_data[i2].num - 1])
+		score_leaderboard.get_node('RoundScore').text = str(round_score[players_data[i1].num - 1], ' : ', round_score[players_data[i2].num - 1])
+	
+	match_switch.get_node('Panel/Players').text = str(players_data[0].username, ' против ', players_data[1].username)
+	var i = 0 if player_num == 1 or player_state == Network.player_state_type.SPECTATOR else 1
+	set_score_texts.call(i, abs(i - 1))
 
 func update_score_text_for_all():
 	update_score_text.rpc()

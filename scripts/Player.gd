@@ -7,7 +7,6 @@ extends CharacterBody3D
 @export var stamina_bar : Node
 @export var throw_power : float = PlayerVariables.MAX_POWER
 @export var aim_x : float = 0
-# TODO: wait for guide to be hidden and then let players play
 @export var can_play : bool = true
 @export var can_throw : bool = false
 
@@ -125,6 +124,8 @@ func _ready():
 	update_camera_transform(1)
 	UI.state.showing_game_ui.set_state(true, {stamina = true, match_switch = false})
 	UI.get_node('GameControls').show()
+	if Game.current_game_type == Game.game_type.MULTIPLAYER:
+		can_play = false
 	stamina_bar = UI.get_node('GameUI/StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
 	stamina_bar.value = stamina
@@ -228,18 +229,21 @@ func _input(event):
 	
 	if can_play:
 		if event.is_action_pressed('action'):
-			var ball = Game.get_ball_by_match_id(match_id)
-			if can_throw and ball != null and ball.ball_ready and Game.is_match_in_progress(match_id):
-				var pos = get_node('Ball').global_position
-				var new_direction = VectorMath.look_vector(get_node('RacketArea')).z
-				var _aim_x = sin((aim_direction.x * 2 * PI) / 2)
-				var _aim_y = aim_direction.y
-				var new_velocity_x = _aim_x * 30 * -new_direction
-				can_throw = false
-				ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
-						name, pos, new_direction, new_velocity_x, _aim_y)
-				get_node('AimArrow').hide()
-				throw_ready.rpc()
+			if can_throw and Game.is_match_in_progress(match_id):
+				var ball = Game.get_ball_by_match_id(match_id)
+				var opponent_id = Game.get_opponent_id(player_id)
+				var opponent_player_object = Level.get_node('Players/' + str(opponent_id))
+				if opponent_player_object.can_play and ball != null and ball.ball_ready:
+					var pos = get_node('Ball').global_position
+					var new_direction = VectorMath.look_vector(get_node('RacketArea')).z
+					var _aim_x = sin((aim_direction.x * 2 * PI) / 2)
+					var _aim_y = aim_direction.y
+					var new_velocity_x = _aim_x * 30 * -new_direction
+					can_throw = false
+					ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
+							name, pos, new_direction, new_velocity_x, _aim_y)
+					get_node('AimArrow').hide()
+					throw_ready.rpc()
 			else:
 				if action_ready and not action_active:
 					action_hold = true
@@ -425,13 +429,18 @@ func _physics_process(delta):
 		position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# aim arrow
-	if can_throw or action_hold:
-		aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
-		if not aim_arrow.visible:
-			aim_arrow_sprite.scale.x = 0
-			aim_arrow_sprite.scale.y = 0
-			aim_arrow.position.z = 0
-			aim_arrow.show()
+	if can_play and can_throw or action_hold:
+		var opponent_id = Game.get_opponent_id(player_id)
+		var opponent_player_object = Level.get_node('Players/' + str(opponent_id))
+		if opponent_player_object.can_play:
+			aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
+			if not aim_arrow.visible:
+				aim_arrow_sprite.scale.x = 0
+				aim_arrow_sprite.scale.y = 0
+				aim_arrow.position.z = 0
+				aim_arrow.show()
+	elif not can_play and aim_arrow.visible:
+		aim_arrow.hide()
 	
 	if Game.window_focus and not is_game_paused():
 		# camera

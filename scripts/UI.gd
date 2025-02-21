@@ -7,6 +7,7 @@ extends Control
 @export var title_label : Node
 @export var username_box : Node
 @export var lobby_player_list : Node
+@export var Level : Node
 @export var Network : Node
 @export var ServerBrowser : Node
 
@@ -193,12 +194,55 @@ func _on_next_match_ready_pressed():
 	ready_check.get_node('Panel/Check').show()
 	ready_check.get_node('Panel/Cross').hide()
 	Game.set_player_ready.rpc_id(1, multiplayer.get_unique_id())
-# TODO: add match switch logic
-func _on_previous_match_switch_pressed():
-	pass
 
+func switch_match(offset):
+	var player_id = multiplayer.get_unique_id()
+	var player_data = Network.Players[player_id]
+	var player_state = player_data.state
+	if player_state != Network.player_state_type.SPECTATOR: return
+	
+	var player_match_id = player_data.match_id
+	var current_match_data = Network.Matches[player_match_id]
+	if current_match_data.status != Network.match_status_type.IN_PROGRESS: return
+
+	var new_match_id = player_match_id
+	var begin = 0
+	var end = Network.Matches.size() - 1
+
+	while true:
+		new_match_id += offset
+		if new_match_id < begin:
+			new_match_id = end
+		elif new_match_id > end:
+			new_match_id = 0
+		if Network.Matches.has(new_match_id):
+			var match_data = Network.Matches[new_match_id]
+			var match_status = match_data.status
+			if match_status == Network.match_status_type.IN_PROGRESS:
+				break
+	
+	if Level.get_node('Spectators').has(str(player_id)):
+		var spectator = Level.get_node('Spectators/' + str(player_id))
+		spectator.match_id = new_match_id
+	for player in Level.get_node('Players').get_children():
+		player.visible = player.match_id == new_match_id
+	for ball in Level.get_node('Balls').get_children():
+		ball.visible = ball.match_id == new_match_id
+
+	Network.set_match_id.rpc_id(1, player_id, new_match_id)
+	Game.update_score_text(new_match_id)
+
+func _on_previous_match_switch_pressed():
+	switch_match(-1)
 func _on_next_match_switch_pressed():
-	pass
+	switch_match(1)
+
+func _on_game_controls_hidden():
+	if Game.current_game_type == Game.game_type.MULTIPLAYER:
+		var player_id = multiplayer.get_unique_id()
+		if Level.get_node('Players').has_node(str(player_id)):
+			var player = Level.get_node('Players/' + str(player_id))
+			player.can_play = true
 
 func _on_lobby_exit_pressed():
 	Network.quit_server()
