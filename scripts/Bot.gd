@@ -38,15 +38,12 @@ var racket_cooldown = false:
 func _on_racket_cooldown_timeout():
 	racket_cooldown = false
 
-# func reset_ball():
-# 	ball = null
-
 func set_can_throw(value):
 	can_throw = value
 
 func reset_position():
-	## TODO: add bot can_throw logic and make bot be able to throw ball
-	var player_index = 2 # player_num - 1
+	# TODO: add bot can_throw logic and make bot be able to throw ball
+	var player_index = 2
 	if true: # not can_throw:
 		player_index = Game.get_opponent_index(player_index)
 	var player_round_score = Game.get_player_round_score(match_id, player_index)
@@ -67,7 +64,6 @@ func _ready():
 	$RacketArea/CSGBox3D.hide()
 
 func _physics_process(delta):
-	# if not Game.game_in_progress:
 	if not Game.is_match_in_progress(match_id):
 		if animation_tree.active:
 			animation_tree.active = false
@@ -94,7 +90,6 @@ func _physics_process(delta):
 	var direction = Vector3.ZERO
 	if ball != null and not ball.ball_ready:
 		if ball.last_interact != name:
-			## jumping
 			target_position = Vector3(ball.get_land_x(), position.y, ball.get_land_z())
 		else:
 			if target_position:

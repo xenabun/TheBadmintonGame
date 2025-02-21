@@ -221,21 +221,6 @@ func is_everyone_ready():
 func set_player_ready(i):
 	players_ready[i] = true
 
-# Leaderboard = {
-# 	[1] = {
-# 		[2] = [ [21, 11], [11, 21], [21, 11] ],
-# 		[3] = [],
-# 	},
-# 	[2] = {
-# 		[1] = [ [11, 21], [21, 11], [11, 21] ],
-# 		[3] = [],
-# 	},
-# 	[3] = {
-# 		[1] = [],
-# 		[2] = [],
-# 	},
-# }
-
 @rpc('any_peer', 'call_local')
 func finish_match(winner_index, match_id):
 	if not multiplayer.is_server(): return
@@ -244,7 +229,6 @@ func finish_match(winner_index, match_id):
 	
 	print('FINISHING MATCH!!!')
 	match_data.status = Network.match_status_type.FINISHED
-	# Network.remove_ball(match_id)
 	var players_data = get_match_players_data(match_id)
 	var spectators_data = get_match_spectators_data(match_id)
 
@@ -257,7 +241,6 @@ func finish_match(winner_index, match_id):
 		if not players_data[i].is_bot:
 			UI.show_match_result.rpc_id(player_id, result_text, score_text)
 	
-	# show results to spectators
 	for i in spectators_data:
 		if get_player_match_id(i) != match_id: continue
 		var score_text = get_full_score_str(get_player_num(players_data[0].id), match_id)
@@ -272,7 +255,6 @@ func finish_match(winner_index, match_id):
 			for i in Network.Players:
 				var pdata = Network.Players[i]
 				pdata.erase('match_id')
-			# UI.set_loading_screen.rpc(true)
 			for i in Network.Balls:
 				Network.remove_ball(i)
 			Network.Balls = {}
@@ -372,25 +354,7 @@ func check_match_sync():
 			return false
 	return true
 
-# Leaderboard = {
-# 	[1] = {
-# 		[2] = [ [21, 11], [11, 21], [21, 11] ],
-# 		[3] = [],
-# 	},
-# 	[2] = {
-# 		[1] = [ [11, 21], [21, 11], [11, 21] ],
-# 		[3] = [],
-# 	},
-# 	[3] = {
-# 		[1] = [],
-# 		[2] = [],
-# 	},
-# }
-
 func start_game():
-	# for match_id in Network.Balls:
-	# 	Network.remove_ball(match_id)
-
 	players_finished = {}
 	is_match_finish_loop_running = false
 	Network.server_state = Network.server_state_type.MATCH
@@ -417,10 +381,9 @@ func start_game():
 	var next_match_id = Network.Matches.size()
 	var first_match_id = next_match_id
 	var last_match_id = first_match_id + match_amount
-	print('first match id: ', first_match_id, '; last match id: ', last_match_id, '; ', match_amount)
-	# TODO: creates two matches but needs to create one
+	print('first match id: ', first_match_id, '; last match id: ', last_match_id, '; match amount: ', match_amount)
 
-	for match_id in range(first_match_id, last_match_id + 1):
+	for match_id in range(first_match_id, last_match_id):
 		Network.Matches[match_id] = {
 			match_score = [ 0, 0 ],
 			round_score = [ 0, 0 ],
@@ -428,8 +391,6 @@ func start_game():
 		}
 
 	if current_game_type == game_type.MULTIPLAYER:
-		# var next_player_num = 1
-		# var next_match = []
 		var players_applied = {}
 
 		for id1 in busy_players:
@@ -445,48 +406,16 @@ func start_game():
 				player_data2.num = 2
 				next_match_id += 1
 			player_data1.state = Network.player_state_type.PLAYER
-			# player_data1.match_ready = true
-			# if id1 == 1:
-			# 	UI.set_loading_screen(true)
-			# else:
-			# 	UI.set_loading_screen.rpc_id(id1, true)
-			# 	match_sync.rpc_id(id1)
 
 		for i in Network.Players:
 			var player_data = Network.Players[i]
 			if not busy_players.has(i):
 				player_data.match_id = first_match_id
 				player_data.erase('num')
-				# player_data.match_ready = true
 				player_data.state = Network.player_state_type.SPECTATOR
 			player_data.match_ready = true
 		match_sync.rpc()
 		UI.set_loading_screen.rpc(true)
-
-		# for i in Network.Players:
-		# 	if next_match.size() >= 2:
-		# 		next_match_id += 1
-		# 		next_player_num = 1
-		# 		next_match.clear()
-		# 	next_match.push_back(i)
-		# 	var player_data = Network.Players[i]
-		# 	player_data.match_id = next_match_id
-		# 	player_data.num = next_player_num
-		# 	player_data.state = Network.player_state_type.PLAYER
-		# 	player_data.match_ready = true
-		# 	next_player_num += 1
-			# if i != 1:
-			# 	UI.set_loading_screen.rpc_id(i, true)
-			# 	match_sync.rpc_id(i)
-			# else:
-			# 	UI.set_loading_screen(true)
-		
-		# if next_match.size() == 1:
-		# 	var spare_id = next_match[0]
-		# 	var player_data = Network.Players[spare_id]
-		# 	player_data.match_id = 0
-		# 	player_data.erase('num')
-		# 	player_data.state = Network.player_state_type.SPECTATOR
 
 		Network.Players[1].match_sync = true
 		print('server sync start')
@@ -494,7 +423,7 @@ func start_game():
 			await get_tree().create_timer(0.1).timeout
 		print('server sync end')
 		
-		for match_id in range(first_match_id, last_match_id + 1):
+		for match_id in range(first_match_id, last_match_id):
 			Network.add_ball(match_id)
 
 		UI.set_loading_screen.rpc(false)
@@ -518,11 +447,6 @@ func start_game():
 
 			player_data.num = player_data.id
 			player_data.state = Network.player_state_type.PLAYER
-			
-			# Network.Leaderboard[i] = {}
-			# for i2 in Network.Players:
-			# 	if i2 == i: continue
-			# 	Network.Leaderboard[i][i2] = []
 			
 			if player_data.is_bot:
 				Network.add_bot(player_data.username)

@@ -37,15 +37,8 @@ func _ready():
 		match_id = player_data.match_id
 
 	camera.make_current()
-	# var GameUI = UI.get_node('')
 	UI.get_node('GameUI/StaminaBarControl/StaminaBar').hide()
-	# GameUI.show()
 	UI.state.showing_game_ui.set_state(true)
-	# UI.leaderboard_init()
-	# if Game.window_focus:
-	# 	Input.set_mouse_mode(Input.MouseMode.MOUSE_MODE_CAPTURED)
-	# Game.window_focus_changed.connect(_on_window_focus_changed)
-	# UI.state.in_game_menu.state_changed.connect(_on_in_game_menu_state_changed)
 
 @rpc('any_peer')
 func reset_authority():

@@ -7,13 +7,11 @@ extends CharacterBody3D
 @export var stamina_bar : Node
 @export var throw_power : float = PlayerVariables.MAX_POWER
 @export var aim_x : float = 0
-## TODO: wait for guide to be hidden and then let players play
+# TODO: wait for guide to be hidden and then let players play
 @export var can_play : bool = true
 @export var can_throw : bool = false
 
 @export var direction : Vector3 = Vector3.ZERO
-# @export var player : Node
-# @export var animation_tree : Node
 @export var sprinting : bool = false
 @export var stamina : float = PlayerVariables.MAX_STAMINA:
 	set(value):
@@ -31,8 +29,6 @@ extends CharacterBody3D
 @onready var UI = get_tree().get_root().get_node('Scene/UI')
 @onready var Network = get_tree().get_root().get_node('Scene/Network')
 
-# @onready var input = get_node('PlayerInput')
-# @onready var racket_hold_timer = get_node('PlayerInput/RacketHold')
 @onready var animation_tree = get_node('AnimationTree')
 @onready var player_model = get_node('playermodel')
 @onready var player_angle_target = get_node('plrangletarget')
@@ -67,11 +63,6 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var speed = PlayerVariables.BASE_SPEED
 var prev_direction = Vector3.ZERO
 var camera
-# var ball
-
-# @rpc('any_peer')
-# func reset_ball():
-# 	ball = null
 
 @rpc('any_peer', 'call_local')
 func set_can_throw(value):
@@ -121,27 +112,21 @@ func _ready():
 		match_id = player_data.match_id
 		username = player_data.username
 		username_billboard.text = player_data.username
-		# ball = Game.get_ball_by_match_id(match_id)
 		Game.print_debug_msg('getting player data: username: ' + str(player_data.username))
 	else:
 		Game.print_debug_msg('getting player data: not found')
 		return
 
-	# reset_position.connect(_reset_position)
 	camera = Level.get_node('World/PlayerCamera')
 	var menu_camera = UI.menu_camera_pivot.get_node('MenuCamera')
-	# var GameUI = UI.get_node('GameUI')
 	camera.make_current()
 	camera.global_position = menu_camera.global_position
 	camera.global_rotation = menu_camera.global_rotation
-	update_camera_transform(0.2)
-	# GameUI.show()
+	update_camera_transform(1)
 	UI.state.showing_game_ui.set_state(true)
 	UI.get_node('GameControls').show()
-	# UI.leaderboard_init()
 	stamina_bar = UI.get_node('GameUI/StaminaBarControl/StaminaBar')
 	stamina_bar.max_value = PlayerVariables.MAX_STAMINA
-	# stamina_bar.value = input.stamina
 	stamina_bar.value = stamina
 	stamina_bar.show()
 	animation_tree.animation_finished.connect(_on_animation_finished)
@@ -153,7 +138,6 @@ func reset_authority():
 
 func _enter_tree():
 	set_multiplayer_authority(str(name).to_int())
-	# get_node('PlayerInput').set_multiplayer_authority(1)
 
 @rpc('any_peer', 'call_local')
 func racket_area_activate(value):
@@ -178,13 +162,6 @@ func racket_swing():
 func _on_animation_finished(anim_name):
 	if anim_name == 'playeranims/RacketHold':
 		racket_hold_idle.rpc()
-
-# @rpc('any_peer', 'call_local')
-# func set_throw_power(value):
-# 	throw_power = value
-# @rpc('any_peer', 'call_local')
-# func set_aim_x(value):
-# 	aim_x = value
 
 func is_game_paused():
 	return UI.get_node('Menu').visible or UI.get_node('GameControls').visible
@@ -246,20 +223,12 @@ func _input(event):
 			var current_state = UI.state.in_game_menu.get_state()
 			var new_state = not current_state
 			UI.state.in_game_menu.set_state(new_state)
-			# var menu = UI.get_node('Menu')
-			# menu.visible = not menu.visible
-			# if Game.current_game_type == Game.game_type.SINGLEPLAYER:
-			# 	Game.game_in_progress = not menu.visible
 	
-	# if not Game.game_in_progress or is_game_paused(): return
 	if not Game.is_match_in_progress(match_id) or is_game_paused(): return
 	
 	if can_play:
 		if event.is_action_pressed('action'):
-			# if player.ball != null and player.ball.ball_ready and Game.game_in_progress:
 			var ball = Game.get_ball_by_match_id(match_id)
-			# print(player.ball != null, ' ', player.ball.ball_ready, ' ', Game.is_match_in_progress(player.match_id))
-			# print(ball != null, ' ', ball.ball_ready, ' ', Game.is_match_in_progress(player.match_id))
 			if can_throw and ball != null and ball.ball_ready and Game.is_match_in_progress(match_id):
 				var pos = get_node('Ball').global_position
 				var new_direction = VectorMath.look_vector(get_node('RacketArea')).z
@@ -332,8 +301,6 @@ func _input(event):
 			sprinting = false
 
 func _physics_process(delta):
-	# print('physics step player_id: ', player_id, ' by ', multiplayer.get_unique_id())
-	# if not Game.game_in_progress:
 	if not Game.is_match_in_progress(match_id):
 		if animation_tree.active:
 			animation_tree.active = false
@@ -369,7 +336,6 @@ func _physics_process(delta):
 	var _aim_x = (clamp(mouse_pos.x / window_size.x, 0, 1) - 0.5) * 2
 	var _aim_y = 0.35 + abs(clamp(mouse_pos.y / window_size.y, 0, 1) - 1) * 0.65
 	aim_direction = Vector2(_aim_x, _aim_y)
-	# set_aim_x.rpc(_aim_x)
 	aim_x = _aim_x
 	
 	# racket hold
@@ -380,9 +346,6 @@ func _physics_process(delta):
 		throw_power = (PlayerVariables.BASE_POWER +
 				(PlayerVariables.MAX_POWER -
 				PlayerVariables.BASE_POWER) * hold_mult)
-		# set_throw_power.rpc(PlayerVariables.BASE_POWER +
-		# 		(PlayerVariables.MAX_POWER -
-		# 		PlayerVariables.BASE_POWER) * hold_mult)
 	
 	# speed
 	if (
@@ -394,7 +357,6 @@ func _physics_process(delta):
 	if direction.length() > 0:
 		var max_speed = PlayerVariables.MAX_SPEED
 		var accel = PlayerVariables.ACCELERATION
-		# if input.sprinting and not input.exhausted and input.stamina > 0:
 		if sprinting and not exhausted and stamina > 0:
 			max_speed *= PlayerVariables.RUN_SPEED_MULT
 			accel *= PlayerVariables.RUN_SPEED_MULT
@@ -406,12 +368,10 @@ func _physics_process(delta):
 	# animation
 	var blend_amount = 0
 	if direction.length() > 0:
-		# if input.sprinting and not input.exhausted and input.stamina > 0:
 		if sprinting and not exhausted and stamina > 0:
 			blend_amount = 1
 		else:
 			blend_amount = 0.5
-		# if not input.action_hold:
 		if not action_hold:
 			player_angle_target.look_at(player_angle_target.global_position + direction)
 			var currot = Quaternion(player_model.transform.basis.orthonormalized())
@@ -423,29 +383,16 @@ func _physics_process(delta):
 		blend_amount,
 		0.1
 	)
-	# if input.action_hold:
 	if action_hold:
 		player_angle_target.look_at(player_angle_target.global_position + VectorMath.look_vector(racket_area))
 		var currot = Quaternion(player_model.transform.basis.orthonormalized())
 		var tarrot = Quaternion(player_angle_target.transform.basis.orthonormalized())
 		var newrot = currot.slerp(tarrot, 0.3)
-		# newrot.y += -input.aim_direction.x / 4.0
-		# newrot.w += -input.aim_direction.x / 4.0
 		newrot.y += -aim_direction.x / 4.0
 		newrot.w += -aim_direction.x / 4.0
 		player_model.transform.basis = Basis(newrot).scaled(player_model.scale)
 	
 	# stamina
-	# if input.sprinting and not input.exhausted and direction.length() > 0:
-	# 	input.stamina = max(input.stamina - PlayerVariables.STAMINA_DELPETION, 0)
-	# 	if input.stamina <= 0:
-	# 		input.sprinting = false
-	# 		input.exhausted = true
-	# else:
-	# 	input.stamina = min(input.stamina + PlayerVariables.STAMINA_REGEN,
-	# 			PlayerVariables.MAX_STAMINA)
-	# 	if input.stamina >= PlayerVariables.MAX_STAMINA:
-	# 		input.exhausted = false
 	if sprinting and not exhausted and direction.length() > 0:
 		stamina = max(stamina - PlayerVariables.STAMINA_DELPETION, 0)
 		if stamina <= 0:
@@ -478,7 +425,6 @@ func _physics_process(delta):
 		position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
 	
 	# aim arrow
-	# if can_throw or input.action_hold:
 	if can_throw or action_hold:
 		aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
 		if not aim_arrow.visible:
@@ -487,15 +433,11 @@ func _physics_process(delta):
 			aim_arrow.position.z = 0
 			aim_arrow.show()
 	
-	# if Game.window_focus and not input.is_game_paused():
 	if Game.window_focus and not is_game_paused():
 		# camera
 		update_camera_transform(0.2)
 		
 		# aim arrow
-		# var aim_dir = input.aim_direction
-		# if input.action_hold:
-		# var aim_dir = aim_direction
 		if action_hold:
 			var hold_mult = ((PlayerVariables.ACTION_HOLD_TIME -
 				racket_hold_timer.time_left) /

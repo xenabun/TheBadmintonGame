@@ -5,14 +5,6 @@ const SHADOW_SIZE = Vector3(15, 2, 15)
 
 @export var match_id : int = 0
 
-# @export var Level : Node
-# @export var Network : Node
-# @export var FieldArea : Node
-# @export var FloorArea : Node
-# @export var NetArea : Node
-# @export var Player1Area : Node
-# @export var Player2Area : Node
-
 @onready var Level = get_tree().get_root().get_node('Scene/Level')
 @onready var Network = get_tree().get_root().get_node('Scene/Network')
 @onready var ball_hitbox : Area3D = get_node('Area')
@@ -55,7 +47,6 @@ var ball_ready = true:
 		reset_ball()
 		ball_ready = value
 		if value and Game.is_match_in_progress(match_id):
-			# await get_tree().create_timer(0.5).timeout
 			Game.reset_player_positions.rpc_id(1, match_id)
 
 @rpc('any_peer', 'call_local')
@@ -110,10 +101,6 @@ func _ready():
 
 	set_physics_process(false)
 	shadow.visible = false
-	# $Debug_MaxHeight.visible = Game.debug
-	# $Debug_Z.visible = Game.debug
-	# $Debug_ZLand.visible = Game.debug
-	# $Debug_LaunchHeight.visible = Game.debug
 
 	var current_authority = multiplayer.get_unique_id()
 	if Network.Players.has(current_authority):
@@ -123,14 +110,7 @@ func _ready():
 			visible = match_id == current_authority_player_data.match_id
 
 func _physics_process(_delta):
-	# reset debug
-	# if Game.debug and ball_ready:
-	# 	for node in get_children():
-	# 		if node.name.contains('Debug'):
-	# 			node.position = Vector3.ZERO
-	
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
-	# if not Game.game_in_progress or ball_ready: return
 	if not Game.is_match_in_progress(match_id) or ball_ready: return
 	
 	# reset when leaves field area
@@ -143,14 +123,11 @@ func _physics_process(_delta):
 		var p = 0
 		if ball_hitbox.overlaps_area(Player1Area):
 			p = 1
-			# Game.grant_point.rpc(1, match_id)
 		elif ball_hitbox.overlaps_area(Player2Area):
 			p = 0
-			# Game.grant_point.rpc(0, match_id)
 		else:
 			var pdata = Network.Players[str(last_interact).to_int()]
 			p = Game.get_opponent_index(pdata.num - 1)
-			# Game.grant_point.rpc(Game.get_opponent_index(pdata.num - 1), match_id)
 		if Game.current_game_type == Game.game_type.MULTIPLAYER:
 			Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
 		else:
@@ -161,18 +138,10 @@ func _physics_process(_delta):
 	
 	# net interact
 	if ball_hitbox.overlaps_area(NetArea) and NetArea != ignored_area:
-		# Game.print_debug_msg('ball hit net')
-		# var player_name = Network.Players[Game.get_opponent_id(get_multiplayer_authority())].username
-		# var last_interact_id = str(last_interact).to_int()
-		# var opponent_id = Game.get_opponent_id(last_interact_id)
-		# var player_name = Network.Players[opponent_id].username
-		# var player_name = str(opponent_id)
-		# print(last_interact_id, opponent_id, player_name)
 		var new_power = power * 0.75
 		var new_direction = -direction
 		var new_velocity_x = -velocity.x
 		bounce_ball.rpc(get_multiplayer_authority(),
-				# player_name, new_velocity_x, new_direction, new_power,
 				last_interact, new_velocity_x, new_direction, new_power,
 				position, NetArea)
 
@@ -207,18 +176,9 @@ func _physics_process(_delta):
 	# shadow
 	if shadow_ray.is_colliding():
 		var floor_point = shadow_ray.get_collision_point()
-		# var floor_normal = $RayCast3D.get_collision_normal()
-		# if floor_point: # + floor_normal / 2 != floor_point + floor_normal:
-			# $Shadow.look_at_from_position(
-			# 		floor_point + floor_normal / 2,
-			# 		floor_point + floor_normal,
-			# 		Vector3(0, 0, -1)
-			# )
 		shadow.global_position = floor_point
-		# $Shadow.scale = Vector3.ONE * (0.5 + (position.y / 6))
 		var height_unit = height / max_height
 		shadow.size = SHADOW_SIZE * height_unit
-		# shadow.material_override.set_shader_parameter('cube_full_size', size)
 		shadow.albedo_mix = height_unit
 		shadow.visible = true
 	else:

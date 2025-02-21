@@ -39,7 +39,6 @@ func _init(_ui, Network):
 		ui.menu_camera_pivot.get_node('MenuCamera').set_current(new_state)
 		ui.get_node('CurrentUsername').visible = new_state
 		if new_state:
-			# ui.get_node('GameUI').hide()
 			showing_game_ui.set_state(false)
 			ui.get_node('Menu').hide()
 			ui.get_node('GameResult').hide()
@@ -107,7 +106,6 @@ func _init(_ui, Network):
 	
 	showing_leaderboard.state_changed.connect(func(_old_state, new_state, show_result):
 		ui.get_node('Leaderboard').visible = new_state
-		# ui.get_node('GameUI').visible = not new_state
 		showing_game_ui.set_state(not new_state)
 		ui.get_node('Leaderboard/Panel/Results').visible = show_result
 		ui.get_node('Leaderboard/Panel/Score').visible = not show_result

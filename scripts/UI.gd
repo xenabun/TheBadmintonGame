@@ -97,14 +97,13 @@ func update_lobby_player_list(players):
 	for player_id in players:
 		var player_data = players[player_id]
 		var player_label = preload("res://prefabs/player_label.tscn").instantiate()
-		# player_label.player_id = player_data.id
 		player_label.get_node('Username').text = player_data.username
 		lobby_player_list.add_child(player_label)
 		if multiplayer.is_server() and multiplayer.get_unique_id() != player_data.id:
 			var kick_button = player_label.get_node('Kick')
 			kick_button.disabled = false
 			kick_button.pressed.connect(func():
-				Network.kick_peer(player_data.id)) # player_label.player_id))
+				Network.kick_peer(player_data.id))
 
 @rpc('any_peer', 'call_local')
 func close_lobby_player_list():
@@ -129,14 +128,9 @@ func close_match_result():
 func show_match_result(result_text, _score_text):
 	get_node('GameControls').hide()
 	var game_result_ui = get_node('GameResult')
-	# game_result_ui.get_node('Result').text = result_text
 	get_node('Leaderboard/Panel/Results/MatchResult').text = result_text
-	# game_result_ui.get_node('Score').text = score_text
 	game_result_ui.show()
 	state.showing_leaderboard.set_state(true, true)
-	# get_node('Leaderboard/Panel/Score').hide()
-	# get_node('Leaderboard/Panel/Results').show()
-	# get_node('GameUI').hide()
 	state.showing_game_ui.set_state(false)
 
 @rpc('any_peer', 'call_local')
@@ -156,9 +150,6 @@ func _on_server_browser_back_pressed():
 
 func _on_pause_menu_close():
 	state.in_game_menu.set_state(false)
-	# get_node('Menu').hide()
-	# if Game.current_game_type == Game.game_type.SINGLEPLAYER:
-	# 	Game.game_in_progress = true
 
 func _on_title_visibility_changed():
 	if title_label.visible:
@@ -178,7 +169,6 @@ func _on_singleplayer_pressed():
 	Network.start_singleplayer()
 
 func _on_multiplayer_pressed():
-	# state.entering_port.set_state(true)
 	state.in_main_menu.set_state(false)
 	state.in_server_browser.set_state(true)
 
@@ -194,8 +184,6 @@ func _on_port_confirm():
 	if port_num and port_num >= 1024 and port_num <= 49151:
 		Network.PORT = port_num
 		state.entering_port.set_state(false)
-		# state.in_main_menu.set_state(false)
-		# state.in_server_browser.set_state(true)
 	else:
 		OS.alert('Введено неверное значение')
 

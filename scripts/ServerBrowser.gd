@@ -71,7 +71,7 @@ func _process(_delta):
 				i.port = server_port
 				i.player_count = pRoomInfo.player_count
 				i.text = 'Загрузка' if int(server_port) == 0 else pRoomInfo.name + '\n' + server_ip
-				i.get_node('PlayerCount').text = get_player_count_string(pRoomInfo.player_count) # + '/' + str(i.max_player_count)
+				i.get_node('PlayerCount').text = get_player_count_string(pRoomInfo.player_count)
 				i.restart_timer.emit()
 				return
 		
@@ -79,10 +79,9 @@ func _process(_delta):
 		server_card.name = pRoomInfo.name
 		server_card.ip = server_ip
 		server_card.port = server_port
-		# server_card.max_player_count = %PlayerSpawner.get_spawn_limit()
 		server_card.player_count = pRoomInfo.player_count
 		server_card.text = 'Загрузка' if int(server_port) == 0 else pRoomInfo.name + '\n' + server_ip
-		server_card.get_node('PlayerCount').text = get_player_count_string(pRoomInfo.player_count) # + '/' + str(server_card.max_player_count)
+		server_card.get_node('PlayerCount').text = get_player_count_string(pRoomInfo.player_count)
 		ServerBrowserUI.get_node('ServerList/ScrollContainer/VBoxContainer').add_child(server_card)
 		server_card.join_server.connect(join_by_ip)
 

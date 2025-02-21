@@ -43,12 +43,6 @@ func _ready():
 	multiplayer.connection_failed.connect(connection_failed)
 	ServerBrowser.join_server.connect(join_by_ip)
 
-# func get_last_match_id():
-# 	var last_match_id = 0
-# 	for id in Matches:
-# 		last_match_id = max(last_match_id, id)
-# 	return last_match_id
-
 func find_first_player_by_match_id(match_id):
 	for i in Players:
 		var pdata = Players[i]
@@ -74,7 +68,6 @@ func add_player_data(player_id, username, is_bot):
 		'state': player_state_type.NONE,
 		'is_bot': is_bot,
 	}
-	# Game.update_score_text_for_all.rpc()
 	update_lobby_player_list_for_all()
 
 func del_player_data(player_id):
@@ -162,9 +155,6 @@ func start_singleplayer():
 	add_player_data(1, UI.username_box.text, false)
 	add_player_data(2, bot_username, true)
 	Game.start_game()
-	# add_spectator()
-	# var plr_char = add_player()
-	# add_bot(plr_char, bot_username)
 
 @rpc('any_peer')
 func kicked():
@@ -192,6 +182,8 @@ func quit_server():
 	# 	Level.get_node('Spectators').remove_child(spectator)
 	# 	spectator.queue_free()
 
+	# TODO: check if has authority then delete
+
 	if peer: peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	
@@ -203,9 +195,6 @@ func quit_server():
 	Balls = {}
 	Matches = {}
 	Leaderboard = {}
-	# Game.game_in_progress = true
-	# Game.ball.set_ball_ready()
-	# Game.ball.reset_ball()
 	UI.leaderboard_clear()
 	UI.state.showing_leaderboard.set_state(false, false)
 	UI.state.in_menu.set_state(true)
@@ -226,47 +215,21 @@ func quit_server():
 @rpc('any_peer', 'call_local')
 func setup_player(character_name, data):
 	var character = Level.get_node('Players/' + character_name)
-	# character.player_num = data.num
 	character.position = data.position
 	character.rotation = data.rotation
 
-func add_player(id : int = 1, num : int = 1): # , can_throw : bool = false):
+func add_player(id : int = 1, num : int = 1):
 	if Level.get_node('Players').has_node(str(id)): return
 	Game.print_debug_msg('adding player ' + str(id) + ' by ' + str(multiplayer.get_unique_id()))
 
 	var character = preload("res://prefabs/Player.tscn").instantiate()
-	# character.player_id = id
-	# print('applying player num: ', num, ' to player ', id)
-	# character.player_num = num
 	character.name = str(id)
-	# var num = 1 if id == 1 else 2
 	var spawn_point = Level.get_node('World/Player' + str(num) + 'SpawnEven')
-	# print('applying spawn position ', 'World/Player' + str(num) + 'Spawn')
-	# character.position = spawn_point.position
-	# character.rotation = spawn_point.rotation
 	Level.get_node('Players').add_child(character, true)
-	# setup_player.rpc(str(id), {
-	# 	# 'num': num,
-	# 	'position': spawn_point.position,
-	# 	'rotation': spawn_point.rotation,
-	# })
 	setup_player.rpc_id(id, str(id), {
 		position = spawn_point.position,
 		rotation = spawn_point.rotation,
 	})
-	# if id == 1:
-	# 	# character.player_num = num
-	# 	# character.can_throw = can_throw
-	# 	character.position = spawn_point.position
-	# 	character.rotation = spawn_point.rotation
-	# else:
-	# 	setup_player.rpc_id(id, str(id), {
-	# 		# 'num': num,
-	# 		# can_throw = can_throw,
-	# 		position = spawn_point.position,
-	# 		rotation = spawn_point.rotation,
-	# 	})
-	# Game.update_score_text_for_all() # .rpc()
 
 	return character
 
@@ -278,29 +241,16 @@ func remove_player(id):
 		match_id = pdata.match_id
 	del_player_data(id)
 	if match_id:
-		# var player = find_first_player_by_match_id(match_id)
 		var ball = Game.get_ball_by_match_id(match_id)
 		if ball:
-			ball.set_multiplayer_authority(1) # player.id)
+			ball.set_multiplayer_authority(1)
 	Game.update_score_text_for_all()
 	if Level.get_node('Players').has_node(str(id)):
 		var player = Level.get_node('Players/' + str(id))
-		# var multiplayer_authority = player.get_multiplayer_authority()
-		# if multiplayer_authority != multiplayer.get_unique_id() and multiplayer_authority in get_tree().get_network_connected_peers():
-		# 	player.reset_authority.rpc_id(multiplayer_authority)
 		player.queue_free()
 	if Level.get_node('Spectators').has_node(str(id)):
 		var spectator = Level.get_node('Spectators/' + str(id))
-		# var multiplayer_authority = spectator.get_multiplayer_authority()
-		# if multiplayer_authority != multiplayer.get_unique_id() and multiplayer_authority in get_tree().get_network_connected_peers():
-		# 	spectator.reset_authority.rpc_id(multiplayer_authority)
 		spectator.queue_free()
-	# for player in get_tree().get_nodes_in_group('Player'):
-	# 	if str(player.name) == str(id):
-	# 		player.queue_free()
-	# for spectator in get_tree().get_nodes_in_group('Spectator'):
-	# 	if str(spectator.name) == str(id):
-	# 		spectator.queue_free()
 
 func add_spectator(id: int = 1):
 	if Level.get_node('Spectators').has_node(str(id)): return
@@ -315,7 +265,6 @@ func add_bot(bot_username):
 	character.name = '2'
 	character.player = Level.get_node('Players/1')
 	character.Level = Level
-	# character.Network = self
 	character.get_node('Username').text = bot_username
 	var spawn_point = Level.get_node('World/Player2Spawn')
 	character.position = spawn_point.position
@@ -325,7 +274,6 @@ func add_bot(bot_username):
 
 func add_ball(match_id):
 	if Balls.has(match_id): return
-	# if Level.get_node('Balls').has_node(str(match_id)): return
 	Game.print_debug_msg('adding ball with match id: ' + str(match_id) + ' by ' + str(multiplayer.get_unique_id()))
 
 	var ball = preload("res://prefabs/Ball.tscn").instantiate()
@@ -340,17 +288,6 @@ func remove_ball(match_id):
 	if not Balls.has(match_id): return
 	if Game.current_game_type == Game.game_type.SINGLEPLAYER:
 		Level.get_node('Players/2').ball = null
-	# for i in Players:
-	# 	var pdata = Players[i]
-	# 	if (Level.get_node('Players').has_node(str(pdata.id))
-	# 			and pdata.has('match_id') and pdata.match_id == match_id):
-	# 		if pdata.is_bot:
-	# 			Level.get_node('Players/' + str(pdata.id)).ball = null
-			# var player = Level.get_node('Players/' + str(pdata.id))
-			# if pdata.is_bot or i == 1:
-			# 	player.reset_ball()
-			# else:
-			# 	player.reset_ball.rpc_id(pdata.id)
 	if Level.get_node('Balls').has_node(str(match_id)):
 		var ball = Level.get_node('Balls/' + str(match_id))
 
