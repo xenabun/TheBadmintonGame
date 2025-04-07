@@ -91,14 +91,6 @@ func get_player_match_id(id):
 	if player_data.has('match_id'):
 		return player_data.match_id
 
-# func get_full_score_str(player_num, match_id):
-# 	var match_data = Network.Matches[match_id]
-# 	var match_score = match_data.match_score
-# 	if player_num == 1:
-# 		return str(match_score[0], ' : ', match_score[1])
-# 	else:
-# 		return str(match_score[1], ' : ', match_score[0])
-
 func get_match_players_data(match_id):
 	var ids = {0: null, 1: null}
 
@@ -166,12 +158,14 @@ func update_score_text_for_all():
 func check_round_win(p, match_id):
 	var match_data = Network.Matches[match_id]
 	var round_score = match_data.round_score
-	return round_score[p] >= 1
-	# if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
-	# 	if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
-	# 		return round_score[p] >= 30
-	# 	else: return round_score[p] - round_score[get_opponent_index(p)] >= 2
-	# else: return round_score[p] >= 21
+	if debug:
+		return round_score[p] >= 1
+	else:
+		if round_score[p] >= 20 and round_score[get_opponent_index(p)] >= 20:
+			if round_score[p] >= 29 and round_score[get_opponent_index(p)] >= 29:
+				return round_score[p] >= 30
+			else: return round_score[p] - round_score[get_opponent_index(p)] >= 2
+		else: return round_score[p] >= 21
 
 func check_match_win(p, match_id):
 	var match_data = Network.Matches[match_id]
@@ -239,14 +233,12 @@ func finish_match(winner_index, match_id):
 		players_finished[player_id] = true
 		var score_index = get_player_num(player_id) - 1
 		var result_text = WIN_TEXT if winner_index == score_index else LOSE_TEXT
-		# var score_text = get_full_score_str(get_player_num(player_id), match_id)
 		if not players_data[i].is_bot:
-			UI.show_match_result.rpc_id(player_id, result_text) # , score_text)
+			UI.show_match_result.rpc_id(player_id, result_text)
 	
 	for i in spectators_data:
 		if get_player_match_id(i) != match_id: continue
-		# var score_text = get_full_score_str(get_player_num(players_data[0].id), match_id)
-		UI.show_match_result.rpc_id(i, '') # , score_text)			
+		UI.show_match_result.rpc_id(i, '')		
 
 	print('is everyone finished? ', is_everyone_finished(), '; can continue? ', can_continue())
 	if not is_match_finish_loop_running:
@@ -282,7 +274,6 @@ func finish_match(winner_index, match_id):
 			UI.close_match_result.rpc()
 			start_game()
 		else:
-			# TODO: show final leaderboard with results
 			UI.show_match_result.rpc('Итоговая таблица лидеров', true)
 			pass
 
