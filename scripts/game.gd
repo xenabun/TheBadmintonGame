@@ -76,6 +76,17 @@ func get_opponent_id(id):
 	print('getting opponent in match:', match_id, '; opponent: ', opponent_id, '; of player: ', id)
 	return opponent_id
 
+func get_player_side(player_num: int):
+	return 1 if player_num == 1 else -1
+
+func get_throw_side(match_id: int, player_num: int, can_throw: bool):
+	var player_index = player_num - 1
+	if not can_throw:
+		player_index = get_opponent_index(player_index)
+	var player_round_score = get_player_round_score(match_id, player_index)
+	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
+	return side
+
 func get_opponent_index(index):
 	return abs(index - 1)
 
@@ -256,12 +267,12 @@ func finish_match(winner_index, match_id):
 				var multiplayer_authority = player.get_multiplayer_authority()
 				if multiplayer_authority != multiplayer.get_unique_id():
 					player.reset_authority.rpc_id(multiplayer_authority)
-				player.queue_free()
+				# player.queue_free()
 			for spectator in get_tree().get_nodes_in_group('Spectator'):
 				var multiplayer_authority = spectator.get_multiplayer_authority()
 				if multiplayer_authority != multiplayer.get_unique_id():
 					spectator.reset_authority.rpc_id(multiplayer_authority)
-				spectator.queue_free()
+				# spectator.queue_free()
 			players_ready = {}
 			UI.show_ready_check.rpc()
 			print('IS EVERYONE READY???')
@@ -274,7 +285,7 @@ func finish_match(winner_index, match_id):
 			UI.close_match_result.rpc()
 			start_game()
 		else:
-			UI.show_match_result.rpc('Итоговая таблица лидеров', true)
+			UI.show_match_result.rpc('Итоговая турнирная таблица', true)
 			pass
 
 @rpc('any_peer', 'call_local')
@@ -289,8 +300,9 @@ func grant_point(p, match_id):
 	if check_round_win(p, match_id):
 		var match_score = match_data.match_score
 		match_score[p] += 1
-		var id1 = Network.find_player_by_match_id_with_num(match_id, 1).id
-		var id2 = get_opponent_id(id1)
+		var player_data1 = Network.find_player_by_match_id_with_num(match_id, 1)
+		var id1 = player_data1.id
+		var id2 = player_data1.opponent_id # get_opponent_id(id1)
 		print('applying leaderboard score for ids: ', str(id1), '; ', str(id2))
 		var reverse_round_score = match_data.round_score.duplicate()
 		reverse_round_score.reverse()
@@ -356,6 +368,9 @@ func start_game():
 	is_match_finish_loop_running = false
 	Network.server_state = Network.server_state_type.MATCH
 
+	for i in Network.Players:
+		Network._remove_player(i)
+
 	if Network.Leaderboard.is_empty():
 		for i in Network.Players:
 			Network.Leaderboard[i] = {}
@@ -399,6 +414,8 @@ func start_game():
 				var player_data2 = Network.Players[id2]
 				player_data1.match_id = next_match_id
 				player_data2.match_id = next_match_id
+				player_data1.opponent_id = id2
+				player_data2.opponent_id = id1
 				player_data1.num = 1
 				player_data2.num = 2
 				next_match_id += 1
@@ -441,7 +458,7 @@ func start_game():
 			var player_data = Network.Players[i]
 			
 			player_data.match_id = 0
-
+			player_data.opponent_id = 1 if player_data.is_bot else 2
 			player_data.num = player_data.id
 			player_data.state = Network.player_state_type.PLAYER
 			

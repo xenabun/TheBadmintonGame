@@ -1,8 +1,8 @@
 [gd_scene load_steps=45 format=3 uid="uid://dao4a65ncuf15"]
 
-[ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://prefabs/terrain.tscn" id="2_f2kou"]
+[ext_resource type="PackedScene" uid="uid://bk1lu4vj07b86" path="res://meshes/terrain.tscn" id="2_f2kou"]
 [ext_resource type="PackedScene" uid="uid://v5oscwlgemrg" path="res://prefabs/net.tscn" id="2_nvxwo"]
-[ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://prefabs/trees.tscn" id="3_f8pxf"]
+[ext_resource type="PackedScene" uid="uid://y3b3vjkgak4y" path="res://meshes/trees.tscn" id="3_f8pxf"]
 [ext_resource type="Texture2D" uid="uid://c6rdby1kjqnc5" path="res://images/6f7a97101ad33899f1b0186481123e241.jpg" id="4_1apb5"]
 [ext_resource type="Texture2D" uid="uid://mys6700w7ww4" path="res://images/field.png" id="4_au1ay"]
 [ext_resource type="Script" path="res://scripts/Network.gd" id="6_h2wnu"]
@@ -269,7 +269,7 @@ collision_layer = 4
 collision_mask = 4
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Level/World/Floor/Area"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.788358, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.508, 0)
 shape = SubResource("BoxShape3D_01mkf")
 
 [node name="Net" type="StaticBody3D" parent="Level/World"]
@@ -1527,6 +1527,7 @@ anchor_bottom = 1.0
 offset_top = -212.0
 offset_right = 413.0
 grow_vertical = 0
+mouse_filter = 1
 
 [node name="Panel" type="Panel" parent="DebugUI"]
 self_modulate = Color(1, 1, 1, 0.670588)
@@ -1537,6 +1538,7 @@ anchor_bottom = 1.0
 offset_top = -260.0
 offset_right = 489.0
 grow_vertical = 0
+mouse_filter = 1
 
 [node name="Label" type="Label" parent="DebugUI"]
 layout_mode = 1
@@ -1547,6 +1549,7 @@ offset_top = -84.0
 offset_right = 1031.0
 offset_bottom = -46.0
 grow_vertical = 0
+mouse_filter = 1
 vertical_alignment = 2
 
 [node name="ListenPortBound" type="Label" parent="DebugUI"]
@@ -1559,6 +1562,7 @@ offset_top = -48.0
 offset_right = 180.0
 offset_bottom = -25.0
 grow_vertical = 0
+mouse_filter = 1
 text = "listen port bound: -"
 
 [node name="ConnectionStatus" type="Label" parent="DebugUI"]
@@ -1571,6 +1575,7 @@ offset_top = -25.0
 offset_right = 612.0
 offset_bottom = -2.0
 grow_vertical = 0
+mouse_filter = 1
 text = "Connection status: -"
 
 [connection signal="timeout" from="ServerBrowser/BroadcastTimer" to="ServerBrowser" method="_on_broadcast_timer_timeout"]
