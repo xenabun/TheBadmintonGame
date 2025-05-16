@@ -144,6 +144,9 @@ properties/16/replication_mode = 2
 properties/17/path = NodePath(".:aim_x")
 properties/17/spawn = true
 properties/17/replication_mode = 2
+properties/18/path = NodePath(".:opponent_id")
+properties/18/spawn = true
+properties/18/replication_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g2tai"]
 transparency = 1
@@ -162,7 +165,7 @@ billboard = 1
 double_sided = false
 no_depth_test = true
 fixed_size = true
-text = "aboba"
+text = "Имя"
 
 [node name="playermodel" parent="." instance=ExtResource("1_4y33c")]
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 1.40104, 0.0206308)

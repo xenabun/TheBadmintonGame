@@ -21,6 +21,7 @@ shader_parameter/size = 1.5
 next_pass = SubResource("ShaderMaterial_t3p6m")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_xei7b"]
+radius = 1.135
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_xd51s"]
 properties/0/path = NodePath(".:position")
@@ -41,6 +42,12 @@ properties/4/replication_mode = 2
 properties/5/path = NodePath("Shadow:visible")
 properties/5/spawn = true
 properties/5/replication_mode = 2
+properties/6/path = NodePath("Area:monitoring")
+properties/6/spawn = true
+properties/6/replication_mode = 2
+properties/7/path = NodePath("TrajectoryRaycast:enabled")
+properties/7/spawn = true
+properties/7/replication_mode = 2
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_v5xe6"]
 shader = ExtResource("4_8effn")
@@ -51,7 +58,7 @@ render_priority = 0
 shader = ExtResource("5_ihc8v")
 shader_parameter/uv_offset = Vector2(0, 0)
 shader_parameter/emmission_transform = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
-shader_parameter/flags = 44
+shader_parameter/flags = 4
 shader_parameter/tex = ExtResource("6_mnr01")
 shader_parameter/color_ramp = ExtResource("6_mnr01")
 shader_parameter/curve = ExtResource("7_3pokd")
@@ -60,9 +67,12 @@ shader_parameter/curve = ExtResource("7_3pokd")
 material = SubResource("ShaderMaterial_e0aow")
 
 [node name="Ball" type="CharacterBody3D" groups=["Ball"]]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -0.0022583, 0, 0)
 collision_layer = 0
 collision_mask = 0
+input_ray_pickable = false
+motion_mode = 1
+slide_on_ceiling = false
 script = ExtResource("1_0k7od")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -71,6 +81,7 @@ disabled = true
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="."]
 cast_shadow = 0
+calculate_tangents = false
 material = SubResource("StandardMaterial3D_oakse")
 
 [node name="Area" type="Area3D" parent="."]
@@ -80,14 +91,20 @@ collision_mask = 4
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area"]
 shape = SubResource("SphereShape3D_xei7b")
 
-[node name="Shadow" type="Decal" parent="."]
-size = Vector3(15, 2, 15)
-texture_albedo = ExtResource("3_r2ahu")
+[node name="TrajectoryRaycast" type="RayCast3D" parent="."]
+target_position = Vector3(0, 0, 0)
+collision_mask = 4
+collide_with_areas = true
+collide_with_bodies = false
 
 [node name="ShadowRaycast" type="RayCast3D" parent="."]
 target_position = Vector3(0, -100, 0)
 collision_mask = 8
 hit_from_inside = true
+
+[node name="Shadow" type="Decal" parent="."]
+size = Vector3(15, 2, 15)
+texture_albedo = ExtResource("3_r2ahu")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_xd51s")
@@ -106,3 +123,6 @@ color_ramp = ExtResource("6_mnr01")
 curve = ExtResource("7_3pokd")
 billboard = true
 _defaults_have_been_set = true
+
+[connection signal="area_entered" from="Area" to="." method="_area_entered"]
+[connection signal="area_exited" from="Area" to="." method="_area_exited"]

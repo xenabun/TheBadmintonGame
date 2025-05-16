@@ -10,6 +10,7 @@ const SHADOW_SIZE = Vector3(15, 2, 15)
 @onready var ball_hitbox : Area3D = get_node('Area')
 @onready var shadow : Decal = get_node('Shadow')
 @onready var shadow_ray : RayCast3D = get_node('ShadowRaycast')
+@onready var trajectory_ray : RayCast3D = get_node('TrajectoryRaycast')
 
 var FieldArea
 var FloorArea
@@ -68,6 +69,8 @@ func throw_ball(peer_id : int, player_name : String, new_position : Vector3,
 	get_node('Trail').emitting = true
 	set_multiplayer_authority(peer_id)
 	set_physics_process(true)
+	ball_hitbox.set_deferred('monitoring', true)
+	trajectory_ray.set_deferred('enabled', true)
 @rpc('any_peer', 'call_local')
 func bounce_ball(peer_id : int, player_name : String, new_velocity_x : float, new_direction : float,
 		new_power : float, new_launch_pos : Vector3, oarea):
@@ -81,6 +84,8 @@ func bounce_ball(peer_id : int, player_name : String, new_velocity_x : float, ne
 	ignored_area = oarea
 	set_multiplayer_authority(peer_id)
 func reset_ball():
+	ball_hitbox.set_deferred('monitoring', false)
+	trajectory_ray.set_deferred('enabled', false)
 	set_physics_process(false)
 	get_node('Trail').emitting = false
 	get_node('Trail').restart()
@@ -99,6 +104,8 @@ func _ready():
 	Player1Area = Level.get_node('World/Player1Area')
 	Player2Area = Level.get_node('World/Player2Area')
 
+	ball_hitbox.monitoring = false
+	trajectory_ray.enabled = false
 	set_physics_process(false)
 	shadow.visible = false
 
@@ -109,17 +116,22 @@ func _ready():
 			print('ball visiblity set for ', current_authority, ': ', match_id == current_authority_player_data.match_id)
 			visible = match_id == current_authority_player_data.match_id
 
-func _physics_process(_delta):
-	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
-	if not Game.is_match_in_progress(match_id) or ball_ready: return
-	
-	# reset when leaves field area
-	if not ball_hitbox.overlaps_area(FieldArea):
-		set_ball_ready.rpc()
-		return
-	
+func bounce_from_racket(area: Area3D):
+	if area == ignored_area: return
+
+	var player = area.get_parent()
+	var player_name = player.name
+	var new_power = player.throw_power
+	var new_direction = VectorMath.look_vector(area).z
+	var aim_x = sin((player.aim_x * PI) / 2)
+	var new_velocity_x = aim_x * 30 * -new_direction
+	bounce_ball.rpc(Game.get_opponent_id(str(player_name).to_int()),
+			player_name, new_velocity_x, new_direction, new_power,
+			position, area)
+
+func _area_entered(area: Area3D):
 	# floor interact
-	if ball_hitbox.overlaps_area(FloorArea):
+	if area == FloorArea:
 		var p = 0
 		if ball_hitbox.overlaps_area(Player1Area):
 			p = 1
@@ -134,11 +146,10 @@ func _physics_process(_delta):
 			Game.set_players_can_throw(match_id, 1)
 		Game.grant_point.rpc(p, match_id)
 		set_ball_ready.rpc()
-		return
-	
+
 	# net interact
-	if ball_hitbox.overlaps_area(NetArea) and NetArea != ignored_area:
-		var new_power = power * 0.75
+	elif area == NetArea and NetArea != ignored_area:
+		var new_power = power * 0.5
 		var new_direction = -direction
 		var new_velocity_x = -velocity.x
 		bounce_ball.rpc(get_multiplayer_authority(),
@@ -146,22 +157,32 @@ func _physics_process(_delta):
 				position, NetArea)
 
 	# racket interact
-	var overlapped_areas = ball_hitbox.get_overlapping_areas()
-	for oarea in overlapped_areas:
-		if oarea.name != 'RacketArea': continue
-		if oarea == ignored_area: continue
-		
-		var player = oarea.get_parent()
-		var player_name = player.name
-		var new_power = player.throw_power
-		var new_direction = VectorMath.look_vector(oarea).z
-		var aim_x = sin((player.aim_x * PI) / 2)
-		var new_velocity_x = aim_x * 30 * -new_direction
-		
-		bounce_ball.rpc(Game.get_opponent_id(str(player_name).to_int()),
-				player_name, new_velocity_x, new_direction, new_power,
-				position, oarea)
-		break
+	elif area.name == 'RacketArea':
+		bounce_from_racket(area)
+
+func _area_exited(area: Area3D):
+	# reset when leaves field area
+	if area == FieldArea:
+		if Game.current_game_type == Game.game_type.MULTIPLAYER:
+			Game.set_players_can_throw.rpc_id(1, match_id, randi_range(1, 2))
+		else:
+			Game.set_players_can_throw(match_id, 1)
+		set_ball_ready.rpc()
+
+func _physics_process(delta):
+	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
+	if not Game.is_match_in_progress(match_id) or ball_ready: return
+	
+	# racket interact
+	if trajectory_ray.enabled:
+		trajectory_ray.target_position = position.direction_to(Vector3(
+				position.x + velocity.x * delta,
+				get_height(position.z + velocity.z * delta),
+				position.z + velocity.z * delta))
+		if trajectory_ray.is_colliding():
+			var area = trajectory_ray.get_collider()
+			if area.name == 'RacketArea':
+				bounce_from_racket(area)
 	
 	# position
 	move_and_slide()

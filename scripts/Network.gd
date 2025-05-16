@@ -217,8 +217,11 @@ func add_player(id : int = 1, num : int = 1):
 	return character
 
 func remove_player(id):
+	if not id: return
+
 	_remove_player.rpc(id)
 	if not multiplayer.is_server(): return
+	
 	var match_id
 	var pdata = Players[id]
 	if pdata.has('match_id'):

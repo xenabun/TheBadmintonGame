@@ -82,13 +82,15 @@ func update_leaderboard_match_data():
 	var score_column_container = get_node('Leaderboard/Panel/Table/Container/Right/Container')
 	for id1 in Network.Leaderboard:
 		for id2 in Network.Leaderboard[id1]:
-			var score_label = score_column_container.get_node(str(id2) + '/Content/' + str(id1) + '/Label')
-			var scores_unformatted = Network.Leaderboard[id1][id2]
-			var scores : PackedStringArray = []
-			for score in scores_unformatted:
-				scores.push_back(str(score[0], '-', score[1]))
-			var score_str = ' '.join(scores)
-			score_label.text = score_str
+			var score_label_name = str(id2) + '/Content/' + str(id1) + '/Label'
+			if score_column_container.has_node(score_label_name):
+				var score_label = score_column_container.get_node(score_label_name)
+				var scores_unformatted = Network.Leaderboard[id1][id2]
+				var scores : PackedStringArray = []
+				for score in scores_unformatted:
+					scores.push_back(str(score[0], '-', score[1]))
+				var score_str = ' '.join(scores)
+				score_label.text = score_str
 
 func clear_lobby_player_list():
 	for child in lobby_player_list.get_children():
@@ -312,7 +314,7 @@ func switch_match(offset):
 			if match_status == Network.match_status_type.IN_PROGRESS:
 				break
 	
-	if Level.get_node('Spectators').has(str(player_id)):
+	if Level.get_node('Spectators').has_node(str(player_id)):
 		var spectator = Level.get_node('Spectators/' + str(player_id))
 		spectator.match_id = new_match_id
 	for player in Level.get_node('Players').get_children():

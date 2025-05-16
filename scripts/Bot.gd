@@ -3,6 +3,7 @@ extends CharacterBody3D
 @export var Level : Node
 @export var aim_x = 0
 @export var player : Node
+var player_num = 2
 @export var match_id : int = 0
 @export var can_play : bool = true
 @export var can_throw : bool = false
@@ -42,9 +43,11 @@ func set_can_throw(value):
 	can_throw = value
 
 func reset_position():
-	var player_round_score = Game.get_player_round_score(match_id, 1)
-	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
-	var spawn_point = Level.get_node('World/Player2Spawn' + side)
+	# var player_round_score = Game.get_player_round_score(match_id, 1)
+	# var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
+	# var spawn_point = Level.get_node('World/Player2Spawn' + side)
+	var spawn_point = Level.get_node('World/Player' + str(player_num)
+			+ 'Spawn' + Game.get_throw_side(match_id, player_num, can_throw))
 	position = spawn_point.position
 	rotation = spawn_point.rotation
 
@@ -207,8 +210,20 @@ func _physics_process(delta):
 			position.x = target_position.x
 		if abs(target_position.z - position.z) <= speed * delta:
 			position.z = target_position.z
-	position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
-	position.z = clamp(position.z, -PlayerVariables.Z_LIMIT, -2)
+	var side = Game.get_player_side(player_num)
+	if ball and ball.ball_ready:
+		var throw_side = Game.get_throw_side(match_id, player_num, can_throw)
+		var throw_size_x = 1 if throw_side == 'Even' else -1
+		var x_clamp = [0, PlayerVariables.X_THROW_LIMIT * side * throw_size_x]
+		var z_clamp = [PlayerVariables.Z_THROW_LIMIT * side, PlayerVariables.Z_LIMIT * side]
+		position.x = clamp(position.x, min(x_clamp[0], x_clamp[1]), max(x_clamp[0], x_clamp[1]))
+		position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
+	else:
+		var z_clamp = [2 * side, PlayerVariables.Z_LIMIT * side]
+		position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
+		position.z = clamp(position.z, min(z_clamp[0], z_clamp[1]), max(z_clamp[0], z_clamp[1]))
+	# position.x = clamp(position.x, -PlayerVariables.X_LIMIT, PlayerVariables.X_LIMIT)
+	# position.z = clamp(position.z, -PlayerVariables.Z_LIMIT, -2)
 	
 	# aim arrow
 	var x_frac = (position.x - player.position.x) / PlayerVariables.X_LIMIT

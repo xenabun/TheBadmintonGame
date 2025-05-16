@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 @export var player_id : int = 0
 @export var player_num : int = 1
+@export var opponent_id : int = 0
 @export var match_id : int = 0
 @export var username : String = ""
 @export var stamina_bar : Node
@@ -67,20 +68,10 @@ var camera
 func set_can_throw(value):
 	can_throw = value
 
-func get_player_side():
-	return 1 if player_num == 1 else -1
-
-func get_throw_side():
-	var player_index = player_num - 1
-	if not can_throw:
-		player_index = Game.get_opponent_index(player_index)
-	var player_round_score = Game.get_player_round_score(match_id, player_index)
-	var side = 'Even' if player_round_score % 2 == 0 else 'Odd'
-	return side
-
 @rpc('any_peer', 'call_local')
 func reset_position():
-	var spawn_point = Level.get_node('World/Player' + str(player_num) + 'Spawn' + get_throw_side())
+	var spawn_point = Level.get_node('World/Player' + str(player_num)
+			+ 'Spawn' + Game.get_throw_side(match_id, player_num, can_throw))
 	position = spawn_point.position
 	rotation = spawn_point.rotation
 	update_camera_transform(1)
@@ -107,6 +98,7 @@ func _ready():
 
 	if player_data:
 		player_num = player_data.num
+		opponent_id = player_data.opponent_id
 		can_throw = player_num == 1
 		match_id = player_data.match_id
 		username = player_data.username
@@ -139,6 +131,7 @@ func reset_authority():
 
 func _enter_tree():
 	set_multiplayer_authority(str(name).to_int())
+	
 
 @rpc('any_peer', 'call_local')
 func racket_area_activate(value):
@@ -177,7 +170,7 @@ func _on_action_pressed_timeout():
 	last_movement_action_pressed = null
 
 func get_camera_transform_info():
-	var side = get_player_side()
+	var side = Game.get_player_side(player_num)
 	var cam_pos_x = position.x
 	var cam_pos_z = position.z + (20 * side)
 	var player_pos_x_frac = position.x / PlayerVariables.X_LIMIT * side
@@ -231,7 +224,7 @@ func _input(event):
 		if event.is_action_pressed('action'):
 			if can_throw and Game.is_match_in_progress(match_id):
 				var ball = Game.get_ball_by_match_id(match_id)
-				var opponent_id = Game.get_opponent_id(player_id)
+				# var opponent_id = Game.get_opponent_id(player_id)
 				var opponent_player_object = Level.get_node('Players/' + str(opponent_id))
 				if opponent_player_object.can_play and ball != null and ball.ball_ready:
 					var pos = get_node('Ball').global_position
@@ -240,7 +233,8 @@ func _input(event):
 					var _aim_y = aim_direction.y
 					var new_velocity_x = _aim_x * 30 * -new_direction
 					can_throw = false
-					ball.throw_ball.rpc(Game.get_opponent_id(multiplayer.get_unique_id()),
+					ball.throw_ball.rpc(opponent_id,
+							# Game.get_opponent_id(multiplayer.get_unique_id()),
 							name, pos, new_direction, new_velocity_x, _aim_y)
 					get_node('AimArrow').hide()
 					throw_ready.rpc()
@@ -337,7 +331,15 @@ func _physics_process(delta):
 	#aim direction
 	var window_size = get_viewport().get_visible_rect().size
 	var mouse_pos = get_viewport().get_mouse_position()
+	var ball = Game.get_ball_by_match_id(match_id)
 	var _aim_x = (clamp(mouse_pos.x / window_size.x, 0, 1) - 0.5) * 2
+	
+	#aim correction for throwing
+	if ball and ball.ball_ready:
+		var throw_side = Game.get_throw_side(match_id, player_num, can_throw)
+		var aim_side = -0.125 if throw_side == 'Even' else 0.125
+		_aim_x = _aim_x * 0.125 + aim_side
+	
 	var _aim_y = 0.35 + abs(clamp(mouse_pos.y / window_size.y, 0, 1) - 1) * 0.65
 	aim_direction = Vector2(_aim_x, _aim_y)
 	aim_x = _aim_x
@@ -414,10 +416,9 @@ func _physics_process(delta):
 	
 	# position
 	move_and_slide()
-	var side = get_player_side()
-	var ball = Game.get_ball_by_match_id(match_id)
+	var side = Game.get_player_side(player_num)
 	if ball and ball.ball_ready:
-		var throw_side = get_throw_side()
+		var throw_side = Game.get_throw_side(match_id, player_num, can_throw)
 		var throw_size_x = 1 if throw_side == 'Even' else -1
 		var z_clamp = [PlayerVariables.Z_THROW_LIMIT * side, PlayerVariables.Z_LIMIT * side]
 		var x_clamp = [0, PlayerVariables.X_THROW_LIMIT * side * throw_size_x]
@@ -430,7 +431,7 @@ func _physics_process(delta):
 	
 	# aim arrow
 	if can_play and can_throw or action_hold:
-		var opponent_id = Game.get_opponent_id(player_id)
+		# var opponent_id = Game.get_opponent_id(player_id)
 		var opponent_player_object = Level.get_node('Players/' + str(opponent_id))
 		if opponent_player_object.can_play:
 			aim_arrow.global_position = global_position * Vector3(1, 0, 1) + Vector3(0, 1, 0)
@@ -439,8 +440,9 @@ func _physics_process(delta):
 				aim_arrow_sprite.scale.y = 0
 				aim_arrow.position.z = 0
 				aim_arrow.show()
-	elif not can_play and aim_arrow.visible:
-		aim_arrow.hide()
+	else: # if not can_play and aim_arrow.visible:
+		if aim_arrow.visible:
+			aim_arrow.hide()
 	
 	if Game.window_focus and not is_game_paused():
 		# camera

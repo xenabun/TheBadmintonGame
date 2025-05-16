@@ -19,10 +19,10 @@ config/icon="res://badminton_icon.svg"
 
 [autoload]
 
+Game="*res://scripts/game.gd"
 PlayerVariables="*res://scripts/player_variables.gd"
 BallVariables="*res://scripts/ball_variables.gd"
 VectorMath="*res://scripts/vector_math.gd"
-Game="*res://scripts/game.gd"
 
 [display]
 
