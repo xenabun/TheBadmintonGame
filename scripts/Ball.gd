@@ -174,14 +174,15 @@ func _physics_process(delta):
 	if not Game.is_match_in_progress(match_id) or ball_ready: return
 	
 	# racket interact
-	trajectory_ray.target_position = position.direction_to(Vector3(
-			position.x + velocity.x * delta,
-			get_height(position.z + velocity.z * delta),
-			position.z + velocity.z * delta))
-	if trajectory_ray.is_colliding():
-		var area = trajectory_ray.get_collider()
-		if area.name == 'RacketArea':
-			bounce_from_racket(area)
+	if trajectory_ray.enabled:
+		trajectory_ray.target_position = position.direction_to(Vector3(
+				position.x + velocity.x * delta,
+				get_height(position.z + velocity.z * delta),
+				position.z + velocity.z * delta))
+		if trajectory_ray.is_colliding():
+			var area = trajectory_ray.get_collider()
+			if area.name == 'RacketArea':
+				bounce_from_racket(area)
 	
 	# position
 	move_and_slide()
