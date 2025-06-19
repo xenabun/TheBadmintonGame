@@ -144,6 +144,7 @@ func join_by_ip(ip):
 	if peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
 		OS.alert('Failed to start client')
 		return
+	peer.get_peer(1).set_timeout(0, 0, 3000)
 	peer.get_host().compress(ENetConnection.COMPRESS_RANGE_CODER)
 	Game.current_game_type = Game.game_type.MULTIPLAYER
 	multiplayer.set_multiplayer_peer(peer)

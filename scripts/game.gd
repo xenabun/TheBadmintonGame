@@ -42,16 +42,30 @@ func get_ball_by_match_id(match_id):
 
 @rpc('any_peer', 'call_local')
 func set_players_can_throw(match_id, player_num):
-	for i in Network.Players:
-		var player_data = Network.Players[i]
-		if (player_data.has('match_id') and player_data.has('num')
-				and player_data.match_id == match_id and player_data.num == player_num
-				and Level.get_node('Players').has_node(str(player_data.id))):
-			var player = Level.get_node('Players/' + str(player_data.id))
-			if player_data.is_bot:
-				player.set_can_throw(true)
-			else:
-				player.set_can_throw.rpc_id(player_data.id, true)
+	# print('got set_players_can_throw_call by ', multiplayer.get_remote_sender_id())
+	var id = multiplayer.get_unique_id()
+	
+	if not Network.Players.has(id): return
+	var player_data = Network.Players[id]
+	
+	if (not player_data.has('match_id') or
+			not player_data.has('num') or
+			not Level.get_node('Players').has_node(str(id))): return
+
+	if player_data.match_id == match_id and player_data.num == player_num:
+		var player = Level.get_node('Players/' + str(id))
+		player.set_can_throw(true)
+
+	# for i in Network.Players:
+	# 	var player_data = Network.Players[i]
+	# 	if (player_data.has('match_id') and player_data.has('num')
+	# 			and player_data.match_id == match_id and player_data.num == player_num
+	# 			and Level.get_node('Players').has_node(str(player_data.id))):
+	# 		var player = Level.get_node('Players/' + str(player_data.id))
+	# 		if player_data.is_bot:
+	# 			player.set_can_throw(true)
+	# 		else:
+	# 			player.set_can_throw.rpc_id(player_data.id, true)
 
 func get_opponent_id(id):
 	if not Network.Players.has(id): return
@@ -320,20 +334,28 @@ func grant_point(p, match_id):
 
 @rpc('any_peer', 'call_local')
 func reset_player_positions(match_id):
+	# print('got reset_player_positions call by ', multiplayer.get_remote_sender_id())
 	if current_game_type == game_type.SINGLEPLAYER:
 		for player in get_tree().get_nodes_in_group('Player'):
 			player.reset_position()
 		for bot in get_tree().get_nodes_in_group('Bot'):
 			bot.reset_position()
 	elif current_game_type == game_type.MULTIPLAYER:
-		for id in Network.Players:
-			var player_data = Network.Players[id]
-			if not player_data.has('match_id') or player_data.match_id != match_id: continue
-			if not Level.get_node('Players').has_node(str(id)): continue
-			if player_data.is_bot:
-				Level.get_node('Players/' + str(id)).reset_position()
-			else:
-				Level.get_node('Players/' + str(id)).reset_position.rpc_id(id)
+		var id = multiplayer.get_unique_id()
+		var player_data = Network.Players[id]
+		if (player_data.has('match_id') and
+				player_data.match_id == match_id and
+				Level.get_node('Players').has_node(str(id))):
+			Level.get_node('Players/' + str(id)).reset_position()
+
+		# for id in Network.Players:
+		# 	var player_data = Network.Players[id]
+		# 	if not player_data.has('match_id') or player_data.match_id != match_id: continue
+		# 	if not Level.get_node('Players').has_node(str(id)): continue
+		# 	if player_data.is_bot:
+		# 		Level.get_node('Players/' + str(id)).reset_position()
+		# 	else:
+		# 		Level.get_node('Players/' + str(id)).reset_position.rpc_id(id)
 
 @rpc('any_peer')
 func set_match_sync(player_id):
