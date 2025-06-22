@@ -48,7 +48,6 @@ var ball_ready = true:
 		reset_ball()
 		ball_ready = value
 		if value and Game.is_match_in_progress(match_id):
-			# Game.reset_player_positions.rpc_id(1, match_id)
 			Game.reset_player_positions.rpc(match_id)
 
 @rpc('any_peer', 'call_local')
@@ -142,8 +141,6 @@ func _area_entered(area: Area3D):
 			var pdata = Network.Players[str(last_interact).to_int()]
 			p = Game.get_opponent_index(pdata.num - 1)
 		if Game.current_game_type == Game.game_type.MULTIPLAYER:
-			# Game.set_players_can_throw.rpc_id(1, match_id, p + 1)
-			# print('calling set_players_can_throw() by ', multiplayer.get_unique_id())
 			Game.set_players_can_throw.rpc(match_id, p + 1)
 		else:
 			Game.set_players_can_throw(match_id, 1)
@@ -160,21 +157,11 @@ func _area_entered(area: Area3D):
 				position, NetArea)
 
 	# racket interact
-	elif area.name == 'RacketArea':
+	elif area.name == 'RacketArea' and area.monitorable:
 		bounce_from_racket(area)
 
-func _area_exited(area: Area3D):
-	# reset when leaves field area
-	# print('exiting area ', area)
-	if area == FieldArea and ball_ready == false:
-		# print('!!! ', ball_ready)
-		if Game.current_game_type == Game.game_type.MULTIPLAYER:
-		# 	# Game.set_players_can_throw.rpc_id(1, match_id, randi_range(1, 2))
-		# 	print('Я ХУЕЮ')
-			Game.set_players_can_throw.rpc(match_id, randi_range(1, 2))
-		else:
-			Game.set_players_can_throw(match_id, 1)
-		set_ball_ready.rpc()
+func _area_exited(_area: Area3D):
+	pass
 
 func _physics_process(delta):
 	if get_multiplayer_authority() != multiplayer.get_unique_id(): return
@@ -188,7 +175,7 @@ func _physics_process(delta):
 				position.z + velocity.z * delta))
 		if trajectory_ray.is_colliding():
 			var area = trajectory_ray.get_collider()
-			if area.name == 'RacketArea':
+			if area.name == 'RacketArea' and area.monitorable:
 				bounce_from_racket(area)
 	
 	# position
